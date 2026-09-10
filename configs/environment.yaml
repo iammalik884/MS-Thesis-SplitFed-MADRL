@@ -1,0 +1,103 @@
+# =============================================================================
+# Step 0 / Step 1 Configuration - Hospital Edge Simulator (No AI Yet)
+# -----------------------------------------------------------------------------
+# Yeh config file saari "magic numbers" ek jagah rakhti hai (project rule:
+# "Keep configuration values in a clearly defined configuration section").
+# Har hospital department (agent) ka apna edge node hota hai jiski processing
+# capacity (per time-step) fixed hai. Deadline abhi is step mein shamil NAHI
+# hai -- woh Step 4 mein add hogi.
+# =============================================================================
+
+seed: 42                 # reproducibility ke liye fixed random seed
+
+simulation:
+  n_steps: 20             # kitne time-steps tak simulator chalega (test run)
+
+departments:
+  - name: Emergency
+    capacity: 5.0          # is department ka edge node ek step mein 5.0 "compute units" process kar sakta hai
+  - name: ICU
+    capacity: 4.0
+  - name: General_Ward
+    capacity: 3.0
+
+# =============================================================================
+# Step 2 Configuration - Medical Task Generator (Poisson Arrivals)
+# -----------------------------------------------------------------------------
+# *** PLACEHOLDER VALUES - NOT YET FROM MIMIC-IV ***
+# ROMAN URDU: Yeh numbers abhi "clinically reasonable guess" hain, real
+# MIMIC-IV statistics NAHI hain (PhysioNet credentialed access abhi tak nahi
+# mila -- roadmap ka Objective 1 admin action). Jab access mil jaye, sirf
+# yeahi values update karni hain -- env/task_generator.py ka code nahi
+# badalna paray ga.
+# ENGLISH: These numbers are a clinically-plausible placeholder, NOT derived
+# from MIMIC-IV yet (PhysioNet credentialed access is still pending -- see
+# the roadmap's Objective 1 admin action). Once access is granted, only this
+# section needs updating; env/task_generator.py reads whatever is here.
+#
+# arrival_rate: expected number of NEW tasks of this priority, in THIS
+#   department, per simulation time-step (the mean of a Poisson draw).
+#   Example: 0.10 means, on average, 1 task arrives every 10 steps.
+# compute_demand_range: [low, high] for a uniform draw of how many "compute
+#   units" the task needs (same units as EdgeNode.capacity above).
+# =============================================================================
+task_generation:
+  departments:
+    Emergency:
+      Critical:
+        arrival_rate: 0.10          # rare, but this is the emergency room -> not zero
+        compute_demand_range: [1.0, 2.5]
+      High:
+        arrival_rate: 0.20
+        compute_demand_range: [1.5, 3.5]
+      Routine:
+        arrival_rate: 0.15
+        compute_demand_range: [2.0, 4.0]
+    ICU:
+      Critical:
+        arrival_rate: 0.15          # ICU patients are already unstable -> higher Critical rate
+        compute_demand_range: [1.0, 2.5]
+      High:
+        arrival_rate: 0.15
+        compute_demand_range: [1.5, 3.5]
+      Routine:
+        arrival_rate: 0.10
+        compute_demand_range: [2.0, 4.0]
+    General_Ward:
+      Critical:
+        arrival_rate: 0.03          # stable patients -> Critical events are rare here
+        compute_demand_range: [1.0, 2.5]
+      High:
+        arrival_rate: 0.10
+        compute_demand_range: [1.5, 3.5]
+      Routine:
+        arrival_rate: 0.25          # routine logging/reporting dominates General Ward traffic
+        compute_demand_range: [2.0, 4.0]
+
+# =============================================================================
+# Step 3 Configuration - Local / Edge / Cloud Offloading
+# -----------------------------------------------------------------------------
+# ROMAN URDU: TaskRouter (env/task_router.py) sirf inn 4 numbers ke zariye
+# faisla karta hai ke task kahan jayega. Yeh ek FIXED rule hai, AI nahi
+# (woh Step 7+ mein aayega).
+# ENGLISH: TaskRouter (env/task_router.py) decides routing using only these
+# numbers. This is a FIXED rule, not AI (that comes in Step 7+).
+#
+# local_capacity: every department's own tiny on-device/bedside compute,
+#   per time-step (zero network delay -- it's already on the device).
+# cloud_capacity: the ONE shared datacenter serving the whole hospital,
+#   per time-step (much bigger than any single Edge node).
+# cloud_network_delay: steps a task spends "in transit" to the cloud before
+#   the cloud can start working on it (see env/cloud_node.py).
+# local_threshold / edge_threshold: compute_demand cutoffs used by
+#   TaskRouter.choose_tier() --
+#     demand <= local_threshold                     -> Local
+#     local_threshold < demand <= edge_threshold     -> Edge
+#     demand > edge_threshold                        -> Cloud
+# =============================================================================
+offloading:
+  local_capacity: 1.0
+  cloud_capacity: 50.0
+  cloud_network_delay: 2
+  local_threshold: 1.5
+  edge_threshold: 6.0

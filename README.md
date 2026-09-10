@@ -1,0 +1,123 @@
+# MS Thesis Project: Privacy-Preserving SplitFed-MADRL
+
+Practical implementation for: *Privacy-Preserving SplitFed-MADRL for Priority-Aware
+Task Scheduling in Healthcare Edge Computing* (Usama Manzoor, MSIT71S25S008,
+University of Sargodha).
+
+This code follows the 18-step roadmap in `My Research Practical ROADMAP.docx`.
+**Do not skip steps** — each step tests exactly one new idea before the next
+is added, so bugs stay easy to isolate.
+
+## Progress
+
+- [x] **Step 0 — Research setup.** Python 3.11, NumPy, PyYAML, Gymnasium 1.3.0,
+      PyTorch 2.14.0 installed and verified. See `requirements.txt`.
+- [x] **Step 1 — Mini hospital simulator (no AI).** Three department edge
+      nodes (Emergency, ICU, General Ward), each with a fixed per-step compute
+      capacity and a FIFO task queue. No scheduling intelligence, no priority,
+      no deadlines yet — this step only proves the queueing + capacity
+      mechanics are correct. All 5 verification tests pass (see below).
+- [x] **Step 2 — Generate medical tasks (Poisson arrivals).** `MedicalTaskGenerator`
+      (`env/task_generator.py`) draws Critical/High/Routine arrivals per
+      department from independent Poisson processes, with compute-demand drawn
+      from a per-priority range. `Task` now carries an optional `priority`
+      field. **Data source note:** arrival rates and compute-demand ranges in
+      `configs/environment.yaml` (`task_generation` section) are PLACEHOLDER
+      values, clinically plausible but not yet derived from MIMIC-IV —
+      PhysioNet credentialed access is still pending (see the roadmap's
+      Objective 1 admin action). Only that config section will need updating
+      once access is granted; no code changes required. Deadlines are still
+      NOT included (deferred to Step 4, as originally planned). All 6
+      verification tests pass (see below).
+- [x] **Step 3 — Local / Edge / Cloud processing choice.** `TaskRouter`
+      (`env/task_router.py`) is a **fixed, non-AI rule** that picks a tier
+      from a task's `compute_demand`: small tasks stay `Local` (on-device,
+      instant, tiny capacity), medium tasks go to the department's existing
+      `Edge` node (unchanged from Step 1/2), and large tasks go to a single
+      shared `Cloud` node (`env/cloud_node.py`) with much bigger capacity but
+      a configurable `network_delay` — the task waits in transit for that
+      many steps before any compute happens. `HospitalSimulator.route_task()`
+      / `route_generated_arrivals()` are new, **opt-in** methods; the
+      original `add_task()` / `add_generated_arrivals()` from Steps 1–2 are
+      completely unchanged and still always use the Edge node (verified by
+      `test_step1_add_task_still_bypasses_routing`). Thresholds and tier
+      capacities live in `configs/environment.yaml` (`offloading` section).
+      All 7 verification tests pass (see below). This is **not** learned —
+      the actual RL agent that will make this choice intelligently is
+      Steps 7+.
+- [ ] Step 4 — Priority and deadline system
+- [ ] Step 5 — Baseline 1: FCFS
+- [ ] Steps 6–18 — see the roadmap document
+
+## Folder structure
+
+```
+MS_Thesis_Project/
+├── configs/
+│   └── environment.yaml      # Step 0/1 values (seed, capacities, n_steps) + Step 2 task_generation section
+├── env/
+│   ├── task.py                # Task data class (id, arrival_time, compute_demand, priority since Step 2, tier since Step 3)
+│   ├── edge_node.py            # EdgeNode: limited-capacity FIFO queue + processing
+│   ├── cloud_node.py           # Step 3: CloudNode (EdgeNode + network_delay before processing)
+│   ├── task_router.py          # Step 3: TaskRouter (fixed Local/Edge/Cloud rule, not AI yet)
+│   ├── hospital_env.py         # HospitalSimulator: ties departments + Local/Cloud tiers together
+│   └── task_generator.py       # Step 2: MedicalTaskGenerator (Poisson arrivals per dept/priority)
+├── tests/
+│   ├── test_step1_simulator.py        # verification tests for Step 1
+│   ├── test_step2_task_generator.py   # verification tests for Step 2
+│   └── test_step3_routing.py          # verification tests for Step 3
+└── requirements.txt
+```
+
+## How to run the tests
+
+```bash
+cd MS_Thesis_Project
+pip install -r requirements.txt
+python3 -m tests.test_step1_simulator
+python3 -m tests.test_step2_task_generator
+python3 -m tests.test_step3_routing
+```
+
+Expected output: 5 `[PASS]` lines + `ALL STEP 1 TESTS PASSED.`, then 6 `[PASS]`
+lines + `ALL STEP 2 TESTS PASSED.`, then 7 `[PASS]` lines + `ALL STEP 3 TESTS
+PASSED.`
+
+## What Step 1 proves (and does NOT prove)
+
+Proves: tasks placed in a department's queue are processed within that
+department's fixed capacity, tasks larger than one step's capacity correctly
+carry over to later steps, departments do not interfere with each other's
+capacity, and invalid inputs raise clear errors.
+
+## What Step 2 proves (and does NOT prove)
+
+Proves: arrivals are generated by an independent Poisson process per
+(department, priority) pair; the same random seed always reproduces the same
+sequence of tasks; over many steps the average arrival count converges to the
+configured `arrival_rate`; generated compute-demand always stays inside its
+configured range; and generated arrivals flow correctly into the Step 1
+simulator (same queue/capacity mechanics apply, priority label preserved).
+
+Does NOT yet include: task deadlines or the tighter-for-Critical deadline
+policy (Step 4), or any learning/scheduling agent (Steps 7+). These are
+intentionally deferred. Also note the Step 2 data source limitation above
+(placeholder arrival rates, pending MIMIC-IV).
+
+## What Step 3 proves (and does NOT prove)
+
+Proves: `TaskRouter` correctly partitions tasks into Local/Edge/Cloud by
+`compute_demand` against two configured thresholds (including exact
+boundary values); each tier dispatches to the right node (`local_nodes`,
+`nodes`/Edge, `cloud_node`); the Cloud tier's `network_delay` correctly
+holds a task untouched until enough steps have passed, then processes it
+under the Cloud's own (larger) capacity using the same proven FIFO/capacity
+mechanics as Step 1; Poisson-generated arrivals (Step 2) route correctly
+end-to-end; and Step 1/2's `add_task()` / `add_generated_arrivals()` are
+provably unchanged (still always Edge, no tier set).
+
+Does NOT yet include: an intelligent/learned routing decision (the
+`TaskRouter` rule is fixed and hand-written — the RL agent that will learn
+this decision is Steps 7+), task deadlines or priority-aware routing (Step
+4), or per-department Cloud capacity (Cloud is intentionally ONE shared
+resource for the whole hospital, matching a centralized datacenter).

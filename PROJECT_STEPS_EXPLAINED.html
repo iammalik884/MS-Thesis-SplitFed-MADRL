@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Steps Explained — MS Thesis Simulator</title>
+<style>
+  :root{
+    --ink:#1c2230;
+    --sub:#5b6472;
+    --paper:#ffffff;
+    --bg:#eef1f6;
+    --card:#f7f8fb;
+    --line:#dfe3ea;
+    --code-bg:#1e2430;
+    --code-fg:#e8ecf3;
+    --code-accent:#8ab4ff;
+    --s1:#2563eb; --s1-soft:#eaf1ff;
+    --s2:#0d9269; --s2-soft:#e7f7f1;
+    --s3:#7c3aed; --s3-soft:#f2ecfe;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family: Georgia, 'Times New Roman', serif;
+    line-height:1.65;
+  }
+  h1,h2,h3,.ui{ font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+
+  .wrap{ max-width:960px; margin:0 auto; padding:40px 24px 80px; }
+
+  header.title{ text-align:center; padding:36px 24px 30px; }
+  header.title .kicker{
+    font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    text-transform:uppercase; letter-spacing:.12em; font-size:.72rem; color:var(--sub);
+    font-weight:700; margin-bottom:10px;
+  }
+  header.title h1{ font-size:1.9rem; margin:0 0 10px; color:var(--ink); }
+  header.title p.sub{ color:var(--sub); font-size:1rem; max-width:640px; margin:0 auto; }
+
+  .paper{ background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:30px 34px; box-shadow:0 1px 2px rgba(20,25,40,.04); }
+
+  nav.toc{ margin:26px 0 30px; }
+  nav.toc ul{ list-style:none; margin:0; padding:0; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  nav.toc a{
+    font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    font-size:.82rem; text-decoration:none; color:var(--ink); background:var(--card);
+    border:1px solid var(--line); padding:7px 14px; border-radius:999px; font-weight:600;
+  }
+
+  h2.section-head{ font-size:1.3rem; margin:0 0 4px; }
+  p.section-sub{ color:var(--sub); font-size:.92rem; margin:0 0 18px; font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;}
+
+  /* ---- roadmap (whole research, phases) ---- */
+  .roadmap{ display:flex; flex-direction:column; gap:12px; margin:0 0 10px; font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+  .phase{ background:var(--card); border:1px solid var(--line); border-left:5px solid #c7cddb; border-radius:10px; padding:14px 16px; }
+  .phase.done{ border-left-color:#0d9269; }
+  .phase-head{ font-size:.86rem; font-weight:700; margin-bottom:9px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .phase-status{ font-size:.64rem; font-weight:700; padding:3px 10px; border-radius:999px; background:#eef1f6; color:var(--sub); white-space:nowrap; }
+  .phase.done .phase-status{ background:#e7f7f1; color:#0d9269; }
+  .phase-steps{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{ font-size:.72rem; font-weight:600; padding:5px 11px; border-radius:999px; background:#fff; border:1px solid var(--line); color:var(--ink); }
+  .chip.done{ background:#0d9269; color:#fff; border-color:#0d9269; }
+
+  /* ---- diagram (shared by all diagrams) ---- */
+  .diagram{
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:26px 20px; margin:20px 0; overflow-x:auto;
+    font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  }
+  .flow-row{ display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:nowrap; min-width:max-content; margin:0 auto; }
+  .node{
+    border:2px solid var(--acc); border-radius:10px; padding:11px 15px; background:#fff;
+    font-size:.8rem; text-align:center; min-width:130px; max-width:180px; box-shadow:0 1px 3px rgba(20,25,40,.06);
+  }
+  .node .tag{ display:block; font-size:.66rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--acc); margin-bottom:4px; }
+  .node .filetag{ display:block; margin-top:5px; font-family:'Consolas','Courier New',monospace; font-size:.62rem; color:var(--sub); }
+  .node.decision{ border-style:dashed; background:#fffaf0; }
+  .node.terminal{ background:var(--acc); color:#fff; border-color:var(--acc); font-weight:700; }
+  .node.terminal .tag{ color:#fff; opacity:.85; }
+  .node.terminal .filetag{ color:#fff; opacity:.8; }
+
+  .arrow-h{ display:flex; flex-direction:column; align-items:center; justify-content:center; width:54px; flex:0 0 auto; }
+  .arrow-h .label{ font-size:.64rem; color:var(--sub); margin-bottom:3px; text-align:center; white-space:nowrap; }
+  .arrow-h .shaft{ width:44px; height:2px; background:#9aa4b5; position:relative; }
+  .arrow-h .shaft::after{ content:''; position:absolute; right:-1px; top:50%; transform:translateY(-50%); border-left:7px solid #9aa4b5; border-top:5px solid transparent; border-bottom:5px solid transparent; }
+
+  .down-connector{ display:flex; justify-content:center; }
+  .down-connector .stem{ width:2px; height:22px; background:#9aa4b5; position:relative; }
+  .down-connector .stem::after{ content:''; position:absolute; bottom:-1px; left:50%; transform:translateX(-50%); border-top:7px solid #9aa4b5; border-left:5px solid transparent; border-right:5px solid transparent; }
+
+  .branches{ display:flex; justify-content:center; gap:26px; margin-top:6px; flex-wrap:wrap; }
+  .branch{ display:flex; flex-direction:column; align-items:center; width:190px; }
+  .branch .cond{ font-size:.68rem; color:var(--sub); text-align:center; margin-bottom:4px; min-height:1.6em; }
+  .branch .stem{ width:2px; height:16px; background:#9aa4b5; position:relative; margin-bottom:2px;}
+  .branch .stem::after{ content:''; position:absolute; bottom:-1px; left:50%; transform:translateX(-50%); border-top:6px solid #9aa4b5; border-left:5px solid transparent; border-right:5px solid transparent; }
+  .branch .subflow{ display:flex; align-items:center; gap:0; flex-wrap:wrap; justify-content:center; margin-top:8px; }
+  .branch .subflow .node{ min-width:110px; font-size:.72rem; padding:8px 10px; }
+  .branch .subflow .arrow-h{ width:26px; }
+  .branch .subflow .arrow-h .shaft{ width:20px; }
+
+  .dept-card{ border:2px solid var(--acc); border-radius:10px; padding:9px; background:#fff; display:flex; flex-direction:column; gap:6px; width:100%; }
+  .dept-card .pill{ background:var(--card); border:1px solid var(--line); border-radius:6px; padding:5px 8px; font-size:.7rem; font-weight:600; text-align:center; }
+  .dept-card .pill .filetag{ display:block; font-family:'Consolas','Courier New',monospace; font-size:.58rem; color:var(--sub); font-weight:400; margin-top:1px; }
+
+  .sim-frame{ border:2px dashed #9aa4b5; border-radius:14px; padding:30px 16px 16px; position:relative; margin-top:6px; }
+  .sim-frame .frame-label{
+    position:absolute; top:-12px; left:18px; background:var(--card); padding:3px 12px; font-size:.68rem; font-weight:800;
+    color:#475569; border:1px solid var(--line); border-radius:999px;
+  }
+
+  .diagram-note{ text-align:center; font-size:.76rem; color:var(--sub); margin-top:14px; font-style:italic; }
+
+  /* ---- explanation ---- */
+  .explain h3{ font-size:1rem; margin:22px 0 6px; }
+  .explain p{ margin:0 0 12px; font-size:.98rem; }
+
+  .callout{
+    background:var(--card); border-left:4px solid var(--acc); border-radius:8px; padding:12px 16px; margin:16px 0 18px;
+    font-size:.92rem; color:var(--ink);
+    font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  }
+  .callout strong{ color:var(--acc); }
+
+  .keyfiles{ width:100%; border-collapse:collapse; margin:14px 0 4px; font-size:.85rem;
+    font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+  .keyfiles th{ text-align:left; font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:var(--sub); padding:6px 10px; border-bottom:1px solid var(--line); }
+  .keyfiles td{ padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  .keyfiles code{ font-family:'Consolas','Courier New',monospace; font-size:.82rem; background:var(--card); padding:2px 6px; border-radius:5px; }
+
+  .codeblock{ margin:16px 0; border-radius:10px; overflow:hidden; border:1px solid #2c3345; }
+  .codeblock .filebar{
+    font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    background:#151a24; color:var(--code-accent); font-size:.72rem; font-weight:700; padding:8px 14px; letter-spacing:.02em;
+  }
+  .codeblock pre{ margin:0; background:var(--code-bg); color:var(--code-fg); padding:14px 16px; overflow-x:auto; font-size:.82rem; line-height:1.55; }
+  .codeblock code{ font-family:'Consolas','Courier New',monospace; }
+
+  section.step{ margin-top:52px; padding-top:8px; border-top:1px solid var(--line); }
+  section.step .eyebrow{
+    font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-top:28px;
+  }
+  section.step h2{ font-size:1.45rem; margin:4px 0 18px; }
+  .status-pill{
+    font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    display:inline-block; font-size:.68rem; font-weight:700; padding:3px 10px; border-radius:999px; margin-left:10px; vertical-align:middle;
+  }
+  .step1 .eyebrow, .step1 h2{ color:var(--s1); }
+  .step2 .eyebrow, .step2 h2{ color:var(--s2); }
+  .step3 .eyebrow, .step3 h2{ color:var(--s3); }
+  .step1 .status-pill{ background:var(--s1-soft); color:var(--s1); }
+  .step2 .status-pill{ background:var(--s2-soft); color:var(--s2); }
+  .step3 .status-pill{ background:var(--s3-soft); color:var(--s3); }
+
+  .closing-note{ text-align:center; color:var(--sub); font-size:.9rem; margin-top:48px; font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+
+  @media (max-width:640px){
+    .flow-row{ flex-direction:column; }
+    .arrow-h{ flex-direction:row; width:auto; padding:6px 0; }
+    .arrow-h .shaft{ width:2px; height:26px; }
+    .arrow-h .shaft::after{ right:auto; top:auto; bottom:-1px; left:50%; transform:translateX(-50%); border-left:5px solid transparent; border-right:5px solid transparent; border-top:7px solid #9aa4b5; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="title">
+    <div class="kicker">MS Thesis · Privacy-Preserving SplitFed-MADRL · University of Sargodha</div>
+    <h1>Project Steps Explained</h1>
+    <p class="sub">A visual, plain-language walkthrough of the hospital edge-computing simulator built so far — for you to read in a few minutes and explain to your supervisor with confidence.</p>
+  </header>
+
+  <div class="paper">
+
+    <nav class="toc">
+      <ul>
+        <li><a href="#roadmap">Research Overview</a></li>
+        <li><a href="#architecture">Full System Picture</a></li>
+        <li><a href="#step1">Step 1</a></li>
+        <li><a href="#step2">Step 2</a></li>
+        <li><a href="#step3">Step 3</a></li>
+      </ul>
+    </nav>
+
+    <!-- ============================= RESEARCH OVERVIEW ============================= -->
+    <section id="roadmap">
+      <h2 class="section-head">1. Where This Fits in the Whole Research</h2>
+      <p class="section-sub">Before looking at individual steps, here is the entire research plan grouped into three phases. This project is currently at the end of Phase A.</p>
+
+      <div class="roadmap">
+        <div class="phase done">
+          <div class="phase-head">
+            Phase A — Build the Simulated Hospital
+            <span class="phase-status">✓ Done (Steps 0–3)</span>
+          </div>
+          <div class="phase-steps">
+            <span class="chip done">Step 0 · Environment setup</span>
+            <span class="chip done">Step 1 · Queue + capacity simulator</span>
+            <span class="chip done">Step 2 · Random task arrivals</span>
+            <span class="chip done">Step 3 · Local / Edge / Cloud routing</span>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="phase-head">
+            Phase B — Add Real Scheduling Rules
+            <span class="phase-status">Next</span>
+          </div>
+          <div class="phase-steps">
+            <span class="chip">Step 4 · Priority + deadlines</span>
+            <span class="chip">Step 5 · FCFS baseline (for comparison)</span>
+            <span class="chip">Step 6 · RL-ready environment wrapper</span>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="phase-head">
+            Phase C — Teach an AI to Schedule
+            <span class="phase-status">Later</span>
+          </div>
+          <div class="phase-steps">
+            <span class="chip">Step 7+ · Learning agents (DQN, then MAPPO)</span>
+            <span class="chip">SplitFed privacy-preserving training</span>
+            <span class="chip">Final evaluation vs. baselines</span>
+          </div>
+        </div>
+      </div>
+      <p class="diagram-note">Exact detail for every one of the 18 steps lives in the full roadmap document — this grouping just keeps the big picture easy to explain.</p>
+    </section>
+
+    <!-- ============================= FULL SYSTEM DIAGRAM ============================= -->
+    <section id="architecture" style="margin-top:44px;">
+      <h2 class="section-head">2. The Complete Picture — What Steps 1, 2 and 3 Built Together</h2>
+      <p class="section-sub">Each step added one new piece. Put together, this is the full simulated hospital as it exists right now — and which file is responsible for which box.</p>
+
+      <div class="diagram" style="--acc:#334155;">
+        <div class="sim-frame">
+          <span class="frame-label">HospitalSimulator — hospital_env.py (runs the clock, owns every node below)</span>
+
+          <div class="flow-row">
+            <div class="node" style="--acc:#0d9269;"><span class="tag">Step 2</span>MedicalTaskGenerator<span class="filetag">task_generator.py</span></div>
+            <div class="arrow-h"><span class="label">creates tasks</span><span class="shaft"></span></div>
+            <div class="node decision" style="--acc:#7c3aed;"><span class="tag">Step 3</span>TaskRouter<span class="filetag">task_router.py</span></div>
+          </div>
+
+          <div class="down-connector"><div class="stem"></div></div>
+
+          <div class="branches">
+            <div class="branch">
+              <div class="cond">Emergency</div>
+              <div class="stem"></div>
+              <div class="dept-card" style="--acc:#2563eb;">
+                <div class="pill">Local<span class="filetag">edge_node.py</span></div>
+                <div class="pill">Edge<span class="filetag">edge_node.py</span></div>
+              </div>
+            </div>
+            <div class="branch">
+              <div class="cond">ICU</div>
+              <div class="stem"></div>
+              <div class="dept-card" style="--acc:#2563eb;">
+                <div class="pill">Local<span class="filetag">edge_node.py</span></div>
+                <div class="pill">Edge<span class="filetag">edge_node.py</span></div>
+              </div>
+            </div>
+            <div class="branch">
+              <div class="cond">General Ward</div>
+              <div class="stem"></div>
+              <div class="dept-card" style="--acc:#2563eb;">
+                <div class="pill">Local<span class="filetag">edge_node.py</span></div>
+                <div class="pill">Edge<span class="filetag">edge_node.py</span></div>
+              </div>
+            </div>
+            <div class="branch">
+              <div class="cond">shared by all departments</div>
+              <div class="stem"></div>
+              <div class="node terminal" style="--acc:#7c3aed;">CLOUD<span class="filetag">cloud_node.py</span></div>
+            </div>
+          </div>
+        </div>
+
+        <p class="diagram-note">Every box (Local / Edge / Cloud) is its own small waiting-line with a fixed amount of work it can do per time-step — that rule was proven correct in Step 1 and reused everywhere. <code>task.py</code> defines the task object that flows through every box.</p>
+      </div>
+
+      <div class="callout" style="--acc:#334155;">
+        <strong>In one sentence:</strong> the generator (Step 2) keeps creating new tasks, the router (Step 3) decides which box each task goes to, and every box processes its queue using the exact same capacity rule proven in Step 1 — <code>HospitalSimulator</code> is simply the manager that holds all of this together and advances the clock by one step at a time.
+      </div>
+    </section>
+
+    <!-- ============================= STEP 1 ============================= -->
+    <section class="step step1" id="step1">
+      <div class="eyebrow">Step 1 · Step-by-step detail</div>
+      <h2>Mini Hospital Simulator (No AI Yet) <span class="status-pill">Complete</span></h2>
+
+      <div class="callout" style="--acc:var(--s1);">
+        <strong>In plain words:</strong> each department has a small computer that can only do a fixed amount of work per time-step; unfinished work simply waits its turn.
+      </div>
+
+      <div class="diagram" style="--acc:#2563eb;">
+        <div class="flow-row">
+          <div class="node"><span class="tag">Input</span>New task arrives<span class="filetag">add_task() in hospital_env.py</span></div>
+          <div class="arrow-h"><span class="label">joins queue</span><span class="shaft"></span></div>
+          <div class="node"><span class="tag">Queue</span>FIFO queue at the department's EdgeNode<span class="filetag">edge_node.py</span></div>
+          <div class="arrow-h"><span class="label">every step</span><span class="shaft"></span></div>
+          <div class="node decision"><span class="tag">Check</span>Enough capacity left this step?</div>
+        </div>
+        <div class="down-connector"><div class="stem"></div></div>
+        <div class="branches">
+          <div class="branch">
+            <div class="cond"><strong>Yes</strong> — fully covers the remaining demand</div>
+            <div class="stem"></div>
+            <div class="node terminal">Task COMPLETE<br>completion_time saved</div>
+          </div>
+          <div class="branch">
+            <div class="cond"><strong>No</strong> — only partially covers it</div>
+            <div class="stem"></div>
+            <div class="node">remaining_demand reduced,<br>stays at front of queue</div>
+          </div>
+        </div>
+        <p class="diagram-note">A task that isn't finished simply waits and tries again on the next time-step — nothing is lost, and no department can ever exceed its own capacity.</p>
+      </div>
+
+      <div class="explain">
+        <p>This step builds the foundation the rest of the project stands on. Three hospital departments — Emergency, ICU, and General Ward — are each modelled as an <strong>EdgeNode</strong>: a small computer with a fixed amount of processing power available per time-step. Tasks are added one at a time and wait in a first-in-first-out queue. On every tick of the simulation clock, a node works through its queue from the front, spending its capacity on whichever task is waiting; if a task needs more work than the remaining capacity allows, it is left partially finished and automatically continues from where it left off on the next step.</p>
+        <p>No intelligence or decision-making exists yet — the goal here is only to prove the basic bookkeeping is correct before anything more advanced is added on top. Five automated tests confirm that tasks are never lost, capacity is never exceeded, departments never interfere with one another, and invalid input is rejected with a clear error message.</p>
+
+        <table class="keyfiles">
+          <tr><th>File</th><th>What it is responsible for</th></tr>
+          <tr><td><code>env/task.py</code></td><td>Describes one <code>Task</code> — how much work it still needs (<code>remaining_demand</code>) and when it finished.</td></tr>
+          <tr><td><code>env/edge_node.py</code></td><td>The department's computer: holds the queue, holds the capacity number, and runs the per-step processing loop below.</td></tr>
+          <tr><td><code>env/hospital_env.py</code></td><td><code>HospitalSimulator</code> — creates the three departments, adds tasks, and calls every department's <code>step()</code> once per tick.</td></tr>
+        </table>
+
+        <div class="codeblock">
+          <div class="filebar">env/edge_node.py — the core per-step processing loop</div>
+          <pre><code>def step(self, current_time: int) -&gt; None:
+    available_capacity = self.capacity
+    still_in_queue = []
+
+    for task in self.queue:
+        if available_capacity &lt;= 0:
+            still_in_queue.append(task)   # no compute left, task simply waits
+            continue
+
+        work_done = min(available_capacity, task.remaining_demand)
+        task.remaining_demand -= work_done
+        available_capacity -= work_done
+
+        if task.is_complete:
+            task.completion_time = current_time
+            self.completed_tasks.append(task)
+        else:
+            still_in_queue.append(task)   # partially done, carries over
+
+    self.queue = still_in_queue</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= STEP 2 ============================= -->
+    <section class="step step2" id="step2">
+      <div class="eyebrow">Step 2 · Step-by-step detail</div>
+      <h2>Poisson Task Generator (Random Arrivals) <span class="status-pill">Complete</span></h2>
+
+      <div class="callout" style="--acc:var(--s2);">
+        <strong>In plain words:</strong> instead of us adding tasks by hand, the computer now creates them on its own, randomly but at a realistic average rate — like a real hospital.
+      </div>
+
+      <div class="diagram" style="--acc:#0d9269;">
+        <div class="flow-row">
+          <div class="node"><span class="tag">Clock</span>Every<br>time-step</div>
+          <div class="arrow-h"><span class="label">for each pair</span><span class="shaft"></span></div>
+          <div class="node">Department × Priority<br><em>e.g. ICU / Critical</em></div>
+          <div class="arrow-h"><span class="label">random draw</span><span class="shaft"></span></div>
+          <div class="node decision"><span class="tag">Check</span>count ~ Poisson(rate)<br>count &gt; 0 ?<span class="filetag">task_generator.py</span></div>
+        </div>
+        <div class="down-connector"><div class="stem"></div></div>
+        <div class="branches">
+          <div class="branch">
+            <div class="cond"><strong>No</strong> — nothing arrives this pair, this step (the usual case)</div>
+            <div class="stem"></div>
+            <div class="node">No task created</div>
+          </div>
+          <div class="branch" style="width:340px;">
+            <div class="cond"><strong>Yes</strong> — one or more tasks arrive</div>
+            <div class="stem"></div>
+            <div class="subflow">
+              <div class="node">demand ~<br>Uniform(low, high)</div>
+              <div class="arrow-h"><span class="shaft"></span></div>
+              <div class="node">GeneratedArrival<br>object built</div>
+              <div class="arrow-h"><span class="shaft"></span></div>
+              <div class="node terminal">Queued via Step 1's<br>EdgeNode rules<span class="filetag">edge_node.py</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="explain">
+        <p>Step 1 required every task to be added by hand. Real hospitals do not work that way — patients and workloads arrive on their own, unpredictably, but around some average rate. This step introduces the <strong>MedicalTaskGenerator</strong>, which reproduces that behaviour using a Poisson process: a standard statistical model for "how many random events happen in a fixed interval." Each department and priority combination — for example, Critical cases in the ICU — runs its own independent Poisson process, because a Critical event in the ICU is naturally far more likely than the same event in the General Ward.</p>
+        <p>Whenever a task is generated, its workload is also drawn randomly, from a range that matches its priority level. Once created, the task is handed to the exact same simulator built in Step 1, so every queueing and capacity rule already proven continues to apply unchanged. The same random seed always reproduces the identical sequence of tasks, which matters for debugging and for defending results later. The specific arrival-rate numbers used right now are clinically-plausible placeholders, pending approved access to the MIMIC-IV clinical dataset — only those numbers will change later, not this code.</p>
+
+        <table class="keyfiles">
+          <tr><th>File</th><th>What it is responsible for</th></tr>
+          <tr><td><code>env/task_generator.py</code></td><td><code>MedicalTaskGenerator</code> — runs one Poisson draw per (department, priority) pair, every step.</td></tr>
+          <tr><td><code>configs/environment.yaml</code></td><td>Holds the arrival-rate and compute-demand numbers the generator reads (placeholder values, pending MIMIC-IV).</td></tr>
+          <tr><td><code>env/hospital_env.py</code></td><td><code>add_generated_arrivals()</code> — takes what the generator produced and feeds it into Step 1's queues.</td></tr>
+        </table>
+
+        <div class="codeblock">
+          <div class="filebar">env/task_generator.py — one Poisson draw per (department, priority)</div>
+          <pre><code>count = int(self.rng.poisson(rate))
+if count == 0:
+    continue                      # nothing arrived for this pair, this step
+
+low, high = settings["compute_demand_range"]
+for _ in range(count):
+    demand = float(self.rng.uniform(low, high))
+    arrivals.append(
+        GeneratedArrival(department=dept_name, priority=priority, compute_demand=demand)
+    )</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= STEP 3 ============================= -->
+    <section class="step step3" id="step3">
+      <div class="eyebrow">Step 3 · Step-by-step detail</div>
+      <h2>Local / Edge / Cloud Routing <span class="status-pill">Complete</span></h2>
+
+      <div class="callout" style="--acc:var(--s3);">
+        <strong>In plain words:</strong> every task now also gets to pick <em>where</em> it runs — small jobs stay on-device, medium jobs go to the department computer, big jobs go to one shared, more powerful, but slower-to-reach computer.
+      </div>
+
+      <div class="diagram" style="--acc:#7c3aed;">
+        <div class="flow-row">
+          <div class="node"><span class="tag">Input</span>New task<br>(compute_demand)</div>
+          <div class="arrow-h"><span class="label">route_task()</span><span class="shaft"></span></div>
+          <div class="node decision"><span class="tag">Fixed rule</span>TaskRouter<br>choose_tier()<br><em>(not AI yet)</em><span class="filetag">task_router.py</span></div>
+        </div>
+        <div class="down-connector"><div class="stem"></div></div>
+        <div class="branches">
+          <div class="branch">
+            <div class="cond">demand ≤ 1.5</div>
+            <div class="stem"></div>
+            <div class="node terminal">LOCAL<br><small style="font-weight:400;">on-device, zero delay, tiny capacity</small></div>
+          </div>
+          <div class="branch">
+            <div class="cond">1.5 &lt; demand ≤ 6.0</div>
+            <div class="stem"></div>
+            <div class="node terminal">EDGE<br><small style="font-weight:400;">department's own node — same as Step 1/2</small></div>
+          </div>
+          <div class="branch">
+            <div class="cond">demand &gt; 6.0</div>
+            <div class="stem"></div>
+            <div class="node terminal">CLOUD<br><small style="font-weight:400;">one shared node, big capacity</small><span class="filetag">cloud_node.py</span></div>
+          </div>
+        </div>
+        <p class="diagram-note">All three tiers then process the task using the same proven FIFO + capacity mechanics from Step 1 — Cloud additionally makes the task wait <strong>network_delay</strong> (2) steps "in transit" before it may start.</p>
+      </div>
+
+      <div class="explain">
+        <p>Every task now faces a choice of <em>where</em> it gets executed, not just <em>when</em>. The <strong>TaskRouter</strong> looks only at a task's compute_demand and, using two configured thresholds, sends it to one of three tiers: <strong>Local</strong> (a tiny on-device resource — instant, but very limited capacity), <strong>Edge</strong> (the department's own node, unchanged from Steps 1 and 2), or <strong>Cloud</strong> (one powerful resource shared by the entire hospital, reached only after a configurable network delay). This mirrors the real "offloading" trade-off found in edge-computing systems: keep work close and fast, or send it somewhere more powerful but slower to reach.</p>
+        <p>It is important to be explicit that this routing rule is <strong>fixed and hand-written, not learned</strong>. Its only job is to prove that the three-tier queueing, capacity, and network-delay mechanics behave correctly before any intelligence is introduced. From Step 7 onward, a reinforcement-learning agent will occupy this exact decision point and learn to route tasks more effectively than this simple rule. Just as importantly, the original Step 1/2 behaviour was left completely untouched — <code>add_task()</code> still always goes straight to the Edge node — so nothing earlier in the project could break by adding this feature.</p>
+
+        <table class="keyfiles">
+          <tr><th>File</th><th>What it is responsible for</th></tr>
+          <tr><td><code>env/task_router.py</code></td><td><code>TaskRouter</code> — the fixed Local/Edge/Cloud decision rule (two threshold numbers, nothing more).</td></tr>
+          <tr><td><code>env/cloud_node.py</code></td><td><code>CloudNode</code> — same processing loop as Step 1's EdgeNode, plus the network-delay wait.</td></tr>
+          <tr><td><code>env/hospital_env.py</code></td><td><code>route_task()</code> / <code>route_generated_arrivals()</code> — asks the router for a tier, then hands the task to the matching node.</td></tr>
+          <tr><td><code>configs/environment.yaml</code></td><td><code>offloading</code> section — Local/Cloud capacities, thresholds, and the network delay.</td></tr>
+        </table>
+
+        <div class="codeblock">
+          <div class="filebar">env/task_router.py — the fixed routing rule</div>
+          <pre><code>def choose_tier(self, compute_demand: float) -&gt; str:
+    if compute_demand &lt;= self.local_threshold:
+        tier = "Local"
+    elif compute_demand &lt;= self.edge_threshold:
+        tier = "Edge"
+    else:
+        tier = "Cloud"
+    return tier</code></pre>
+        </div>
+
+        <div class="codeblock">
+          <div class="filebar">env/cloud_node.py — the network-delay gate</div>
+          <pre><code>still_in_transit = (current_time - task.arrival_time) &lt; self.network_delay
+if still_in_transit or available_capacity &lt;= 0:
+    still_in_queue.append(task)   # not reachable yet, or no cloud capacity left
+    continue</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <p class="closing-note">Next up: Step 4 — adding priority and deadlines, so Critical tasks are expected to finish faster than Routine ones.</p>
+
+  </div>
+</div>
+</body>
+</html>

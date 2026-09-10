@@ -1,0 +1,6 @@
+# Step 0 - Reproducible environment for the thesis simulation project.
+# Install with: pip install -r requirements.txt
+numpy>=2.0
+PyYAML>=6.0
+gymnasium==1.3.0     # needed starting Step 6 (Gymnasium environment wrapper)
+torch==2.14.0        # needed starting Step 7 (DQN) / Step 9 (MAPPO)
