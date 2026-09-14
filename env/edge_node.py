@@ -80,9 +80,21 @@ class EdgeNode:
 
     @property
     def utilization(self) -> float:
-        """Fraction of capacity that would be used if the queue is non-empty
-        (1.0 = fully busy this step, 0.0 = idle). Useful for logging/plots."""
+        """Fraction of this step's capacity that step() would actually spend,
+        given the current queue (1.0 = fully busy this step, 0.0 = idle).
+        Useful for logging/plots and, later, as an RL observation feature.
+
+        Mirrors step()'s FIFO capacity-consumption loop (without mutating any
+        task) so it accounts for EVERY task capacity reaches this step, not
+        just the one at the front of the queue -- a node with three small
+        tasks that together fill its capacity is 100% utilized, even though
+        no single task uses the full capacity by itself.
+        """
         if not self.queue:
             return 0.0
-        demand_now = sum(min(self.capacity, t.remaining_demand) for t in self.queue[:1])
-        return min(1.0, demand_now / self.capacity)
+        available_capacity = self.capacity
+        for task in self.queue:
+            if available_capacity <= 0:
+                break
+            available_capacity -= min(available_capacity, task.remaining_demand)
+        return (self.capacity - available_capacity) / self.capacity

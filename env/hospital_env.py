@@ -22,8 +22,8 @@ and priority class) and injects it the same way `add_task()` always did --
 so Step 1's tests and behaviour are completely unchanged.
 
 Must Remember:
-- Priority labels exist on tasks now (Step 2), but deadlines and the
-  "Critical must be faster" policy are still Step 4.
+- Priority labels exist on tasks now (Step 2). Deadlines (Step 4) are now
+  tracked too, but nothing here uses them to make a decision yet.
 
 STEP 3 update: add_task()/add_generated_arrivals() are UNCHANGED on purpose
 (Step 1/2 tests still call them and still expect every task to land on the
@@ -35,6 +35,13 @@ tier, then dispatch to whichever node actually represents that tier:
   - "Edge"  -> self.nodes[department]        (same node Step 1/2 always used)
   - "Cloud" -> self.cloud_node                (ONE node shared by the whole
                                                 hospital, has network_delay)
+
+STEP 4 update: both add_task() and route_task() now also compute a
+`deadline` for the Task they create, via the private _compute_deadline()
+helper -- current_time + a priority-based offset read from
+configs/environment.yaml's 'deadlines' section. This is OPT-IN exactly like
+'offloading' in Step 3: no priority given, or no 'deadlines' section in the
+config, and deadline just stays None -- no error, nothing else changes.
 """
 
 from typing import Dict, List, Optional
@@ -42,7 +49,7 @@ import yaml
 
 from env.cloud_node import CloudNode
 from env.edge_node import EdgeNode
-from env.task import Task
+from env.task import PRIORITY_CLASSES, Task
 from env.task_router import TaskRouter
 
 
@@ -90,8 +97,42 @@ class HospitalSimulator:
             self.cloud_node = None
             self.router = None
 
+        # STEP 4: deadline offsets, one per priority class, read from the
+        # optional 'deadlines' section. Validated once here (fail fast on a
+        # bad config) rather than in _compute_deadline(), which runs on
+        # every single task creation.
+        deadlines_config = config.get("deadlines")
+        if deadlines_config:
+            for priority in PRIORITY_CLASSES:
+                if priority not in deadlines_config:
+                    raise ValueError(
+                        f"Config 'deadlines' section is missing priority class "
+                        f"'{priority}' (need all of {PRIORITY_CLASSES})"
+                    )
+                offset = deadlines_config[priority]
+                if not isinstance(offset, (int, float)) or isinstance(offset, bool) or offset < 0:
+                    raise ValueError(
+                        f"Config 'deadlines.{priority}' must be a number >= 0, got {offset!r}"
+                    )
+            self.deadline_offsets: Optional[Dict[str, float]] = deadlines_config
+        else:
+            self.deadline_offsets = None
+
         self.current_time = 0
         self._next_task_id = 0
+
+    def _compute_deadline(self, priority: Optional[str]) -> Optional[int]:
+        """STEP 4 - current_time + this priority's configured offset, or
+        None if either no priority was given or the config has no
+        'deadlines' section (deadline tracking is opt-in, like offloading).
+        Every priority in PRIORITY_CLASSES is guaranteed present in
+        self.deadline_offsets by the __init__ validation above, and Task
+        itself only ever accepts a priority from PRIORITY_CLASSES or None --
+        so the lookup below can never raise KeyError.
+        """
+        if priority is None or self.deadline_offsets is None:
+            return None
+        return self.current_time + self.deadline_offsets[priority]
 
     def add_task(self, department_name: str, compute_demand: float, priority: Optional[str] = None) -> Task:
         """Manually inject a single task into a department's queue.
@@ -109,6 +150,7 @@ class HospitalSimulator:
             arrival_time=self.current_time,
             compute_demand=compute_demand,
             priority=priority,
+            deadline=self._compute_deadline(priority),
         )
         self._next_task_id += 1
         self.nodes[department_name].add_task(task)
@@ -158,6 +200,7 @@ class HospitalSimulator:
             compute_demand=compute_demand,
             priority=priority,
             tier=tier,
+            deadline=self._compute_deadline(priority),
         )
         self._next_task_id += 1
 

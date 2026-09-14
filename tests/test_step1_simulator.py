@@ -73,6 +73,33 @@ def test_independent_departments_do_not_interfere():
     print("[PASS] test_independent_departments_do_not_interfere")
 
 
+def test_utilization_reflects_whole_queue_not_just_front_task():
+    """Regression test for a bug fixed after Step 1: EdgeNode.utilization used
+    to look only at the queue's FRONT task, so 3 small tasks that together
+    fill capacity were misreported as barely busy. It must reflect the total
+    work step() would actually do this step, across the whole queue."""
+    sim = HospitalSimulator(CONFIG_PATH)
+    # General_Ward capacity = 3.0; three tasks of 1.0 each fully use it.
+    sim.add_task("General_Ward", compute_demand=1.0)
+    sim.add_task("General_Ward", compute_demand=1.0)
+    sim.add_task("General_Ward", compute_demand=1.0)
+    assert sim.nodes["General_Ward"].utilization == 1.0, (
+        "3 tasks of 1.0 each should fully use General_Ward's 3.0 capacity (utilization 1.0), "
+        "not just count the front task"
+    )
+
+    # A single task smaller than capacity should NOT report full utilization.
+    sim2 = HospitalSimulator(CONFIG_PATH)
+    sim2.add_task("Emergency", compute_demand=2.0)  # Emergency capacity = 5.0
+    assert sim2.nodes["Emergency"].utilization == 0.4, (
+        f"Expected 0.4 (2.0/5.0), got {sim2.nodes['Emergency'].utilization}"
+    )
+
+    # Empty queue must report 0.0.
+    assert sim2.nodes["ICU"].utilization == 0.0
+    print("[PASS] test_utilization_reflects_whole_queue_not_just_front_task")
+
+
 def test_invalid_inputs_raise_meaningful_errors():
     """Input validation: invalid config/task values must raise clear errors."""
     sim = HospitalSimulator(CONFIG_PATH)
@@ -94,5 +121,6 @@ if __name__ == "__main__":
     test_task_spans_multiple_steps_when_larger_than_capacity()
     test_fifo_ordering_and_capacity_never_exceeded()
     test_independent_departments_do_not_interfere()
+    test_utilization_reflects_whole_queue_not_just_front_task()
     test_invalid_inputs_raise_meaningful_errors()
     print("\nALL STEP 1 TESTS PASSED.")

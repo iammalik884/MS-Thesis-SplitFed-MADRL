@@ -1,5 +1,5 @@
 """
-Step 1/2 - Task representation (priority added in Step 2, deadline still Step 4).
+Step 1/2/4 - Task representation (priority since Step 2, deadline since Step 4).
 ================================================================================
 ROMAN URDU: Yeh sabse chota building-block hai. Ek "Task" matlab ek medical
 computation job -- jaise ek ECG reading process karna. Step 1 mein hum sirf
@@ -8,10 +8,12 @@ liye kitna "compute demand" chahiye. STEP 2 update: ab har task ka apna
 "priority" (Critical / High / Routine) bhi hota hai, kyunke Poisson
 generator (env/task_generator.py) teeno priority classes ko alag-alag
 arrival-rate aur compute-demand se generate karta hai -- is liye task ko
-yeh label yaad rakhna zaroori hai. Deadline (aur "kitni jaldi Critical
-task complete honi chahiye" wala policy) abhi bhi Step 4 mein aayega --
-is se pehle add karna do naye concepts ek sath test karna hota (project
-ka "ek waqt mein sirf ek idea" rule tootne se bachaya gaya hai).
+yeh label yaad rakhna zaroori hai. STEP 4 update: ab task apni "deadline"
+bhi yaad rakhta hai -- kitne time-step tak usay complete ho jana chahiye
+(priority ke hisaab se, configs/environment.yaml ke 'deadlines' section se
+tay hoti hai -- Critical sab se tight, Routine sab se loose). Yeh deadline
+sirf TRACK hoti hai (`met_deadline` property se) -- abhi koi scheduling
+decision isay istemal nahi karti, queue order abhi bhi Step 1 wala FIFO hai.
 
 ENGLISH: This is the smallest building block of the simulation. A "Task"
 represents one medical computation job (e.g. processing an ECG reading).
@@ -19,9 +21,11 @@ Step 1 tracked only when it arrived and how much compute it needs. STEP 2
 adds a `priority` label (Critical / High / Runtime -> Routine) because the
 Poisson generator now creates tasks with different arrival rates and
 compute-demand ranges per priority class, so each task must remember which
-class it belongs to. Deadlines (and the "Critical must finish faster" rule)
-are intentionally still deferred to Step 4, so this step tests exactly one
-new idea: automatic, priority-labeled arrivals.
+class it belongs to. STEP 4 update: a task now also remembers its
+"deadline" -- how many time-steps it should finish within, set from
+configs/environment.yaml's 'deadlines' section (per priority, Critical
+tightest, Routine loosest). This is tracked only (`met_deadline` property)
+-- no scheduling decision uses it yet; queue order is still Step 1's FIFO.
 """
 
 from dataclasses import dataclass, field
@@ -62,6 +66,12 @@ class Task:
             (add_task/add_generated_arrivals always use the Edge tier but do
             not bother labeling it) -- again optional so nothing before
             Step 3 breaks.
+        deadline: the time-step by which this task is expected to finish
+            (arrival_time + a priority-based offset from
+            configs/environment.yaml's 'deadlines' section), set by
+            HospitalSimulator (Step 4). None for tasks with no priority, or
+            when the config has no 'deadlines' section -- deadline tracking
+            is opt-in, same pattern as tier/offloading in Step 3.
     """
 
     task_id: int
@@ -71,6 +81,7 @@ class Task:
     completion_time: Optional[int] = None
     priority: Optional[str] = None
     tier: Optional[str] = None
+    deadline: Optional[int] = None
 
     def __post_init__(self):
         # Input validation with meaningful error messages (project coding rule).
@@ -92,9 +103,27 @@ class Task:
                 f"Task {self.task_id}: tier must be one of {TIER_CLASSES} or None, "
                 f"got {self.tier!r}"
             )
+        if self.deadline is not None and self.deadline < self.arrival_time:
+            raise ValueError(
+                f"Task {self.task_id}: deadline ({self.deadline}) cannot be before "
+                f"arrival_time ({self.arrival_time})"
+            )
         self.remaining_demand = self.compute_demand
 
     @property
     def is_complete(self) -> bool:
         """True once the node has done enough work on this task."""
         return self.remaining_demand <= 0
+
+    @property
+    def met_deadline(self) -> Optional[bool]:
+        """STEP 4 - whether this task finished on or before its deadline.
+
+        Returns None (not yet decidable) if the task has no deadline, or has
+        not completed yet. Once completed, True if completion_time <=
+        deadline, False otherwise. Deliberately read-only/derived -- nothing
+        else sets it, so it can never drift out of sync with completion_time.
+        """
+        if self.deadline is None or self.completion_time is None:
+            return None
+        return self.completion_time <= self.deadline

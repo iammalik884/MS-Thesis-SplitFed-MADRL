@@ -1,8 +1,9 @@
 """
-Live simulation demo - Steps 1-3 (Poisson arrivals + Local/Edge/Cloud routing).
+Live simulation demo - Steps 1-4 (Poisson arrivals, Local/Edge/Cloud routing,
+priority deadlines).
 ================================================================================
 Reuses HospitalSimulator, MedicalTaskGenerator, and TaskRouter exactly as
-implemented and tested in Steps 1-3. No new logic is added here, and nothing
+implemented and tested in Steps 1-4. No new logic is added here, and nothing
 is hard-coded -- every printed number comes from actually running the
 simulation with seed=42 (configs/environment.yaml).
 
@@ -81,13 +82,37 @@ def main():
     else:
         print("Average Completion Time: N/A (no tasks completed)")
 
+    with_deadline = [t for t in completed if t.deadline is not None]
+    if with_deadline:
+        met_n = sum(1 for t in with_deadline if t.met_deadline)
+        missed_n = len(with_deadline) - met_n
+        print(f"Deadlines Met: {met_n}/{len(with_deadline)}  (Missed: {missed_n})")
+        for priority in ("Critical", "High", "Routine"):
+            subset = [t for t in with_deadline if t.priority == priority]
+            if subset:
+                subset_met = sum(1 for t in subset if t.met_deadline)
+                print(f"  {priority:<9} {subset_met}/{len(subset)} met")
+    else:
+        print("Deadlines Met: N/A (no completed task had a deadline)")
+
     if cloud_n == 0:
+        edge_threshold = CONFIG["offloading"]["edge_threshold"]
+        max_configured_demand = max(
+            settings["compute_demand_range"][1]
+            for priorities in CONFIG["task_generation"]["departments"].values()
+            for settings in priorities.values()
+        )
         print(
-            "\nNOTE: 0 Cloud-routed tasks is expected with the current config, not a bug -- "
-            "configs/environment.yaml's max compute_demand (4.0, Routine upper bound) never "
-            "exceeds edge_threshold (6.0), so TaskRouter.choose_tier() can never return "
-            "'Cloud' with these values. Raise edge_threshold or the Routine demand range in "
-            "configs/environment.yaml if you want to see a real Cloud-routed task."
+            f"\nNOTE: 0 Cloud-routed tasks this run. With edge_threshold={edge_threshold} and "
+            f"the highest configured compute_demand upper bound at {max_configured_demand}, "
+            + (
+                "no generated task can ever exceed edge_threshold, so TaskRouter.choose_tier() "
+                "can never return 'Cloud' -- raise edge_threshold or a compute_demand_range in "
+                "configs/environment.yaml if you want to guarantee a Cloud-routed task."
+                if max_configured_demand <= edge_threshold
+                else "Cloud IS reachable with this config -- 0 this run is just this seed's draw; "
+                "try more steps or a different seed."
+            )
         )
 
 

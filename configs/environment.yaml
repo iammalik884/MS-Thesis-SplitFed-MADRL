@@ -40,6 +40,16 @@ departments:
 #   Example: 0.10 means, on average, 1 task arrives every 10 steps.
 # compute_demand_range: [low, high] for a uniform draw of how many "compute
 #   units" the task needs (same units as EdgeNode.capacity above).
+#
+# ROUTINE RANGE NOTE (post-Step-3 correction): Routine's upper bound is 8.0,
+# not 4.0, on purpose -- with the Step 3 'offloading' section below
+# (edge_threshold: 6.0), a max of 4.0 meant NO generated task could ever
+# exceed edge_threshold, so the Cloud tier was silently unreachable by any
+# realistic (generator-driven) simulation, even though TaskRouter/CloudNode
+# were fully implemented and tested with manually-injected tasks. Routine
+# tasks (batch analytics / reporting jobs, per the note below) are the
+# plausible place for occasional heavy compute_demand, so only their upper
+# bound was raised. Still a placeholder pending real MIMIC-IV-derived values.
 # =============================================================================
 task_generation:
   departments:
@@ -52,7 +62,7 @@ task_generation:
         compute_demand_range: [1.5, 3.5]
       Routine:
         arrival_rate: 0.15
-        compute_demand_range: [2.0, 4.0]
+        compute_demand_range: [2.0, 8.0]
     ICU:
       Critical:
         arrival_rate: 0.15          # ICU patients are already unstable -> higher Critical rate
@@ -62,7 +72,7 @@ task_generation:
         compute_demand_range: [1.5, 3.5]
       Routine:
         arrival_rate: 0.10
-        compute_demand_range: [2.0, 4.0]
+        compute_demand_range: [2.0, 8.0]
     General_Ward:
       Critical:
         arrival_rate: 0.03          # stable patients -> Critical events are rare here
@@ -72,7 +82,7 @@ task_generation:
         compute_demand_range: [1.5, 3.5]
       Routine:
         arrival_rate: 0.25          # routine logging/reporting dominates General Ward traffic
-        compute_demand_range: [2.0, 4.0]
+        compute_demand_range: [2.0, 8.0]
 
 # =============================================================================
 # Step 3 Configuration - Local / Edge / Cloud Offloading
@@ -101,3 +111,31 @@ offloading:
   cloud_network_delay: 2
   local_threshold: 1.5
   edge_threshold: 6.0
+
+# =============================================================================
+# Step 4 Configuration - Priority Deadlines
+# -----------------------------------------------------------------------------
+# ROMAN URDU: Har priority class ki apni deadline hoti hai -- kitne time-steps
+# arrival ke baad task complete ho jana "chahiye". Yeh abhi sirf TRACK hoti hai
+# (Task.met_deadline se) -- koi scheduling decision isay istemal nahi karti,
+# queue order abhi bhi Step 1 wala plain FIFO hai. Section poori tarah OPT-IN
+# hai (jaise 'offloading'): agar yeh section config se hata diya jaye,
+# HospitalSimulator.add_task()/route_task() bilkul waisे hi chalte hain jaise
+# pehle chalte thay, bas deadline hamesha None rahegi -- koi error nahi.
+#
+# ENGLISH: Every priority class gets its own deadline -- how many time-steps
+# after arrival a task "should" finish by. This is only TRACKED for now (via
+# Task.met_deadline) -- no scheduling decision uses it yet; queue order is
+# still Step 1's plain FIFO. This section is fully OPT-IN (like 'offloading'):
+# remove it and HospitalSimulator.add_task()/route_task() behave exactly as
+# before, deadline just stays None -- no error.
+#
+# deadline_offset: how many steps after arrival_time this priority's tasks
+#   are expected to finish by (deadline = arrival_time + deadline_offset).
+#   Critical is tightest, Routine is loosest -- still a PLACEHOLDER, pending
+#   real MIMIC-IV-derived values (same limitation as task_generation above).
+# =============================================================================
+deadlines:
+  Critical: 2
+  High: 5
+  Routine: 10
