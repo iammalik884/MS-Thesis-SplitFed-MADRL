@@ -82,7 +82,20 @@ is added, so bugs stay easy to isolate.
       of the miss case itself is verified directly by
       `test_met_deadline_all_three_states` (unit-level, not seed-dependent).
       Worth revisiting once real MIMIC-IV-derived offsets are available.
-- [ ] Step 5 — Baseline 1: FCFS
+- [x] **Step 5 — Baseline 1: FCFS (First-Come-First-Served).** Not new
+      scheduling logic — Steps 1–4 already process every queue in pure
+      arrival order and route with a fixed rule, so this step formalizes
+      that existing behaviour as a **reproducible, measurable baseline**
+      for comparison against later learned policies (Step 7's DQN, Step 9's
+      MAPPO). `env/metrics.py` (`compute_baseline_metrics()`) turns a
+      finished run's tasks into the roadmap-approved numbers: throughput,
+      average latency, overall and **Critical-specific** deadline-violation
+      rate, and a per-priority breakdown. `run_baseline_fcfs.py` runs the
+      full Step 1–4 pipeline (Poisson arrivals → Local/Edge/Cloud routing →
+      FIFO processing) for one seed, prints the metrics, and saves them to
+      `results/step5_fcfs_baseline_seed<seed>.json` (seed + config path
+      included) so later baselines can be diffed against this exact run.
+      All 6 verification tests pass (see below).
 - [ ] Steps 6–18 — see the roadmap document
 
 ## Folder structure
@@ -102,7 +115,10 @@ MS_Thesis_Project/
 │   ├── test_step1_simulator.py        # verification tests for Step 1
 │   ├── test_step2_task_generator.py   # verification tests for Step 2
 │   ├── test_step3_routing.py          # verification tests for Step 3
-│   └── test_step4_deadlines.py        # verification tests for Step 4
+│   ├── test_step4_deadlines.py        # verification tests for Step 4
+│   └── test_step5_fcfs_baseline.py    # verification tests for Step 5
+├── results/                    # Step 5+: saved baseline/agent metrics (seed + config tagged)
+├── run_baseline_fcfs.py        # Step 5: runs the FCFS baseline experiment
 └── requirements.txt
 ```
 
@@ -115,11 +131,13 @@ python3 -m tests.test_step1_simulator
 python3 -m tests.test_step2_task_generator
 python3 -m tests.test_step3_routing
 python3 -m tests.test_step4_deadlines
+python3 -m tests.test_step5_fcfs_baseline
 ```
 
 Expected output: 6 `[PASS]` lines + `ALL STEP 1 TESTS PASSED.`, then 6 `[PASS]`
 lines + `ALL STEP 2 TESTS PASSED.`, then 7 `[PASS]` lines + `ALL STEP 3 TESTS
-PASSED.`, then 8 `[PASS]` lines + `ALL STEP 4 TESTS PASSED.`
+PASSED.`, then 8 `[PASS]` lines + `ALL STEP 4 TESTS PASSED.`, then 6 `[PASS]`
+lines + `ALL STEP 5 TESTS PASSED.`
 
 ## What Step 1 proves (and does NOT prove)
 
@@ -186,3 +204,22 @@ question left to the baselines (Step 5+) and the RL agent (Steps 7+). Also
 note the offsets in `configs/environment.yaml`'s `deadlines` section are the
 same kind of clinically-plausible PLACEHOLDER as Step 2's arrival rates —
 pending MIMIC-IV-derived values.
+
+## What Step 5 proves (and does NOT prove)
+
+Proves: `compute_baseline_metrics()` correctly turns a finished run into
+throughput, average latency, overall and Critical-specific deadline-violation
+rate, and a per-priority breakdown, checked against hand-calculated expected
+values on small crafted scenarios (including a deliberately-missed deadline
+and a task still mid-processing, to prove incomplete tasks are excluded from
+latency but counted in `still_waiting`); and that the full FCFS pipeline
+(`run_baseline_fcfs.py`) is deterministic — the same seed reproduces byte-for-
+byte identical metrics every run, which is required before any later
+baseline (DQN, MAPPO) result can be fairly compared against it.
+
+Does NOT yet include: any new scheduling behaviour — Step 5 adds zero lines
+to `env/hospital_env.py`, `env/edge_node.py`, or `env/task_router.py`. "FCFS"
+just names what Steps 1–4 already do (pure arrival-order queueing, a fixed
+non-learned routing rule); this step's only contribution is making that
+behaviour's *performance* measurable and saved (`results/`) so Steps 7+ have
+a real number to beat, not a vibe.

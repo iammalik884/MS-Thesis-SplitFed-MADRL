@@ -1,0 +1,31 @@
+{
+  "method": "FCFS",
+  "seed": 42,
+  "config_path": "A:\\MS Research\\MS_Thesis_Project\\configs\\environment.yaml",
+  "metrics": {
+    "total_tasks": 21,
+    "completed_tasks": 21,
+    "still_waiting": 0,
+    "throughput": 0.7,
+    "avg_latency": 0.6666666666666666,
+    "deadline_violation_rate": 0.0,
+    "per_priority": {
+      "Critical": {
+        "completed": 8,
+        "met": 8,
+        "violation_rate": 0.0
+      },
+      "High": {
+        "completed": 6,
+        "met": 6,
+        "violation_rate": 0.0
+      },
+      "Routine": {
+        "completed": 7,
+        "met": 7,
+        "violation_rate": 0.0
+      }
+    },
+    "critical_deadline_violation_rate": 0.0
+  }
+}
