@@ -1,0 +1,22 @@
+# =============================================================================
+# SCENARIO: overdue_critical  (synthetic, deliberately ARTIFICIAL stress case)
+# -----------------------------------------------------------------------------
+# ROMAN URDU: Sirf metric ko test karne ke liye: Critical tasks ki demand
+# [12, 16] (kisi node par 2 steps mein khatam nahi ho sakti), Cloud band
+# (cloud_threshold 100), aur drain_limit 0 -- yani window ke end par kuch
+# Critical tasks unfinished aur deadline guzri hui ("overdue_unfinished")
+# hongi. Yeh realistic workload NAHI hai; sirf yeh prove karta hai ke aisa
+# task completed-only 0% rate ke peeche chhup nahi sakta.
+# ENGLISH: artificial metric stress test, not a realistic workload.
+# =============================================================================
+extends: ../environment.yaml
+scenario: {name: overdue_critical, purpose: "huge Critical demand, no cloud, no drain -> overdue unfinished Critical"}
+offloading:
+  cloud_threshold: 100.0
+evaluation:
+  drain_limit: 0
+task_generation:
+  departments:
+    Emergency:    {Critical: {compute_demand_range: [12.0, 16.0]}}
+    ICU:          {Critical: {compute_demand_range: [12.0, 16.0]}}
+    General_Ward: {Critical: {compute_demand_range: [12.0, 16.0]}}

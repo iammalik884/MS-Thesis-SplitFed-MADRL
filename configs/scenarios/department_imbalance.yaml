@@ -1,0 +1,15 @@
+# =============================================================================
+# SCENARIO: department_imbalance  (synthetic verification scenario)
+# -----------------------------------------------------------------------------
+# ROMAN URDU: Sirf ICU ka load 6 guna (ICU akela apni capacity 4 se zyada
+# kaam paata hai), Emergency aur General Ward normal. Maqsad: dekhna ke ICU
+# ka kaam padosi departments ke ASLI nodes par jata hai aur un ki queue/
+# capacity ko affect karta hai (roadmap checkpoint: "Does offloading to
+# another department correctly change that department's queue/load?").
+# ENGLISH: ICU arrival rates x6, other departments unchanged.
+# =============================================================================
+extends: ../environment.yaml
+scenario: {name: department_imbalance, purpose: "ICU rates x6 -> ICU offloads to neighbours"}
+task_generation:
+  departments:
+    ICU: {Critical: {arrival_rate: 0.90}, High: {arrival_rate: 0.90}, Routine: {arrival_rate: 0.60}}

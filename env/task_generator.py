@@ -41,7 +41,8 @@ from typing import Dict, List
 
 import numpy as np
 
-from env.task import PRIORITY_CLASSES
+from env.config_validation import validate_task_generation
+from env.task import PRIORITY_CLASSES, is_int
 
 
 @dataclass
@@ -77,16 +78,13 @@ class MedicalTaskGenerator:
                 RNG (default True). False keeps the raw loop order
                 (department -> Critical/High/Routine); only for tests.
         """
-        task_generation_config = config.get("task_generation")
-        if not task_generation_config or "departments" not in task_generation_config:
-            raise ValueError(
-                "Config is missing a 'task_generation.departments' section. "
-                "Step 2 requires arrival_rate and compute_demand_range for "
-                "every department and priority class -- see configs/environment.yaml."
-            )
-
-        self.department_settings: Dict[str, Dict[str, dict]] = task_generation_config["departments"]
-        self._validate_settings()
+        # V2: shared validator (env/config_validation.py) -- NaN/inf rates,
+        # unknown/missing departments and unknown priority keys are rejected.
+        department_names = [d["name"] for d in config["departments"]] if config.get("departments") else None
+        validate_task_generation(config.get("task_generation"), department_names)
+        if not is_int(seed) or seed < 0:
+            raise ValueError(f"MedicalTaskGenerator: seed must be an int >= 0, got {seed!r}")
+        self.department_settings: Dict[str, Dict[str, dict]] = config["task_generation"]["departments"]
 
         # np.random.default_rng is NumPy's modern, reproducible RNG (project
         # rule: reproducible seeds). Two generators built with the same seed
@@ -100,40 +98,6 @@ class MedicalTaskGenerator:
         # same-step arrivals, so the generated workload for a seed is unchanged.
         self.order_rng = np.random.default_rng(np.random.SeedSequence(seed).spawn(1)[0])
         self.shuffle_arrivals = shuffle_arrivals
-
-    def _validate_settings(self) -> None:
-        """Input validation with meaningful error messages (project coding rule).
-        Checked once at construction time so a bad config fails immediately,
-        not silently halfway through a long training run."""
-        if not self.department_settings:
-            raise ValueError("task_generation.departments must not be empty")
-
-        for dept_name, priorities in self.department_settings.items():
-            for priority in PRIORITY_CLASSES:
-                if priority not in priorities:
-                    raise ValueError(
-                        f"task_generation.departments.{dept_name} is missing "
-                        f"priority class '{priority}' (need all of {PRIORITY_CLASSES})"
-                    )
-                settings = priorities[priority]
-                rate = settings.get("arrival_rate")
-                if rate is None or rate < 0:
-                    raise ValueError(
-                        f"task_generation.departments.{dept_name}.{priority}.arrival_rate "
-                        f"must be a number >= 0, got {rate!r}"
-                    )
-                demand_range = settings.get("compute_demand_range")
-                if not demand_range or len(demand_range) != 2:
-                    raise ValueError(
-                        f"task_generation.departments.{dept_name}.{priority}.compute_demand_range "
-                        f"must be a [low, high] pair, got {demand_range!r}"
-                    )
-                low, high = demand_range
-                if low <= 0 or high < low:
-                    raise ValueError(
-                        f"task_generation.departments.{dept_name}.{priority}.compute_demand_range "
-                        f"must satisfy 0 < low <= high, got [{low}, {high}]"
-                    )
 
     def generate_for_step(self, current_time: int) -> List[GeneratedArrival]:
         """Draw this step's new arrivals for every department and priority class.

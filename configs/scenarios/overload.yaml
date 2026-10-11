@@ -1,0 +1,18 @@
+# =============================================================================
+# SCENARIO: overload  (synthetic verification scenario -- NOT clinical data)
+# -----------------------------------------------------------------------------
+# ROMAN URDU: Har department/priority ka arrival_rate default ka 5 guna.
+# Department nodes ki expected load (~14.7 units/step) un ki total capacity
+# (12) se zyada hai -> queues badhti hain, offloading hoti hai, aur deadline
+# misses honestly nazar aate hain. Default workload ko NAHI chheda gaya.
+# ENGLISH: every arrival_rate x5 vs. configs/environment.yaml. Purpose: verify
+# backlog growth, neighbour offloading, drain/incomplete reporting and
+# deadline categories under stress. Everything else is inherited.
+# =============================================================================
+extends: ../environment.yaml
+scenario: {name: overload, purpose: "arrival rates x5 -> demand exceeds department capacity"}
+task_generation:
+  departments:
+    Emergency:    {Critical: {arrival_rate: 0.50}, High: {arrival_rate: 1.00}, Routine: {arrival_rate: 0.75}}
+    ICU:          {Critical: {arrival_rate: 0.75}, High: {arrival_rate: 0.75}, Routine: {arrival_rate: 0.50}}
+    General_Ward: {Critical: {arrival_rate: 0.15}, High: {arrival_rate: 0.50}, Routine: {arrival_rate: 1.25}}

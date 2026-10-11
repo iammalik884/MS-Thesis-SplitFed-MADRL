@@ -1,0 +1,15 @@
+# =============================================================================
+# SCENARIO: empty_workload  (all-idle edge case)
+# -----------------------------------------------------------------------------
+# ROMAN URDU: Saare arrival_rate 0 -> koi task nahi aata. Metrics ko crash
+# nahi karna chahiye: throughput 0.0, aur latency / deadline rates None
+# ("not applicable"), 0 nahi.
+# ENGLISH: every arrival_rate 0 -> zero tasks; rates must be None, not 0.
+# =============================================================================
+extends: ../environment.yaml
+scenario: {name: empty_workload, purpose: "no arrivals at all -> empty-group handling"}
+task_generation:
+  departments:
+    Emergency:    {Critical: {arrival_rate: 0}, High: {arrival_rate: 0}, Routine: {arrival_rate: 0}}
+    ICU:          {Critical: {arrival_rate: 0}, High: {arrival_rate: 0}, Routine: {arrival_rate: 0}}
+    General_Ward: {Critical: {arrival_rate: 0}, High: {arrival_rate: 0}, Routine: {arrival_rate: 0}}

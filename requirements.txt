@@ -1,6 +1,16 @@
-# Step 0 - Reproducible environment for the thesis simulation project.
-# Install with: pip install -r requirements.txt
-numpy>=2.0
-PyYAML>=6.0
-gymnasium==1.3.0     # needed starting Step 6 (Gymnasium environment wrapper)
-torch==2.14.0        # needed starting Step 7 (DQN) / Step 9 (MAPPO)
+# Current phase (Steps 1-5, simulator + FCFS baseline).
+# Install with:  py -m pip install -r requirements.txt
+#
+# Verified on 2026-10-11 by actually running: Windows 11, Python 3.14.6
+# (C:\Users\USr\AppData\Local\Python\pythoncore-3.14-64\python.exe via the
+# `py` launcher). Python >= 3.10 is required (bisect.bisect_right(key=...)).
+# The versions in comments are the ones the 74 tests passed with; the lower
+# bounds are not separately tested.
+numpy>=2.0       # tested 2.5.3
+PyYAML>=6.0      # tested 6.0.3
+pytest>=8.0      # tested 9.1.1 (test runner only)
+
+# FUTURE steps -- NOT installed or verified in this environment yet:
+#   gymnasium  (Step 6, Gymnasium environment wrapper)
+#   torch      (Step 7+, DQN / MAPPO)
+# Add them here with tested versions when those steps start.

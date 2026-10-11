@@ -1,0 +1,19 @@
+# =============================================================================
+# SCENARIO: slow_network  (synthetic verification scenario)
+# -----------------------------------------------------------------------------
+# ROMAN URDU: Network slow: cloud delay 2 -> 6, neighbour delay 1 -> 3, aur
+# load 3 guna taake offloading waqai ho. Roadmap checkpoint: "If the cloud
+# link is slow, does cloud latency increase?" Har Cloud task ka
+# transmission_delay = 6 aur latency >= 6 hona chahiye.
+# ENGLISH: cloud_network_delay 6, neighbour_network_delay 3, arrival rates x3.
+# =============================================================================
+extends: ../environment.yaml
+scenario: {name: slow_network, purpose: "slow cloud (6) and neighbour (3) links, rates x3"}
+offloading:
+  cloud_network_delay: 6
+  neighbour_network_delay: 3
+task_generation:
+  departments:
+    Emergency:    {Critical: {arrival_rate: 0.30}, High: {arrival_rate: 0.60}, Routine: {arrival_rate: 0.45}}
+    ICU:          {Critical: {arrival_rate: 0.45}, High: {arrival_rate: 0.45}, Routine: {arrival_rate: 0.30}}
+    General_Ward: {Critical: {arrival_rate: 0.09}, High: {arrival_rate: 0.30}, Routine: {arrival_rate: 0.75}}

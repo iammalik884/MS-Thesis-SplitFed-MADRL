@@ -40,24 +40,41 @@ from typing import Dict, List, Optional
 import yaml
 
 from env.cloud_node import CloudNode
+from env.config_validation import validate_config
 from env.edge_node import EdgeNode
 from env.task import CLOUD_NODE_NAME, PRIORITY_CLASSES, Task, is_finite_number, is_int
 from env.task_router import TaskRouter
 
-# Config keys of the removed pre-v2 bedside Local tier. Seeing one means the
-# config was written for the old architecture -> fail loudly, never ignore.
-REMOVED_OFFLOADING_KEYS = ("local_capacity", "local_threshold", "edge_threshold")
+
+def _deep_merge(base: dict, override: dict) -> dict:
+    """override wins; nested dicts merge key by key, lists are replaced."""
+    merged = copy.deepcopy(base)
+    for key, value in override.items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = _deep_merge(merged[key], value)
+        else:
+            merged[key] = copy.deepcopy(value)
+    return merged
 
 
 def load_config(config) -> dict:
     """Accept a YAML path or an already-loaded dict (deep-copied, so the
-    simulator can never mutate the caller's dict)."""
-    if isinstance(config, (str, os.PathLike)):
-        with open(config, "r") as f:
-            return yaml.safe_load(f)
+    simulator can never mutate the caller's dict). V2: a YAML file may say
+    `extends: <other.yaml>` (path relative to itself) to start from another
+    config and override only some values -- used by configs/scenarios/."""
     if isinstance(config, dict):
         return copy.deepcopy(config)
-    raise ValueError(f"config must be a YAML path or a dict, got {type(config).__name__}")
+    if not isinstance(config, (str, os.PathLike)):
+        raise ValueError(f"config must be a YAML path or a dict, got {type(config).__name__}")
+    with open(config, "r", encoding="utf-8") as f:
+        loaded = yaml.safe_load(f)
+    if not isinstance(loaded, dict):
+        raise ValueError(f"Config file '{config}' must contain a YAML mapping")
+    parent = loaded.pop("extends", None)
+    if parent is None:
+        return loaded
+    parent_path = os.path.join(os.path.dirname(os.path.abspath(config)), parent)
+    return _deep_merge(load_config(parent_path), loaded)
 
 
 class HospitalSimulator:
@@ -66,76 +83,38 @@ class HospitalSimulator:
 
     def __init__(self, config):
         config = load_config(config)
+        validate_config(config)  # V2: whole config checked before ANY state is built
         self.config = config
-
-        if "departments" not in config or not config["departments"]:
-            raise ValueError("Config must define a non-empty 'departments' list")
-
         self.seed = config.get("seed", 42)
         self.n_steps = config["simulation"]["n_steps"]
 
         # One EdgeNode per configured department (Step 1).
-        self.nodes: Dict[str, EdgeNode] = {}
-        for dept in config["departments"]:
-            if dept["name"] in self.nodes or dept["name"] == CLOUD_NODE_NAME:
-                raise ValueError(f"Duplicate or reserved department name {dept['name']!r}")
-            self.nodes[dept["name"]] = EdgeNode(name=dept["name"], capacity=dept["capacity"])
+        self.nodes: Dict[str, EdgeNode] = {
+            dept["name"]: EdgeNode(name=dept["name"], capacity=dept["capacity"]) for dept in config["departments"]
+        }
 
         # Cloud + routing rule -- optional, only if 'offloading' is configured.
         offloading_config = config.get("offloading")
         if offloading_config:
-            stale = [k for k in REMOVED_OFFLOADING_KEYS if k in offloading_config]
-            if stale:
-                raise ValueError(
-                    f"Config 'offloading' uses removed pre-v2 keys {stale}: the bedside Local "
-                    "tier no longer exists (Local = own department node, Edge = neighbour). "
-                    "Use cloud_threshold / offload_threshold / neighbour_network_delay -- see README."
-                )
             self.cloud_node: Optional[CloudNode] = CloudNode(
                 name=CLOUD_NODE_NAME,
                 capacity=offloading_config["cloud_capacity"],
                 network_delay=offloading_config["cloud_network_delay"],
             )
-            self.neighbour_delay = offloading_config["neighbour_network_delay"]
-            if not is_int(self.neighbour_delay) or self.neighbour_delay < 0:
-                raise ValueError(
-                    f"Config 'offloading.neighbour_network_delay' must be an int >= 0, "
-                    f"got {self.neighbour_delay!r}"
-                )
-            order = offloading_config.get("neighbour_tie_break_order", list(self.nodes))
-            if sorted(order) != sorted(self.nodes):
-                raise ValueError(
-                    f"Config 'offloading.neighbour_tie_break_order' {order!r} must list every "
-                    f"department exactly once: {list(self.nodes)}"
-                )
+            self.neighbour_delay: Optional[int] = offloading_config["neighbour_network_delay"]
             self.router: Optional[TaskRouter] = TaskRouter(
                 cloud_threshold=offloading_config["cloud_threshold"],
                 offload_threshold=offloading_config["offload_threshold"],
-                neighbour_order=order,
+                neighbour_order=offloading_config.get("neighbour_tie_break_order", list(self.nodes)),
             )
         else:
             self.cloud_node = None
             self.neighbour_delay = None
             self.router = None
 
-        # STEP 4: deadline offsets per priority (optional section). V2: offsets
-        # must be ints (time is in whole steps), NaN/inf/bool rejected.
+        # STEP 4: deadline offsets per priority (optional; validated as ints >= 0).
         deadlines_config = config.get("deadlines")
-        if deadlines_config:
-            for priority in PRIORITY_CLASSES:
-                if priority not in deadlines_config:
-                    raise ValueError(
-                        f"Config 'deadlines' section is missing priority class "
-                        f"'{priority}' (need all of {PRIORITY_CLASSES})"
-                    )
-                offset = deadlines_config[priority]
-                if not is_int(offset) or offset < 0:
-                    raise ValueError(
-                        f"Config 'deadlines.{priority}' must be an int >= 0 (steps), got {offset!r}"
-                    )
-            self.deadline_offsets: Optional[Dict[str, int]] = dict(deadlines_config)
-        else:
-            self.deadline_offsets = None
+        self.deadline_offsets: Optional[Dict[str, int]] = dict(deadlines_config) if deadlines_config else None
 
         self.current_time = 0
         self._next_task_id = 0
@@ -260,5 +239,7 @@ class HospitalSimulator:
     def run(self, n_steps: int = None) -> None:
         """Run for a fixed number of steps (no automatic task generation)."""
         steps = n_steps if n_steps is not None else self.n_steps
+        if not is_int(steps) or steps < 0:
+            raise ValueError(f"run(): n_steps must be an int >= 0, got {steps!r}")
         for _ in range(steps):
             self.step()
