@@ -156,3 +156,24 @@ deadlines:
   Critical: 2
   High: 5
   Routine: 10
+
+# =============================================================================
+# Step 5 (V2) Configuration - Common evaluation protocol
+# -----------------------------------------------------------------------------
+# ROMAN URDU: Har policy (FCFS, DQN, FedAvg-MAPPO, SplitFed-MAPPO) isi
+# protocol se evaluate hogi (env/evaluation.py, README "Evaluation protocol"):
+#   measurement window = steps 0 .. simulation.n_steps-1 (arrivals sirf yahan)
+#   PRIMARY throughput  = window ke andar complete hue tasks / n_steps
+#   drain phase         = bina arrivals ke, zyada se zyada drain_limit steps,
+#                         ya sab tasks khatam hone tak. Baqi kaam -> run
+#                         "incomplete" flag hota hai (completion guaranteed nahi).
+# ENGLISH: drain_limit 50 >= the largest deadline offset (10), so every
+#   window task's deadline outcome is decided unless the run is overloaded.
+# synthetic_payload_units_per_compute_unit: offloading payload model --
+#   SYNTHETIC units (SPU), NOT bytes. 1 SPU per compute unit = "data size
+#   proportional to compute demand" (a common MEC modelling assumption).
+#   No real payload sizes exist yet; nothing here is a byte measurement.
+# =============================================================================
+evaluation:
+  drain_limit: 50
+  synthetic_payload_units_per_compute_unit: 1.0

@@ -1,115 +1,46 @@
 """
-Live simulation demo - Steps 1-4 (Poisson arrivals, Local/Edge/Cloud routing,
-priority deadlines).
+Live simulation demo - Steps 1-5 (Poisson arrivals, Local / Edge(neighbour) /
+Cloud routing, priority deadlines, V2 evaluation protocol).
 ================================================================================
-Reuses HospitalSimulator, MedicalTaskGenerator, and TaskRouter exactly as
-implemented and tested in Steps 1-4. No new logic is added here, and nothing
-is hard-coded -- every printed number comes from actually running the
-simulation with seed=42 (configs/environment.yaml).
+ROMAN URDU: Yeh script ek run chala kar har task ki poori lifecycle (kahan se
+aaya, kahan gaya, kab ready hua, kab shuru, kab khatam) aur phir summary
+print karti hai. Koi nayi logic nahi, koi hard-coded number nahi -- sab kuch
+env/evaluation.py ke common protocol se aata hai. Kuch save nahi karti.
 
-Run with:  py demo_simulation.py   (from MS_Thesis_Project/)
+ENGLISH: Runs one FCFS episode under the common protocol and prints every
+task's lifecycle plus the summary. Nothing is saved (use
+run_baseline_fcfs.py for saved, provenance-tagged results).
+
+Run with:  py demo_simulation.py [--config PATH] [--seed N]   (from MS_Thesis_Project/)
 """
 
+import argparse
 import os
-import statistics
 import sys
-
-import yaml
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from env.hospital_env import HospitalSimulator
-from env.task_generator import MedicalTaskGenerator
-
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "configs", "environment.yaml")
-
-with open(CONFIG_PATH, "r") as f:
-    CONFIG = yaml.safe_load(f)
-
-SEED = 42
-GENERATION_STEPS = CONFIG["simulation"]["n_steps"]  # 20, from configs/environment.yaml
-DRAIN_STEPS = 10  # extra steps with no new arrivals, so already-queued tasks get a chance to finish
+from env.evaluation import run_fcfs_evaluation
+from env.hospital_env import load_config
+from run_baseline_fcfs import CONFIG_PATH, print_report
 
 
-def main():
-    sim = HospitalSimulator(CONFIG_PATH)
-    generator = MedicalTaskGenerator(CONFIG, seed=SEED)
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="Print one FCFS episode task by task")
+    parser.add_argument("--config", default=CONFIG_PATH)
+    parser.add_argument("--seed", type=int)
+    args = parser.parse_args(argv)
+    config = load_config(args.config)
+    seed = config.get("seed", 42) if args.seed is None else args.seed
 
-    all_tasks = []
-
-    print(f"Running {GENERATION_STEPS} arrival steps (seed={SEED}), then "
-          f"{DRAIN_STEPS} drain steps (no new arrivals) so queued work can finish...\n")
-
-    for _ in range(GENERATION_STEPS):
-        arrivals = generator.generate_for_step(sim.current_time)
-        created = sim.route_generated_arrivals(arrivals)
-        for arrival, task in zip(arrivals, created):
-            all_tasks.append(task)
-            dept_label = arrival.department.replace("_", " ")
-            print(
-                f"Task {task.task_id + 1:03d} | {dept_label} | {task.priority} | "
-                f"Demand {task.compute_demand:.1f} | {task.tier.upper()} -> {task.destination}"
-            )
-        sim.step()
-
-    for _ in range(DRAIN_STEPS):
-        sim.step()
-
-    completed = sim.completed_tasks
-
-    total = len(all_tasks)
-    local_n = sum(1 for t in all_tasks if t.tier == "Local")
-    edge_n = sum(1 for t in all_tasks if t.tier == "Edge")
-    cloud_n = sum(1 for t in all_tasks if t.tier == "Cloud")
-    completed_n = len(completed)
-    waiting_n = total - completed_n
-
-    print("\n--- Summary ---")
-    print(f"Total Tasks: {total}")
-    print(f"Local: {local_n}")
-    print(f"Edge: {edge_n}")
-    print(f"Cloud: {cloud_n}")
-    print(f"Completed: {completed_n}")
-    print(f"Still Waiting: {waiting_n}")
-
-    if completed:
-        avg_latency = statistics.mean(t.completion_time - t.arrival_time for t in completed)
-        print(f"Average Completion Time (steps from arrival to finish): {avg_latency:.2f}")
-    else:
-        print("Average Completion Time: N/A (no tasks completed)")
-
-    with_deadline = [t for t in completed if t.deadline is not None]
-    if with_deadline:
-        met_n = sum(1 for t in with_deadline if t.met_deadline)
-        missed_n = len(with_deadline) - met_n
-        print(f"Deadlines Met: {met_n}/{len(with_deadline)}  (Missed: {missed_n})")
-        for priority in ("Critical", "High", "Routine"):
-            subset = [t for t in with_deadline if t.priority == priority]
-            if subset:
-                subset_met = sum(1 for t in subset if t.met_deadline)
-                print(f"  {priority:<9} {subset_met}/{len(subset)} met")
-    else:
-        print("Deadlines Met: N/A (no completed task had a deadline)")
-
-    if cloud_n == 0:
-        cloud_threshold = CONFIG["offloading"]["cloud_threshold"]
-        max_configured_demand = max(
-            settings["compute_demand_range"][1]
-            for priorities in CONFIG["task_generation"]["departments"].values()
-            for settings in priorities.values()
-        )
-        print(
-            f"\nNOTE: 0 Cloud-routed tasks this run. With cloud_threshold={cloud_threshold} and "
-            f"the highest configured compute_demand upper bound at {max_configured_demand}, "
-            + (
-                "no generated task can ever exceed cloud_threshold, so TaskRouter.choose_destination() "
-                "can never return 'Cloud' -- lower cloud_threshold or raise a compute_demand_range in "
-                "configs/environment.yaml if you want to guarantee a Cloud-routed task."
-                if max_configured_demand <= cloud_threshold
-                else "Cloud IS reachable with this config -- 0 this run is just this seed's draw; "
-                "try more steps or a different seed."
-            )
-        )
+    result = run_fcfs_evaluation(config, seed=seed)
+    print("id  | source -> destination (tier)          | prio     | demand | arr ready start done | deadline")
+    for t in result.simulator.tasks:
+        route = f"{t.source_department} -> {t.destination} ({t.tier})"
+        times = f"{t.arrival_time:>3} {t.ready_time:>5} {str(t.start_time):>5} {str(t.completion_time):>4}"
+        print(f"{t.task_id:03d} | {route:<38} | {str(t.priority):<8} | {t.compute_demand:6.2f} | {times} | {t.deadline}")
+    print()
+    print_report(result.report, seed, os.path.basename(args.config))
 
 
 if __name__ == "__main__":
