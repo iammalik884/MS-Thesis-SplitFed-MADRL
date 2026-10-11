@@ -1,34 +1,41 @@
 """
-Step 1/2/4 - Task representation (priority since Step 2, deadline since Step 4).
+Step 1/2/4 - Task representation (priority since Step 2, deadline since Step 4,
+full lifecycle timing since the v2 audit fixes).
 ================================================================================
 ROMAN URDU: Yeh sabse chota building-block hai. Ek "Task" matlab ek medical
 computation job -- jaise ek ECG reading process karna. Step 1 mein hum sirf
 itna jaante thay: task kab aaya (arrival_time) aur usay process karne ke
 liye kitna "compute demand" chahiye. STEP 2 update: ab har task ka apna
-"priority" (Critical / High / Routine) bhi hota hai, kyunke Poisson
-generator (env/task_generator.py) teeno priority classes ko alag-alag
-arrival-rate aur compute-demand se generate karta hai -- is liye task ko
-yeh label yaad rakhna zaroori hai. STEP 4 update: ab task apni "deadline"
-bhi yaad rakhta hai -- kitne time-step tak usay complete ho jana chahiye
-(priority ke hisaab se, configs/environment.yaml ke 'deadlines' section se
-tay hoti hai -- Critical sab se tight, Routine sab se loose). Yeh deadline
-sirf TRACK hoti hai (`met_deadline` property se) -- abhi koi scheduling
-decision isay istemal nahi karti, queue order abhi bhi Step 1 wala FIFO hai.
+"priority" (Critical / High / Routine) bhi hota hai. STEP 4 update: task
+apni "deadline" bhi yaad rakhta hai (sirf TRACK hoti hai, scheduling isay
+istemal nahi karti).
 
-ENGLISH: This is the smallest building block of the simulation. A "Task"
-represents one medical computation job (e.g. processing an ECG reading).
-Step 1 tracked only when it arrived and how much compute it needs. STEP 2
-adds a `priority` label (Critical / High / Runtime -> Routine) because the
-Poisson generator now creates tasks with different arrival rates and
-compute-demand ranges per priority class, so each task must remember which
-class it belongs to. STEP 4 update: a task now also remembers its
-"deadline" -- how many time-steps it should finish within, set from
-configs/environment.yaml's 'deadlines' section (per priority, Critical
-tightest, Routine loosest). This is tracked only (`met_deadline` property)
--- no scheduling decision uses it yet; queue order is still Step 1's FIFO.
+V2 (AUDIT FIX) update: ab har task apni poori "zindagi" (lifecycle) record
+karta hai -- kis department se aaya (source_department), kahan process hua
+(destination + tier), network se kab pohancha (ready_time), pehli baar CPU
+kab mila (start_time), aur kab khatam hua (completion_time). Is se latency
+ko teen hisson mein toda ja sakta hai:
+    latency = transmission_delay + queue_wait + execution_span
+
+ENGLISH: The smallest building block. STEP 2 added `priority`, STEP 4 added
+a tracked-only `deadline`. V2 (audit fix): every task now records its full
+lifecycle -- source department, destination node + tier, transmission-ready
+time, first processing (start) time and completion time -- so latency can
+be decomposed exactly (see the properties at the bottom of the class).
+
+TIME CONVENTION (discrete steps, unchanged from Step 1):
+  - A task arriving at step t is created at the START of step t and can be
+    processed in that same step t (if it is ready and capacity is left).
+  - completion_time = the index of the step in which the last unit of work
+    was done. A task that arrives and finishes in step t has latency 0
+    ("finished within its arrival step"), NOT latency 1.
+  - ready_time = arrival_time + transfer delay (0 for Local). The task can
+    first be processed in step ready_time.
 """
 
+import math
 from dataclasses import dataclass, field
+from numbers import Integral, Real
 from typing import Optional
 
 # The three approved priority classes (synopsis-locked). Kept as a module-level
@@ -36,42 +43,47 @@ from typing import Optional
 # same list instead of retyping the strings (avoids silent typos like "critical").
 PRIORITY_CLASSES = ("Critical", "High", "Routine")
 
-# STEP 3: the three places a task can be executed. Same reasoning as
-# PRIORITY_CLASSES above -- one shared constant so "Local"/"Edge"/"Cloud"
-# is never retyped (and possibly mistyped) in more than one file.
+# The three scheduling actions (roadmap/synopsis): Local = source department's
+# OWN edge node, Edge = a NEIGHBOUR department's edge node, Cloud = the one
+# shared remote server. Same reasoning as PRIORITY_CLASSES: one shared constant.
 TIER_CLASSES = ("Local", "Edge", "Cloud")
+
+# Name used for the shared cloud node (destination field of Cloud tasks).
+CLOUD_NODE_NAME = "Cloud"
+
+
+def is_int(value) -> bool:
+    """True for real integers only (bool is excluded on purpose -- YAML
+    'true' must not silently become a step count of 1)."""
+    return isinstance(value, Integral) and not isinstance(value, bool)
+
+
+def is_finite_number(value) -> bool:
+    """True for finite int/float values (rejects NaN, +/-inf, bool, str)."""
+    return isinstance(value, Real) and not isinstance(value, bool) and math.isfinite(value)
 
 
 @dataclass
 class Task:
-    """A single unit of work arriving at a hospital department's edge node.
+    """A single unit of work created in a hospital department.
 
     Attributes:
-        task_id: unique identifier for this task (for logging/debugging).
-        arrival_time: the simulation time-step at which the task arrived.
-        compute_demand: total amount of "compute capacity" needed to finish
-            this task. If a node cannot finish it in one step, the leftover
-            work carries over to the next step (see EdgeNode.step()).
-        remaining_demand: compute still required to finish the task. Starts
-            equal to compute_demand and decreases as the node works on it.
-        completion_time: the time-step at which the task finished, or None
-            if it has not finished yet.
-        priority: one of PRIORITY_CLASSES ("Critical"/"High"/"Routine"), or
-            None for tasks created the Step-1 way (manual add_task without a
-            priority) -- kept optional so Step 1's existing tests and API do
-            not break (project rule: preserve working code).
-        tier: one of TIER_CLASSES ("Local"/"Edge"/"Cloud"), set by
-            HospitalSimulator.route_task() (Step 3) to record WHERE this task
-            ended up executing. None for tasks created the Step-1/2 way
-            (add_task/add_generated_arrivals always use the Edge tier but do
-            not bother labeling it) -- again optional so nothing before
-            Step 3 breaks.
-        deadline: the time-step by which this task is expected to finish
-            (arrival_time + a priority-based offset from
-            configs/environment.yaml's 'deadlines' section), set by
-            HospitalSimulator (Step 4). None for tasks with no priority, or
-            when the config has no 'deadlines' section -- deadline tracking
-            is opt-in, same pattern as tier/offloading in Step 3.
+        task_id: unique identifier (assigned in enqueue order by the simulator).
+        arrival_time: step at which the task was created at its source.
+        compute_demand: total compute units needed (finite, > 0).
+        remaining_demand: compute still required; starts = compute_demand.
+        completion_time: step in which the task finished, or None.
+        priority: one of PRIORITY_CLASSES, or None (Step-1 style tasks).
+        tier: "Local" / "Edge" / "Cloud" -- WHERE the task executes relative
+            to its source (None only for hand-built tasks never placed by
+            the simulator).
+        deadline: arrival_time + priority offset (Step 4), or None.
+        source_department: department that created the task.
+        destination: name of the node that executes it (a department name,
+            or "Cloud").
+        ready_time: first step at which the destination may process it
+            (arrival_time + transfer delay). Defaults to arrival_time.
+        start_time: step in which the task first received any compute.
     """
 
     task_id: int
@@ -82,16 +94,25 @@ class Task:
     priority: Optional[str] = None
     tier: Optional[str] = None
     deadline: Optional[int] = None
+    source_department: Optional[str] = None
+    destination: Optional[str] = None
+    ready_time: Optional[int] = None
+    start_time: Optional[int] = None
 
     def __post_init__(self):
         # Input validation with meaningful error messages (project coding rule).
-        if self.compute_demand <= 0:
+        # V2: NaN/inf/bool/non-integer times are rejected too -- `nan <= 0` is
+        # False, so the old check silently accepted NaN demand.
+        if not is_int(self.task_id):
+            raise ValueError(f"Task: task_id must be an int, got {self.task_id!r}")
+        if not is_finite_number(self.compute_demand) or self.compute_demand <= 0:
             raise ValueError(
-                f"Task {self.task_id}: compute_demand must be > 0, got {self.compute_demand}"
+                f"Task {self.task_id}: compute_demand must be a finite number > 0, "
+                f"got {self.compute_demand!r}"
             )
-        if self.arrival_time < 0:
+        if not is_int(self.arrival_time) or self.arrival_time < 0:
             raise ValueError(
-                f"Task {self.task_id}: arrival_time cannot be negative, got {self.arrival_time}"
+                f"Task {self.task_id}: arrival_time must be an int >= 0, got {self.arrival_time!r}"
             )
         if self.priority is not None and self.priority not in PRIORITY_CLASSES:
             raise ValueError(
@@ -103,11 +124,22 @@ class Task:
                 f"Task {self.task_id}: tier must be one of {TIER_CLASSES} or None, "
                 f"got {self.tier!r}"
             )
-        if self.deadline is not None and self.deadline < self.arrival_time:
+        if self.deadline is not None:
+            if not is_int(self.deadline):
+                raise ValueError(f"Task {self.task_id}: deadline must be an int, got {self.deadline!r}")
+            if self.deadline < self.arrival_time:
+                raise ValueError(
+                    f"Task {self.task_id}: deadline ({self.deadline}) cannot be before "
+                    f"arrival_time ({self.arrival_time})"
+                )
+        if self.ready_time is None:
+            self.ready_time = self.arrival_time  # no transfer -> ready immediately
+        elif not is_int(self.ready_time) or self.ready_time < self.arrival_time:
             raise ValueError(
-                f"Task {self.task_id}: deadline ({self.deadline}) cannot be before "
-                f"arrival_time ({self.arrival_time})"
+                f"Task {self.task_id}: ready_time must be an int >= arrival_time "
+                f"({self.arrival_time}), got {self.ready_time!r}"
             )
+        self.compute_demand = float(self.compute_demand)
         self.remaining_demand = self.compute_demand
 
     @property
@@ -119,11 +151,43 @@ class Task:
     def met_deadline(self) -> Optional[bool]:
         """STEP 4 - whether this task finished on or before its deadline.
 
-        Returns None (not yet decidable) if the task has no deadline, or has
-        not completed yet. Once completed, True if completion_time <=
-        deadline, False otherwise. Deliberately read-only/derived -- nothing
-        else sets it, so it can never drift out of sync with completion_time.
+        None if there is no deadline or the task has not completed yet;
+        otherwise completion_time <= deadline (exact boundary = on time).
+        NOTE (v2): None does NOT mean "fine" -- an unfinished task can already
+        be overdue. Use env.metrics.deadline_status(task, cutoff) for the full
+        4-way classification used by the evaluation metrics.
         """
         if self.deadline is None or self.completion_time is None:
             return None
         return self.completion_time <= self.deadline
+
+    # ------------------------------------------------------------------
+    # V2 lifecycle timing (all in steps; None until the event happened).
+    # ROMAN URDU: latency = transmission_delay + queue_wait + execution_span
+    # -- yeh teeno hisse aapas mein overlap NAHI karte (transit ka waqt
+    # queue wait mein dobara count nahi hota).
+    # ------------------------------------------------------------------
+    @property
+    def transmission_delay(self) -> int:
+        """Steps spent in network transit before the destination may process it."""
+        return self.ready_time - self.arrival_time
+
+    @property
+    def queue_wait(self) -> Optional[int]:
+        """Steps the task was READY at its destination but received no compute
+        (start_time - ready_time). Transit time is NOT included."""
+        return None if self.start_time is None else self.start_time - self.ready_time
+
+    @property
+    def execution_span(self) -> Optional[int]:
+        """completion_time - start_time: 0 means it finished in the same step
+        it started; k means it needed k further steps (carry-over)."""
+        if self.start_time is None or self.completion_time is None:
+            return None
+        return self.completion_time - self.start_time
+
+    @property
+    def latency(self) -> Optional[int]:
+        """End-to-end latency = completion_time - arrival_time (0 = finished in
+        its arrival step)."""
+        return None if self.completion_time is None else self.completion_time - self.arrival_time

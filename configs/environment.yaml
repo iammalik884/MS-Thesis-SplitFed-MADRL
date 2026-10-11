@@ -43,8 +43,8 @@ departments:
 #
 # ROUTINE RANGE NOTE (post-Step-3 correction): Routine's upper bound is 8.0,
 # not 4.0, on purpose -- with the Step 3 'offloading' section below
-# (edge_threshold: 6.0), a max of 4.0 meant NO generated task could ever
-# exceed edge_threshold, so the Cloud tier was silently unreachable by any
+# (edge_threshold: 6.0, now cloud_threshold), a max of 4.0 meant NO generated
+# task could ever exceed that threshold, so the Cloud tier was silently unreachable by any
 # realistic (generator-driven) simulation, even though TaskRouter/CloudNode
 # were fully implemented and tested with manually-injected tasks. Routine
 # tasks (batch analytics / reporting jobs, per the note below) are the
@@ -85,32 +85,49 @@ task_generation:
         compute_demand_range: [2.0, 8.0]
 
 # =============================================================================
-# Step 3 Configuration - Local / Edge / Cloud Offloading
+# Step 3/5 Configuration - Local / Edge(neighbour) / Cloud Offloading  (V2)
 # -----------------------------------------------------------------------------
-# ROMAN URDU: TaskRouter (env/task_router.py) sirf inn 4 numbers ke zariye
-# faisla karta hai ke task kahan jayega. Yeh ek FIXED rule hai, AI nahi
-# (woh Step 7+ mein aayega).
-# ENGLISH: TaskRouter (env/task_router.py) decides routing using only these
-# numbers. This is a FIXED rule, not AI (that comes in Step 7+).
+# ROMAN URDU: Roadmap/synopsis ke mutabiq teen actions hain:
+#   Local = task source department ke APNE edge node par process ho.
+#   Edge  = task kisi DOOSRE (padosi) department ke edge node par offload ho
+#           (us department ki ASLI queue/capacity share hoti hai).
+#   Cloud = ek shared remote server (network delay ke saath).
+# TaskRouter (env/task_router.py) ka FIXED, priority-blind FCFS rule (AI nahi):
+#   1. compute_demand > cloud_threshold                    -> Cloud
+#   2. warna source node ka backlog <= offload_threshold    -> Local
+#   3. warna -> Edge: sab se kam backlog wala padosi; tie par
+#      neighbour_tie_break_order (Emergency -> ICU -> General_Ward).
+# "backlog" = node ko assign kiye gaye tamam unfinished tasks ki remaining
+# demand, transit (raste) wale tasks samet.
 #
-# local_capacity: every department's own tiny on-device/bedside compute,
-#   per time-step (zero network delay -- it's already on the device).
-# cloud_capacity: the ONE shared datacenter serving the whole hospital,
-#   per time-step (much bigger than any single Edge node).
-# cloud_network_delay: steps a task spends "in transit" to the cloud before
-#   the cloud can start working on it (see env/cloud_node.py).
-# local_threshold / edge_threshold: compute_demand cutoffs used by
-#   TaskRouter.choose_tier() --
-#     demand <= local_threshold                     -> Local
-#     local_threshold < demand <= edge_threshold     -> Edge
-#     demand > edge_threshold                        -> Cloud
+# ENGLISH: see the rule above. Purana chhota bedside "Local" tier
+# (local_capacity / local_threshold / edge_threshold) V2 mein HATA diya gaya
+# hai -- woh keys ab error deti hain (purani config galti se na chal jaye).
+#
+# cloud_capacity: the ONE shared cloud server's compute units per step.
+# cloud_network_delay: whole steps a task spends in transit to the cloud
+#   (ready_time = arrival_time + delay). Unchanged from Step 3: 2.
+# neighbour_network_delay: whole steps in transit to a neighbour department's
+#   node. Default 1 (<= cloud delay): an in-hospital LAN hop is assumed faster
+#   than the WAN link to a remote cloud, and 1 is the smallest non-zero delay
+#   on the discrete step clock. 0 is allowed (ideal LAN), and so is a value
+#   larger than the cloud delay (slow-neighbour stress scenarios). PLACEHOLDER.
+# cloud_threshold: compute_demand above this -> Cloud (same 6.0 cut-off the old
+#   edge_threshold used, so the same tasks are cloud-eligible as before).
+# offload_threshold: backlog (compute units) above which the source node is
+#   considered too busy. Default 3.0 = capacity of the smallest node
+#   (General_Ward): a backlog above it cannot be cleared within one step on
+#   the weakest node. PLACEHOLDER, a fixed baseline choice -- not tuned.
+# neighbour_tie_break_order: must list every department exactly once. An
+#   intentional deterministic preference, NOT a fairness claim.
 # =============================================================================
 offloading:
-  local_capacity: 1.0
   cloud_capacity: 50.0
   cloud_network_delay: 2
-  local_threshold: 1.5
-  edge_threshold: 6.0
+  neighbour_network_delay: 1
+  cloud_threshold: 6.0
+  offload_threshold: 3.0
+  neighbour_tie_break_order: [Emergency, ICU, General_Ward]
 
 # =============================================================================
 # Step 4 Configuration - Priority Deadlines
@@ -120,7 +137,7 @@ offloading:
 # (Task.met_deadline se) -- koi scheduling decision isay istemal nahi karti,
 # queue order abhi bhi Step 1 wala plain FIFO hai. Section poori tarah OPT-IN
 # hai (jaise 'offloading'): agar yeh section config se hata diya jaye,
-# HospitalSimulator.add_task()/route_task() bilkul waisे hi chalte hain jaise
+# HospitalSimulator.add_task()/route_task() bilkul waise hi chalte hain jaise
 # pehle chalte thay, bas deadline hamesha None rahegi -- koi error nahi.
 #
 # ENGLISH: Every priority class gets its own deadline -- how many time-steps

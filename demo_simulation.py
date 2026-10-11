@@ -48,18 +48,14 @@ def main():
             dept_label = arrival.department.replace("_", " ")
             print(
                 f"Task {task.task_id + 1:03d} | {dept_label} | {task.priority} | "
-                f"Demand {task.compute_demand:.1f} | {task.tier.upper()}"
+                f"Demand {task.compute_demand:.1f} | {task.tier.upper()} -> {task.destination}"
             )
         sim.step()
 
     for _ in range(DRAIN_STEPS):
         sim.step()
 
-    completed = []
-    for node in list(sim.nodes.values()) + list(sim.local_nodes.values()):
-        completed.extend(node.completed_tasks)
-    if sim.cloud_node is not None:
-        completed.extend(sim.cloud_node.completed_tasks)
+    completed = sim.completed_tasks
 
     total = len(all_tasks)
     local_n = sum(1 for t in all_tasks if t.tier == "Local")
@@ -96,20 +92,20 @@ def main():
         print("Deadlines Met: N/A (no completed task had a deadline)")
 
     if cloud_n == 0:
-        edge_threshold = CONFIG["offloading"]["edge_threshold"]
+        cloud_threshold = CONFIG["offloading"]["cloud_threshold"]
         max_configured_demand = max(
             settings["compute_demand_range"][1]
             for priorities in CONFIG["task_generation"]["departments"].values()
             for settings in priorities.values()
         )
         print(
-            f"\nNOTE: 0 Cloud-routed tasks this run. With edge_threshold={edge_threshold} and "
+            f"\nNOTE: 0 Cloud-routed tasks this run. With cloud_threshold={cloud_threshold} and "
             f"the highest configured compute_demand upper bound at {max_configured_demand}, "
             + (
-                "no generated task can ever exceed edge_threshold, so TaskRouter.choose_tier() "
-                "can never return 'Cloud' -- raise edge_threshold or a compute_demand_range in "
+                "no generated task can ever exceed cloud_threshold, so TaskRouter.choose_destination() "
+                "can never return 'Cloud' -- lower cloud_threshold or raise a compute_demand_range in "
                 "configs/environment.yaml if you want to guarantee a Cloud-routed task."
-                if max_configured_demand <= edge_threshold
+                if max_configured_demand <= cloud_threshold
                 else "Cloud IS reachable with this config -- 0 this run is just this seed's draw; "
                 "try more steps or a different seed."
             )

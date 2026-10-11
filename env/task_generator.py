@@ -65,7 +65,7 @@ class MedicalTaskGenerator:
         sim.add_generated_arrivals(arrivals)
     """
 
-    def __init__(self, config: dict, seed: int):
+    def __init__(self, config: dict, seed: int, shuffle_arrivals: bool = True):
         """
         Args:
             config: the full loaded environment.yaml dict (must contain a
@@ -73,6 +73,9 @@ class MedicalTaskGenerator:
             seed: random seed for NumPy's Generator, so the same seed always
                 reproduces the same sequence of generated tasks (project rule:
                 use reproducible random seeds).
+            shuffle_arrivals: V2 -- shuffle each step's arrivals with a seeded
+                RNG (default True). False keeps the raw loop order
+                (department -> Critical/High/Routine); only for tests.
         """
         task_generation_config = config.get("task_generation")
         if not task_generation_config or "departments" not in task_generation_config:
@@ -89,6 +92,14 @@ class MedicalTaskGenerator:
         # rule: reproducible seeds). Two generators built with the same seed
         # will always produce the exact same sequence of arrivals.
         self.rng = np.random.default_rng(seed)
+        # V2 (AUDIT FIX): ALAG seeded RNG sirf same-step arrivals ka order
+        # shuffle karne ke liye. Alag stream is liye ke workload (counts +
+        # demands) same seed par purane version jaisa hi rahe -- sirf order
+        # badle. SeedSequence.spawn() independent child stream deta hai.
+        # ENGLISH: separate seeded stream used ONLY to shuffle the order of
+        # same-step arrivals, so the generated workload for a seed is unchanged.
+        self.order_rng = np.random.default_rng(np.random.SeedSequence(seed).spawn(1)[0])
+        self.shuffle_arrivals = shuffle_arrivals
 
     def _validate_settings(self) -> None:
         """Input validation with meaningful error messages (project coding rule).
@@ -140,7 +151,8 @@ class MedicalTaskGenerator:
 
         Returns:
             A list of GeneratedArrival (possibly empty, if nothing arrived
-            this step -- perfectly normal for low arrival_rate values).
+            this step -- perfectly normal for low arrival_rate values), in a
+            seeded random order (V2) -- this order becomes the enqueue order.
         """
         arrivals: List[GeneratedArrival] = []
         for dept_name, priorities in self.department_settings.items():
@@ -158,4 +170,11 @@ class MedicalTaskGenerator:
                     arrivals.append(
                         GeneratedArrival(department=dept_name, priority=priority, compute_demand=demand)
                     )
+        # V2 (AUDIT FIX): loop order (department -> Critical/High/Routine) se
+        # enqueue order tay hota tha, yani same-step Critical tasks aur config
+        # mein pehle likhe department hamesha queue mein aage -- FCFS ko
+        # "chhupa hua" priority advantage. Ab seeded shuffle: same seed = same order.
+        if self.shuffle_arrivals and len(arrivals) > 1:
+            order = self.order_rng.permutation(len(arrivals))
+            arrivals = [arrivals[i] for i in order]
         return arrivals

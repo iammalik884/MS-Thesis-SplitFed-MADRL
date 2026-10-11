@@ -1,106 +1,125 @@
 """
-Step 1/2 - HospitalSimulator: ties the 3 department EdgeNodes into one simulator.
+Step 1-5 - HospitalSimulator: ties the department edge nodes + shared Cloud
+into one simulator.
 ================================================================================
-ROMAN URDU: Yeh class poore "mini hospital" ko represent karti hai. Isme
-teen departments (Emergency, ICU, General Ward) hain, har ek apna EdgeNode
-rakhta hai. Simulator ek simple "clock" chalata hai: har time-step par woh
-har department ke edge node ko ek step aage badhata hai. Step 1 mein tasks
-sirf manually `add_task()` se dalay jate thay. STEP 2 update: ab
-`add_generated_arrivals()` bhi mojood hai, jo MedicalTaskGenerator
-(env/task_generator.py) ke banaye hue Poisson-arrivals ko simulator mein
-daal deta hai -- lekin `add_task()` ka purana behaviour (Step 1 tests ke
-liye) bilkul waisa hi rakha gaya hai, sirf ek naya optional `priority`
-parameter add hua hai.
+ROMAN URDU: Yeh class poore "mini hospital" ko represent karti hai. Teen
+departments (Emergency, ICU, General Ward), har ek ka apna EdgeNode, aur
+poore hospital ka EK shared Cloud. Simulator ek "clock" chalata hai: har
+time-step par har node ek step aage badhta hai.
 
-ENGLISH: This class represents the whole "mini hospital". It holds three
-departments (Emergency, ICU, General Ward), each with its own EdgeNode.
-The simulator runs a simple clock: each time-step, every department's edge
-node advances by one step. Step 1 only supported manual task injection via
-`add_task()`. STEP 2 adds `add_generated_arrivals()`, a thin wrapper that
-takes the output of MedicalTaskGenerator (Poisson arrivals per department
-and priority class) and injects it the same way `add_task()` always did --
-so Step 1's tests and behaviour are completely unchanged.
+  - add_task()               (Step 1): task ko source department ke APNE node
+                              par daalta hai (koi routing nahi) -> tier "Local".
+  - add_generated_arrivals() (Step 2): Poisson arrivals, har ek add_task() se.
+  - route_task()             (Step 3/5): TaskRouter (fixed FCFS rule, AI nahi)
+                              se faisla: Local / Edge (padosi) / Cloud.
+  - route_generated_arrivals(): Poisson arrivals, har ek route_task() se.
 
-Must Remember:
-- Priority labels exist on tasks now (Step 2). Deadlines (Step 4) are now
-  tracked too, but nothing here uses them to make a decision yet.
+V2 (AUDIT FIX) -- roadmap/synopsis ke mutabiq action space:
+  Local = task source department ke APNE edge node par process ho.
+  Edge  = task kisi DOOSRE (padosi) department ke ASLI edge node par jaye --
+          wahan ki real queue aur capacity share hoti hai (koi duplicate
+          resource nahi). Raste mein `neighbour_network_delay` steps lagte hain.
+  Cloud = ek shared remote server, `cloud_network_delay` ke saath.
+Purana chhota bedside "Local" tier (local_nodes / local_capacity) hata diya
+gaya hai -- woh thesis scope mein nahi tha.
 
-STEP 3 update: add_task()/add_generated_arrivals() are UNCHANGED on purpose
-(Step 1/2 tests still call them and still expect every task to land on the
-department's Edge node) -- Local/Edge/Cloud ROUTING is opt-in through two
-new methods, route_task() and route_generated_arrivals(), which use a
-TaskRouter (env/task_router.py, a fixed rule, not AI yet) to decide the
-tier, then dispatch to whichever node actually represents that tier:
-  - "Local" -> self.local_nodes[department]  (small, per-department, EdgeNode)
-  - "Edge"  -> self.nodes[department]        (same node Step 1/2 always used)
-  - "Cloud" -> self.cloud_node                (ONE node shared by the whole
-                                                hospital, has network_delay)
+ENGLISH: V2 action space follows the roadmap/synopsis: Local = the source
+department's own node; Edge = a NEIGHBOUR department's real node (shared
+queue + capacity, after neighbour_network_delay steps of transit); Cloud =
+the one shared remote server (after cloud_network_delay). The old tiny
+bedside Local tier was removed. Every task records source_department,
+destination, tier and its lifecycle times (see env/task.py).
 
-STEP 4 update: both add_task() and route_task() now also compute a
-`deadline` for the Task they create, via the private _compute_deadline()
-helper -- current_time + a priority-based offset read from
-configs/environment.yaml's 'deadlines' section. This is OPT-IN exactly like
-'offloading' in Step 3: no priority given, or no 'deadlines' section in the
-config, and deadline just stays None -- no error, nothing else changes.
+Deadlines (Step 4) are still tracking-only: nothing here uses them to decide.
 """
 
+import copy
+import os
 from typing import Dict, List, Optional
+
 import yaml
 
 from env.cloud_node import CloudNode
 from env.edge_node import EdgeNode
-from env.task import PRIORITY_CLASSES, Task
+from env.task import CLOUD_NODE_NAME, PRIORITY_CLASSES, Task, is_finite_number, is_int
 from env.task_router import TaskRouter
+
+# Config keys of the removed pre-v2 bedside Local tier. Seeing one means the
+# config was written for the old architecture -> fail loudly, never ignore.
+REMOVED_OFFLOADING_KEYS = ("local_capacity", "local_threshold", "edge_threshold")
+
+
+def load_config(config) -> dict:
+    """Accept a YAML path or an already-loaded dict (deep-copied, so the
+    simulator can never mutate the caller's dict)."""
+    if isinstance(config, (str, os.PathLike)):
+        with open(config, "r") as f:
+            return yaml.safe_load(f)
+    if isinstance(config, dict):
+        return copy.deepcopy(config)
+    raise ValueError(f"config must be a YAML path or a dict, got {type(config).__name__}")
 
 
 class HospitalSimulator:
-    """Multi-department hospital simulator. No learning/scheduling AI yet --
-    Step 3 adds a fixed, non-learned rule for choosing Local/Edge/Cloud."""
+    """Multi-department hospital simulator. No learning/scheduling AI --
+    routing (if enabled) is the fixed FCFS-baseline rule in TaskRouter."""
 
-    def __init__(self, config_path: str):
-        with open(config_path, "r") as f:
-            config = yaml.safe_load(f)
+    def __init__(self, config):
+        config = load_config(config)
+        self.config = config
 
         if "departments" not in config or not config["departments"]:
-            raise ValueError(f"Config '{config_path}' must define a non-empty 'departments' list")
+            raise ValueError("Config must define a non-empty 'departments' list")
 
         self.seed = config.get("seed", 42)
         self.n_steps = config["simulation"]["n_steps"]
 
-        # Build one EdgeNode per configured department (Step 1, unchanged).
+        # One EdgeNode per configured department (Step 1).
         self.nodes: Dict[str, EdgeNode] = {}
         for dept in config["departments"]:
+            if dept["name"] in self.nodes or dept["name"] == CLOUD_NODE_NAME:
+                raise ValueError(f"Duplicate or reserved department name {dept['name']!r}")
             self.nodes[dept["name"]] = EdgeNode(name=dept["name"], capacity=dept["capacity"])
 
-        # STEP 3: Local tier (one tiny EdgeNode per department) + Cloud tier
-        # (one CloudNode shared by the whole hospital) + the routing rule
-        # that decides which tier a task goes to. All optional -- if the
-        # config has no 'offloading' section, routing simply is not
-        # available and route_task()/route_generated_arrivals() explain why.
+        # Cloud + routing rule -- optional, only if 'offloading' is configured.
         offloading_config = config.get("offloading")
         if offloading_config:
-            self.local_nodes: Dict[str, EdgeNode] = {
-                dept_name: EdgeNode(name=f"{dept_name}_Local", capacity=offloading_config["local_capacity"])
-                for dept_name in self.nodes
-            }
+            stale = [k for k in REMOVED_OFFLOADING_KEYS if k in offloading_config]
+            if stale:
+                raise ValueError(
+                    f"Config 'offloading' uses removed pre-v2 keys {stale}: the bedside Local "
+                    "tier no longer exists (Local = own department node, Edge = neighbour). "
+                    "Use cloud_threshold / offload_threshold / neighbour_network_delay -- see README."
+                )
             self.cloud_node: Optional[CloudNode] = CloudNode(
-                name="Cloud",
+                name=CLOUD_NODE_NAME,
                 capacity=offloading_config["cloud_capacity"],
                 network_delay=offloading_config["cloud_network_delay"],
             )
+            self.neighbour_delay = offloading_config["neighbour_network_delay"]
+            if not is_int(self.neighbour_delay) or self.neighbour_delay < 0:
+                raise ValueError(
+                    f"Config 'offloading.neighbour_network_delay' must be an int >= 0, "
+                    f"got {self.neighbour_delay!r}"
+                )
+            order = offloading_config.get("neighbour_tie_break_order", list(self.nodes))
+            if sorted(order) != sorted(self.nodes):
+                raise ValueError(
+                    f"Config 'offloading.neighbour_tie_break_order' {order!r} must list every "
+                    f"department exactly once: {list(self.nodes)}"
+                )
             self.router: Optional[TaskRouter] = TaskRouter(
-                local_threshold=offloading_config["local_threshold"],
-                edge_threshold=offloading_config["edge_threshold"],
+                cloud_threshold=offloading_config["cloud_threshold"],
+                offload_threshold=offloading_config["offload_threshold"],
+                neighbour_order=order,
             )
         else:
-            self.local_nodes = {}
             self.cloud_node = None
+            self.neighbour_delay = None
             self.router = None
 
-        # STEP 4: deadline offsets, one per priority class, read from the
-        # optional 'deadlines' section. Validated once here (fail fast on a
-        # bad config) rather than in _compute_deadline(), which runs on
-        # every single task creation.
+        # STEP 4: deadline offsets per priority (optional section). V2: offsets
+        # must be ints (time is in whole steps), NaN/inf/bool rejected.
         deadlines_config = config.get("deadlines")
         if deadlines_config:
             for priority in PRIORITY_CLASSES:
@@ -110,90 +129,65 @@ class HospitalSimulator:
                         f"'{priority}' (need all of {PRIORITY_CLASSES})"
                     )
                 offset = deadlines_config[priority]
-                if not isinstance(offset, (int, float)) or isinstance(offset, bool) or offset < 0:
+                if not is_int(offset) or offset < 0:
                     raise ValueError(
-                        f"Config 'deadlines.{priority}' must be a number >= 0, got {offset!r}"
+                        f"Config 'deadlines.{priority}' must be an int >= 0 (steps), got {offset!r}"
                     )
-            self.deadline_offsets: Optional[Dict[str, float]] = deadlines_config
+            self.deadline_offsets: Optional[Dict[str, int]] = dict(deadlines_config)
         else:
             self.deadline_offsets = None
 
         self.current_time = 0
         self._next_task_id = 0
+        self.tasks: List[Task] = []  # V2: every task ever created, in creation order
+
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+    @property
+    def all_nodes(self) -> List[EdgeNode]:
+        """Department nodes followed by the Cloud node (if any)."""
+        return list(self.nodes.values()) + ([self.cloud_node] if self.cloud_node else [])
+
+    @property
+    def completed_tasks(self) -> List[Task]:
+        return [t for node in self.all_nodes for t in node.completed_tasks]
 
     def _compute_deadline(self, priority: Optional[str]) -> Optional[int]:
-        """STEP 4 - current_time + this priority's configured offset, or
-        None if either no priority was given or the config has no
-        'deadlines' section (deadline tracking is opt-in, like offloading).
-        Every priority in PRIORITY_CLASSES is guaranteed present in
-        self.deadline_offsets by the __init__ validation above, and Task
-        itself only ever accepts a priority from PRIORITY_CLASSES or None --
-        so the lookup below can never raise KeyError.
-        """
+        """STEP 4 - current_time + this priority's offset, or None."""
         if priority is None or self.deadline_offsets is None:
             return None
         return self.current_time + self.deadline_offsets[priority]
 
-    def add_task(self, department_name: str, compute_demand: float, priority: Optional[str] = None) -> Task:
-        """Manually inject a single task into a department's queue.
-
-        Still used directly by Step 1 tests (without `priority`) and now also
-        called internally, once per generated arrival, by
-        `add_generated_arrivals()` (Step 2, with `priority` set).
-        """
+    def _check_new_task(self, department_name: str, compute_demand: float, priority: Optional[str]) -> None:
+        """Validate BEFORE anything is mutated (no task id consumed, no queue
+        touched). V2 fix: an invalid priority like "critical" used to reach
+        the deadline lookup first and leak a raw KeyError."""
         if department_name not in self.nodes:
             raise ValueError(
                 f"Unknown department '{department_name}'. Valid options: {list(self.nodes.keys())}"
             )
-        task = Task(
-            task_id=self._next_task_id,
-            arrival_time=self.current_time,
-            compute_demand=compute_demand,
-            priority=priority,
-            deadline=self._compute_deadline(priority),
-        )
-        self._next_task_id += 1
-        self.nodes[department_name].add_task(task)
-        return task
+        if priority is not None and priority not in PRIORITY_CLASSES:
+            raise ValueError(f"priority must be one of {PRIORITY_CLASSES} or None, got {priority!r}")
+        if not is_finite_number(compute_demand) or compute_demand <= 0:
+            raise ValueError(f"compute_demand must be a finite number > 0, got {compute_demand!r}")
 
-    def add_generated_arrivals(self, arrivals: List) -> List[Task]:
-        """Step 2 - inject a batch of MedicalTaskGenerator arrivals at once.
-
-        `arrivals` is the list of `GeneratedArrival` objects returned by
-        `MedicalTaskGenerator.generate_for_step()` for the CURRENT time-step.
-        Each one is added through the same `add_task()` used by Step 1, so
-        the queueing/capacity mechanics tested in Step 1 apply unchanged to
-        generated tasks too.
-        """
-        created_tasks = []
+    def _check_batch(self, arrivals: List) -> None:
+        """All-or-nothing: validate every arrival before placing any of them."""
         for arrival in arrivals:
-            task = self.add_task(
-                department_name=arrival.department,
-                compute_demand=arrival.compute_demand,
-                priority=arrival.priority,
-            )
-            created_tasks.append(task)
-        return created_tasks
+            self._check_new_task(arrival.department, arrival.compute_demand, arrival.priority)
 
-    def route_task(self, department_name: str, compute_demand: float, priority: Optional[str] = None) -> Task:
-        """STEP 3 - like add_task(), but instead of always using the
-        department's Edge node, asks self.router which tier (Local/Edge/
-        Cloud) this task's compute_demand belongs on, and places it there.
-        The returned Task's `.tier` field records the decision.
-        """
+    def _require_router(self) -> None:
         if self.router is None:
             raise ValueError(
-                "HospitalSimulator: config has no 'offloading' section, so routing "
-                "is not available. Add local_capacity/cloud_capacity/"
-                "cloud_network_delay/local_threshold/edge_threshold under "
-                "'offloading' in configs/environment.yaml (see the Step 3 section)."
-            )
-        if department_name not in self.nodes:
-            raise ValueError(
-                f"Unknown department '{department_name}'. Valid options: {list(self.nodes.keys())}"
+                "HospitalSimulator: config has no 'offloading' section, so routing is not "
+                "available. Add cloud_capacity/cloud_network_delay/neighbour_network_delay/"
+                "cloud_threshold/offload_threshold under 'offloading' (see README)."
             )
 
-        tier = self.router.choose_tier(compute_demand)
+    def _place(self, department_name, compute_demand, priority, tier, destination) -> Task:
+        """Create the Task (validates it), then -- only if that succeeded --
+        consume a task id and enqueue it on its destination node."""
         task = Task(
             task_id=self._next_task_id,
             arrival_time=self.current_time,
@@ -201,63 +195,70 @@ class HospitalSimulator:
             priority=priority,
             tier=tier,
             deadline=self._compute_deadline(priority),
+            source_department=department_name,
+            destination=destination,
         )
-        self._next_task_id += 1
-
-        if tier == "Local":
-            self.local_nodes[department_name].add_task(task)
+        if tier == "Cloud":
+            self.cloud_node.add_task(task)  # cloud_network_delay
         elif tier == "Edge":
-            self.nodes[department_name].add_task(task)
-        else:  # "Cloud"
-            self.cloud_node.add_task(task)
-
+            self.nodes[destination].add_task(task, transfer_delay=self.neighbour_delay)
+        else:  # "Local"
+            self.nodes[destination].add_task(task, transfer_delay=0)
+        self._next_task_id += 1
+        self.tasks.append(task)
         return task
 
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+    def add_task(self, department_name: str, compute_demand: float, priority: Optional[str] = None) -> Task:
+        """Step 1 - place a task on its own department's node (no routing).
+        V2: the task is now labelled tier="Local", destination=department,
+        because that is literally where it executes."""
+        self._check_new_task(department_name, compute_demand, priority)
+        return self._place(department_name, compute_demand, priority, "Local", department_name)
+
+    def add_generated_arrivals(self, arrivals: List) -> List[Task]:
+        """Step 2 - inject a batch of generator arrivals via add_task()."""
+        self._check_batch(arrivals)
+        return [self.add_task(a.department, a.compute_demand, a.priority) for a in arrivals]
+
+    def route_task(self, department_name: str, compute_demand: float, priority: Optional[str] = None) -> Task:
+        """STEP 3/5 - ask the FCFS router where this task goes (Local / Edge
+        neighbour / Cloud) using the CURRENT backlogs, then place it there.
+        The task's tier/destination/source_department record the decision."""
+        self._require_router()
+        self._check_new_task(department_name, compute_demand, priority)
+        backlogs = {name: node.backlog_demand for name, node in self.nodes.items()}
+        tier, destination = self.router.choose_destination(department_name, compute_demand, backlogs)
+        return self._place(department_name, compute_demand, priority, tier, destination)
+
     def route_generated_arrivals(self, arrivals: List) -> List[Task]:
-        """STEP 3 - like add_generated_arrivals(), but routes each arrival
-        through route_task() (Local/Edge/Cloud) instead of always the
-        department's Edge node."""
-        created_tasks = []
-        for arrival in arrivals:
-            task = self.route_task(
-                department_name=arrival.department,
-                compute_demand=arrival.compute_demand,
-                priority=arrival.priority,
-            )
-            created_tasks.append(task)
-        return created_tasks
+        """STEP 3/5 - route a batch of generator arrivals, in the given (seeded,
+        shuffled) order. Each routing decision sees the backlog left by the
+        previous ones. The batch is validated first (all-or-nothing)."""
+        self._require_router()
+        self._check_batch(arrivals)
+        return [self.route_task(a.department, a.compute_demand, a.priority) for a in arrivals]
 
     def step(self) -> Dict[str, dict]:
-        """Advance the whole simulator by one time-step. Returns a small
-        status snapshot per node (useful for logging/plots later)."""
+        """Advance every node by one time-step. Department nodes do not share
+        capacity with each other (and all arrivals were placed before the
+        step), so the iteration order here gives no department an advantage."""
         status = {}
-        for name, node in self.nodes.items():
+        for node in self.all_nodes:
             node.step(self.current_time)
-            status[name] = {
+            status[node.name] = {
                 "queue_length": node.queue_length,
+                "in_transit": node.in_transit_count(self.current_time + 1),
                 "completed_total": len(node.completed_tasks),
-            }
-        # STEP 3: Local and Cloud tiers advance the same way every step too,
-        # so tasks routed there make progress even between route_task() calls.
-        for name, node in self.local_nodes.items():
-            node.step(self.current_time)
-            status[f"{name}_Local"] = {
-                "queue_length": node.queue_length,
-                "completed_total": len(node.completed_tasks),
-            }
-        if self.cloud_node is not None:
-            self.cloud_node.step(self.current_time)
-            status["Cloud"] = {
-                "queue_length": self.cloud_node.queue_length,
-                "completed_total": len(self.cloud_node.completed_tasks),
+                "last_step_utilization": node.last_step_utilization,
             }
         self.current_time += 1
         return status
 
     def run(self, n_steps: int = None) -> None:
-        """Run the simulator for a fixed number of time-steps (no tasks are
-        generated automatically -- inject tasks with add_task() beforehand
-        or between steps)."""
+        """Run for a fixed number of steps (no automatic task generation)."""
         steps = n_steps if n_steps is not None else self.n_steps
         for _ in range(steps):
             self.step()

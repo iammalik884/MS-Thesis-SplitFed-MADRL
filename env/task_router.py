@@ -1,70 +1,82 @@
 """
-Step 3 - TaskRouter: decides Local vs Edge vs Cloud for each task.
+Step 3 / Step 5 - TaskRouter: the fixed FCFS-baseline routing rule
+(Local / Edge(neighbour) / Cloud).
 ================================================================================
-ROMAN URDU: Yeh class faisla karti hai ke ek naya task kahan process hoga --
-Local (on-device), Edge (department ka apna server), ya Cloud (shared,
-door, lekin powerful). **YEH ABHI AI NAHI HAI** -- sirf ek fixed, insaan ke
-likhe hue rule par mabni hai:
+ROMAN URDU: Yeh class faisla karti hai ke naya task kahan process hoga.
+**YEH AI NAHI HAI** -- ek fixed, priority-blind (FCFS) rule hai:
 
-    compute_demand <= local_threshold                    -> Local
-    local_threshold < compute_demand <= edge_threshold    -> Edge
-    compute_demand > edge_threshold                       -> Cloud
+    1. compute_demand > cloud_threshold                     -> Cloud
+    2. warna, source node ka backlog <= offload_threshold    -> Local
+       (apne department ka edge node)
+    3. warna                                                 -> Edge
+       (padosi department jis ka backlog sab se kam ho; tie ho to fixed
+        order Emergency -> ICU -> General_Ward)
 
-Wajah: chhote kaam itne halke hote hain ke turant device par hi khatam ho
-jayen (network tak jane ki zaroorat nahi), darmiyani kaam department ke
-apne Edge server mein aaram se fit ho jate hain, aur sirf sab se bhaari kaam
-hi Cloud ke network_delay "afford" karne ke laiq hote hain (kyunke Cloud ki
-capacity bohat zyada hai). Steps 7+ mein isi jaga par ek RL agent aayega jo
-seekhega ke is fixed rule se BEHTAR faisle kaise karne hain -- Step 3 ka
-maqsad sirf itna hai ke teenon tiers ki queueing/capacity/delay mechanics
-sahi kaam kar rahi hain, iss se pehle koi "learning" shamil ki jaye.
+"Backlog" = node ko assign kiye gaye tamam unfinished tasks ki remaining
+demand, transit wale (raste mein) tasks samet -- warna ek hi step mein do
+tasks ek hi "khaali" padosi par chale jate. Priority ko yeh rule bilkul
+nahi dekhta (FCFS baseline). Steps 7+ mein yahin RL agent aayega.
 
-ENGLISH: This class decides where a new task should be processed -- Local
-(on-device), Edge (the department's own server), or Cloud (shared, remote,
-powerful). **THIS IS NOT AI YET** -- it is a fixed, human-written rule based
-only on how big the task's compute_demand is (see the three-line rule
-above). The reasoning: small jobs are cheap enough to finish instantly
-on-device (no need to pay the network cost); medium jobs comfortably fit
-the department's own edge server; only the biggest jobs are worth paying
-the cloud's network_delay for its much larger capacity. Starting Step 7+,
-an RL agent will replace this exact decision point and learn to make BETTER
-choices than this fixed rule -- Step 3's only job is to prove the 3-tier
-queueing/capacity/delay mechanics are correct before any learning is added
-(project rule: one new idea at a time).
+ENGLISH: Fixed, non-learned, priority-blind routing rule for the FCFS
+baseline (see the 3 lines above). "Backlog" = total remaining demand
+assigned to a node, including in-transit reservations. The tie-break order
+is an intentional deterministic preference, NOT a claim of fairness.
+
+V2 (AUDIT FIX): the old rule (demand <= local_threshold -> a tiny bedside
+"Local" node; <= edge_threshold -> the department's own node; else Cloud)
+did not match the thesis action space (Local = own department, Edge =
+neighbour department). The old `choose_tier(compute_demand)` is replaced by
+`choose_destination(source, compute_demand, backlogs)`.
 """
 
-from env.task import TIER_CLASSES
+from typing import Dict, Mapping, Sequence, Tuple
+
+from env.task import CLOUD_NODE_NAME, is_finite_number
 
 
 class TaskRouter:
-    """Fixed (non-learned) Local/Edge/Cloud routing rule, based on a task's
-    compute_demand compared against two configured thresholds."""
+    """FCFS-baseline routing rule based on compute_demand and node backlogs."""
 
-    def __init__(self, local_threshold: float, edge_threshold: float):
-        if local_threshold <= 0:
+    def __init__(self, cloud_threshold: float, offload_threshold: float, neighbour_order: Sequence[str]):
+        if not is_finite_number(cloud_threshold) or cloud_threshold <= 0:
+            raise ValueError(f"TaskRouter: cloud_threshold must be a finite number > 0, got {cloud_threshold!r}")
+        if not is_finite_number(offload_threshold) or offload_threshold < 0:
             raise ValueError(
-                f"TaskRouter: local_threshold must be > 0, got {local_threshold}"
+                f"TaskRouter: offload_threshold must be a finite number >= 0, got {offload_threshold!r}"
             )
-        if edge_threshold <= local_threshold:
+        neighbour_order = list(neighbour_order)
+        if len(neighbour_order) < 2 or len(set(neighbour_order)) != len(neighbour_order):
             raise ValueError(
-                f"TaskRouter: edge_threshold ({edge_threshold}) must be > "
-                f"local_threshold ({local_threshold})"
+                f"TaskRouter: neighbour_order must list >= 2 distinct departments, got {neighbour_order!r}"
             )
-        self.local_threshold = local_threshold
-        self.edge_threshold = edge_threshold
+        self.cloud_threshold = float(cloud_threshold)
+        self.offload_threshold = float(offload_threshold)
+        self.neighbour_order = neighbour_order
+        self._rank: Dict[str, int] = {name: i for i, name in enumerate(neighbour_order)}
 
-    def choose_tier(self, compute_demand: float) -> str:
-        """Return one of TIER_CLASSES ("Local"/"Edge"/"Cloud") for a task
-        with this compute_demand."""
-        if compute_demand <= 0:
+    def choose_destination(
+        self, source: str, compute_demand: float, backlogs: Mapping[str, float]
+    ) -> Tuple[str, str]:
+        """Return (tier, destination_node_name) for a new task.
+
+        Args:
+            source: the department that created the task.
+            compute_demand: the task's total demand (finite, > 0).
+            backlogs: {department: backlog_demand} for EVERY department, measured
+                just before this task is placed.
+        """
+        if source not in self._rank:
+            raise ValueError(f"TaskRouter: unknown source department {source!r}")
+        if not is_finite_number(compute_demand) or compute_demand <= 0:
             raise ValueError(
-                f"TaskRouter.choose_tier: compute_demand must be > 0, got {compute_demand}"
+                f"TaskRouter.choose_destination: compute_demand must be a finite number > 0, "
+                f"got {compute_demand!r}"
             )
-        if compute_demand <= self.local_threshold:
-            tier = "Local"
-        elif compute_demand <= self.edge_threshold:
-            tier = "Edge"
-        else:
-            tier = "Cloud"
-        assert tier in TIER_CLASSES  # sanity check, should never fire
-        return tier
+        if compute_demand > self.cloud_threshold:
+            return "Cloud", CLOUD_NODE_NAME
+        if backlogs[source] <= self.offload_threshold:
+            return "Local", source
+        # Source khud candidate nahi; (backlog, fixed rank) se sab se halka padosi.
+        neighbours = [d for d in self.neighbour_order if d != source]
+        destination = min(neighbours, key=lambda d: (backlogs[d], self._rank[d]))
+        return "Edge", destination

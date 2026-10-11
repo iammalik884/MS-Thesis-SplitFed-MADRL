@@ -65,11 +65,7 @@ def run_fcfs_baseline(seed: int = SEED) -> dict:
     for _ in range(DRAIN_STEPS):
         sim.step()
 
-    completed = []
-    for node in list(sim.nodes.values()) + list(sim.local_nodes.values()):
-        completed.extend(node.completed_tasks)
-    if sim.cloud_node is not None:
-        completed.extend(sim.cloud_node.completed_tasks)
+    completed = sim.completed_tasks
 
     total_steps = GENERATION_STEPS + DRAIN_STEPS
     return compute_baseline_metrics(all_tasks, completed, total_steps)

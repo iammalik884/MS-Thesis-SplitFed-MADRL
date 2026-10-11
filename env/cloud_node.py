@@ -1,70 +1,40 @@
 """
 Step 3 - CloudNode: the one shared, powerful, but "far away" compute resource.
 ================================================================================
-ROMAN URDU: Ab tak har department ka apna "Edge" computer tha (Step 1/2).
-Step 3 mein hum do naye "tiers" add kar rahe hain: "Local" (bilkul chhota,
-device ke andar hi, jaise ek bedside monitor) aur "Cloud" (bahut powerful,
-lekin poore hospital ke liye SIRF EK shared server, aur wahan tak data
-bhejne mein waqt lagta hai -- "network_delay"). Local device banane ke liye
-hum EdgeNode class hi dobara istemal kar lete hain (chhoti capacity, delay
-zero). Lekin Cloud ke liye ek nayi class chahiye kyunke usme EXTRA behaviour
-hai: task pohanchne ke baad turant kaam shuru nahi hota, pehle
-`network_delay` steps "safar" (transit) mein guzarte hain.
+ROMAN URDU: Poore hospital ke liye SIRF EK shared Cloud server hai -- bahut
+powerful, lekin wahan tak data bhejne mein waqt lagta hai ("network_delay").
+Task Cloud par pohanchne (ready_time) se pehle process nahi ho sakta.
 
-ENGLISH: Until now every department had its own "Edge" computer (Step 1/2).
-Step 3 adds two new tiers: "Local" (tiny, on-device, e.g. a bedside monitor)
-and "Cloud" (very powerful, but only ONE shared server for the whole
-hospital, and reaching it costs time -- "network_delay"). The Local tier
-reuses the existing EdgeNode class as-is (small capacity, zero delay). The
-Cloud tier needs its own class because of one EXTRA rule: a task does not
-start being processed the instant it arrives -- it first spends
-`network_delay` steps "in transit" over the network.
+V2 (AUDIT FIX): pehle Cloud ka apna alag step() tha jo "current_time -
+arrival_time >= network_delay" check karta tha, jabke `utilization` transit
+wale tasks ko bhi count kar leta tha (capacity 50, demand 20, delay 2 ->
+time 0 par 0.4 dikhata tha jabke CPU bilkul khaali tha). Ab network readiness
+har task ke `ready_time` mein hai aur EdgeNode hi sab rules apply karta hai
+-- Cloud aur padosi (neighbour) transfer ke ready-time rules ek jaise hain.
 
-CloudNode is an EdgeNode with one added rule inserted at the front of the
-per-step loop: a task is only eligible for compute once
-    current_time - task.arrival_time >= network_delay
-Before that, it just waits (same as waiting for capacity in Step 1) -- so
-all of Step 1's proven queueing/capacity mechanics still apply underneath,
-this class only adds the network-delay gate on top.
+ENGLISH: One shared cloud server for the whole hospital. V2: network
+readiness is stored per task (ready_time = arrival_time + network_delay) and
+enforced by EdgeNode's destination-ready FCFS loop, so Cloud and neighbour
+transfers follow ONE consistent rule and utilization never counts transit
+work. CloudNode only adds a default transfer delay.
 """
 
 from env.edge_node import EdgeNode
+from env.task import Task, is_int
 
 
 class CloudNode(EdgeNode):
-    """The hospital-wide shared cloud server: big capacity, but every task
-    must wait `network_delay` steps after arriving before it can be worked
-    on (simulates the time to transmit the task over the network)."""
+    """Hospital-wide shared cloud server: big capacity, every task arrives
+    `network_delay` steps after it was sent."""
 
     def __init__(self, name: str, capacity: float, network_delay: int):
         super().__init__(name, capacity)
-        if network_delay < 0:
+        if not is_int(network_delay) or network_delay < 0:
             raise ValueError(
-                f"CloudNode '{name}': network_delay must be >= 0, got {network_delay}"
+                f"CloudNode '{name}': network_delay must be an int >= 0, got {network_delay!r}"
             )
         self.network_delay = network_delay
 
-    def step(self, current_time: int) -> None:
-        """Same FIFO + capacity loop as EdgeNode.step(), except a task is
-        skipped (kept waiting) until it has spent `network_delay` steps in
-        the queue, simulating network transmission time to the cloud."""
-        available_capacity = self.capacity
-        still_in_queue = []
-
-        for task in self.queue:
-            still_in_transit = (current_time - task.arrival_time) < self.network_delay
-            if still_in_transit or available_capacity <= 0:
-                still_in_queue.append(task)
-                continue
-
-            work_done = min(available_capacity, task.remaining_demand)
-            task.remaining_demand -= work_done
-            available_capacity -= work_done
-
-            if task.is_complete:
-                task.completion_time = current_time
-                self.completed_tasks.append(task)
-            else:
-                still_in_queue.append(task)
-
-        self.queue = still_in_queue
+    def add_task(self, task: Task, transfer_delay: int = None) -> None:
+        """Enqueue with the cloud link delay unless a delay is given explicitly."""
+        super().add_task(task, self.network_delay if transfer_delay is None else transfer_delay)
