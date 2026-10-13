@@ -11,6 +11,7 @@ ENGLISH: e.g.
 """
 
 import argparse
+import glob
 import os
 import subprocess
 import sys
@@ -29,7 +30,10 @@ def main(argv=None):
                         help="NAME=OVERRIDE (one KEY=VALUE, or empty for the reference)")
     parser.add_argument("--seeds", type=int, nargs="+", default=[0, 1])
     parser.add_argument("--scenarios", nargs="+", default=list(SCENARIOS))
-    parser.add_argument("--workers", type=int, default=10)
+    parser.add_argument("--workers", type=int, default=2,
+                        help="parallel runs; each needs ~300 MB RAM (10 at once ran out of memory on this PC)")
+    parser.add_argument("--only-missing", action="store_true",
+                        help="skip (experiment, scenario, seed) runs that already have a summary.json")
     args = parser.parse_args(argv)
 
     jobs = []
@@ -39,9 +43,12 @@ def main(argv=None):
             raise SystemExit(f"{name}: only ONE override per experiment, got {override!r}")
         for scenario in args.scenarios:
             for seed in args.seeds:
+                out_dir = os.path.join(ROOT, "results", "runs", args.group, name)
+                if args.only_missing and glob.glob(os.path.join(out_dir, f"{name}_{scenario}_seed{seed}_*", "summary.json")):
+                    continue
                 cmd = [sys.executable, os.path.join(ROOT, "train_dqn_pilot.py"), "--config", SCENARIOS[scenario],
                        "--train-seed", str(seed), "--name", f"{name}_{scenario}_seed{seed}",
-                       "--out-dir", os.path.join(ROOT, "results", "runs", args.group, name)]
+                       "--out-dir", out_dir]
                 if override:
                     cmd += ["--set", override]
                 jobs.append((f"{name}/{scenario}/seed{seed}", cmd))
