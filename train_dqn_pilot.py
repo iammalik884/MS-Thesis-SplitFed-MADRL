@@ -1,15 +1,17 @@
 """
-Step 7 (PILOT) - Train a single-agent DQN in the Step 6 environment.
+Step 7 - Train a single-agent DQN in the Step 6 environment.
 ================================================================================
-ROMAN URDU: Yeh PRELIMINARY pilot hai -- training pipeline ko debug karne aur
-learning dynamics dekhne ke liye. Final thesis results NAHI (design note,
-Section 6). Environment, reward aur simulator bilkul wahi hain jo Step 6
-mein verified hue.
+ROMAN URDU: Yeh Step 7 ka training script hai. Pehle preliminary pilot
+(results/pilot/), phir debugging experiments (results/debug/) aur aakhir mein
+frozen setting ki close-out training isi se hui (Step7_DQN_Debugging.md).
+Environment, reward aur simulator bilkul wahi hain jo Step 6 mein verified
+hue. Yeh script sirf VALIDATION seeds par evaluate karta hai; test seeds ka
+ek-dafa evaluation evaluate_dqn_test.py karta hai.
 
 Seeds (design note, Section 5):
   training workloads : har episode ke liye 10,000-19,999 se ek seed
   validation         : 1,000-1,029 (checkpoint chunne ke liye)
-  test               : 2,000-2,029 -- pilot mein ISTEMAL NAHI hota
+  test               : 2,000-2,029 -- is script mein ISTEMAL NAHI hota
 Report: undiscounted return, protocol metrics, action proportions; saath mein
 saare baselines (FCFS, always Local/Edge/Cloud, random, ECT) same validation
 seeds par.
@@ -38,7 +40,7 @@ from env.run_records import collect_provenance, unique_run_dir, write_json
 ROOT = os.path.dirname(os.path.abspath(__file__))
 TRAIN_SEED_RANGE = (10_000, 19_999)
 VALIDATION_SEEDS = range(1_000, 1_030)
-TEST_SEEDS = range(2_000, 2_030)  # reserved for final Step 7 results; never used here
+TEST_SEEDS = range(2_000, 2_030)  # reserved; used only by evaluate_dqn_test.py, never here
 
 
 def train(config_path, train_seed, total_steps, eval_every, dqn_config, log=print):
@@ -103,7 +105,7 @@ def _write_csv(path, rows):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="PILOT: train a DQN in the Step 6 environment")
+    parser = argparse.ArgumentParser(description="Step 7: train a DQN in the Step 6 environment (validation seeds only)")
     parser.add_argument("--config", default=os.path.join(ROOT, "configs", "environment.yaml"))
     parser.add_argument("--train-seed", type=int, default=0)
     parser.add_argument("--total-steps", type=int, default=40_000)
@@ -162,7 +164,7 @@ def main(argv=None):
     provenance = collect_provenance()
     out = unique_run_dir(args.out_dir, name, provenance["git_commit"])
     write_json(os.path.join(out, "manifest.json"), {
-        "method": "DQN (PILOT / debugging, preliminary -- not a thesis result)",
+        "method": "DQN (Step 7 training script; evaluation here on validation seeds only)",
         "config_path": os.path.relpath(os.path.abspath(args.config), ROOT),
         "config_snapshot": load_config(args.config),
         "dqn_config": dqn_config.to_dict(),
