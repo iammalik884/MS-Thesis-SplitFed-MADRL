@@ -11,4 +11,5 @@ PyYAML>=6.0      # tested 6.0.3
 gymnasium>=1.0   # tested 1.4.0 (Step 6, env/gym_env.py)
 torch>=2.0       # tested 2.14.1+cpu (Step 7 DQN pilot, agents/dqn.py)
                  # CPU build: py -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+matplotlib>=3.5  # tested 3.11.2 (Step 7 learning-curve figure, evaluate_dqn_test.py)
 pytest>=8.0      # tested 9.1.1 (test runner only)

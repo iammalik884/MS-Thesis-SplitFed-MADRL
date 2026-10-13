@@ -211,3 +211,54 @@ stable, so that Step 7 ends with an honest DQN baseline instead of a tuned
 - If the setting is not stable, Step 7 says so explicitly. The result is then
   "DQN as the single-agent baseline in this environment", not a claim that DQN
   works well. No further tuning is done after the test seeds have been used.
+
+## Round 2 — results
+
+All runs are on validation seeds 1,000–1,029 from the clean commit `c7f7912`;
+**test seeds were not used.** Compact artefacts are in
+[results/debug/round2/](../results/debug/round2/). Reproduce the table with
+`python summarize_dqn_experiments.py results/debug/round2`.
+
+| Setting | Decisions | Mean final score | Mean best score | Best → final drop |
+|---|---|---|---|---|
+| G095 (Round 1 choice: reward × 0.01, γ = 0.95) | 40,000 | −0.565 | 0.306 | 0.871 |
+| **R2a `DDQN`** (G095 + Double DQN) | 40,000 | **0.486** | 0.707 | **0.221** |
+| R2b `LONG` (DDQN, longer run) | 120,000 | 0.034 | 0.787 | 0.753 |
+
+Per run (final-checkpoint score, seed 0 / seed 1):
+
+| Setting | Default | Overload | Slow network |
+|---|---|---|---|
+| DDQN | 0.84 / 0.72 | 0.87 / 0.31 | **−0.10** / 0.28 |
+| LONG | 0.81 / 0.84 | 0.40 / −2.29 | 0.41 / 0.03 |
+
+Q estimates vs matching discounted Monte Carlo returns (means over both
+training seeds, unscaled):
+
+| Setting | Overload: best ckpt | Overload: final ckpt | Default: final ckpt |
+|---|---|---|---|
+| DDQN | −13.8 vs −34.0 | −31.1 vs −48.4 | −7.3 vs −8.0 |
+| LONG | −37.6 vs −36.1 | −67.7 vs −116.1 | −7.3 vs −7.6 |
+
+- **Double DQN** was the largest improvement in all rounds: the mean final
+  score rose from −0.565 to 0.486, and the drop fell from 0.871 to 0.221. No
+  Q estimate is positive any more. Q is still above MC in overload and slow
+  network, but much less so than in Round 1 (G095 final: −15.3 vs −162.1).
+- **The longer run** found better *best* checkpoints, all late in training
+  (between 96,000 and 120,077 decisions), but its final checkpoints were worse.
+  Overload seed 1 collapsed to −1,091.9 at the end. Longer training does not
+  remove the instability. In the runner, the ε decay is a fraction (0.5) of
+  the run, so in LONG exploration also lasts 3× longer; this is part of the
+  setting "120,000 decisions" as it was run.
+
+**Stability check (rule fixed before the runs).** No tested setting is
+stable. DDQN meets the drop rule (0.221 ≤ 0.25), but one of its 6 final
+checkpoints is below the random baseline (slow network seed 0, −0.10). LONG
+fails both rules.
+
+**Frozen Step 7 configuration** (highest mean final score over all 9 settings
+of Round 1 and Round 2): **DDQN** = `reward_scale = 0.01`, `gamma = 0.95`,
+`double_dqn = true`, 40,000 decisions; everything else as in `DQNConfig`. It is
+frozen as it is, **not stable** by the definition above. As pre-registered,
+the close-out below runs anyway, and Step 7 reports DQN as the single-agent
+baseline in this environment, not as a method that works well.

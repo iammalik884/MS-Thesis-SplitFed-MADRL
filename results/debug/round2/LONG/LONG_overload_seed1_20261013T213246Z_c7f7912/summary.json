@@ -1,0 +1,729 @@
+{
+  "note": "Validation seeds only; undiscounted returns in original units",
+  "dqn_best": {
+    "step": 108036,
+    "seeds": [
+      1000,
+      1001,
+      1002,
+      1003,
+      1004,
+      1005,
+      1006,
+      1007,
+      1008,
+      1009,
+      1010,
+      1011,
+      1012,
+      1013,
+      1014,
+      1015,
+      1016,
+      1017,
+      1018,
+      1019,
+      1020,
+      1021,
+      1022,
+      1023,
+      1024,
+      1025,
+      1026,
+      1027,
+      1028,
+      1029
+    ],
+    "mean_return": -240.8,
+    "std_return": 22.989352857955488,
+    "means": {
+      "avg_latency": 1.9798161706037167,
+      "throughput_in_window": 5.451666666666666,
+      "deadline_violation_rate": 0.0002469135802469136,
+      "critical_deadline_violation_rate": 0.0011904761904761904,
+      "unfinished_after_drain": 0,
+      "neighbour_transfers": 5.733333333333333,
+      "cloud_transfers": 115.73333333333333,
+      "synthetic_payload_units_total": 400.11054752655986
+    },
+    "action_proportions": {
+      "Local": 0.0,
+      "Edge": 0.04720087815587267,
+      "Cloud": 0.9527991218441273
+    },
+    "action_proportions_by_priority": {
+      "Critical": {
+        "Local": 0.0,
+        "Edge": 0.04062126642771804,
+        "Cloud": 0.959378733572282
+      },
+      "High": {
+        "Local": 0.0,
+        "Edge": 0.06425992779783393,
+        "Cloud": 0.935740072202166
+      },
+      "Routine": {
+        "Local": 0.0,
+        "Edge": 0.034458509142053444,
+        "Cloud": 0.9655414908579466
+      }
+    },
+    "action_proportions_by_source": {
+      "Emergency": {
+        "Local": 0.0,
+        "Edge": 0.038461538461538464,
+        "Cloud": 0.9615384615384616
+      },
+      "General_Ward": {
+        "Local": 0.0,
+        "Edge": 0.05850585058505851,
+        "Cloud": 0.9414941494149415
+      },
+      "ICU": {
+        "Local": 0.0,
+        "Edge": 0.04657070279424217,
+        "Cloud": 0.9534292972057579
+      }
+    }
+  },
+  "dqn_final": {
+    "step": 120028,
+    "seeds": [
+      1000,
+      1001,
+      1002,
+      1003,
+      1004,
+      1005,
+      1006,
+      1007,
+      1008,
+      1009,
+      1010,
+      1011,
+      1012,
+      1013,
+      1014,
+      1015,
+      1016,
+      1017,
+      1018,
+      1019,
+      1020,
+      1021,
+      1022,
+      1023,
+      1024,
+      1025,
+      1026,
+      1027,
+      1028,
+      1029
+    ],
+    "mean_return": -1091.9,
+    "std_return": 799.321580876666,
+    "means": {
+      "avg_latency": 5.690942963712811,
+      "throughput_in_window": 4.336666666666667,
+      "deadline_violation_rate": 0.2920239606141406,
+      "critical_deadline_violation_rate": 0.37819878986012845,
+      "unfinished_after_drain": 0,
+      "neighbour_transfers": 8.1,
+      "cloud_transfers": 37.9,
+      "synthetic_payload_units_total": 153.5200718259238
+    },
+    "action_proportions": {
+      "Local": 0.6212952799121844,
+      "Edge": 0.06668496158068057,
+      "Cloud": 0.31201975850713504
+    },
+    "action_proportions_by_priority": {
+      "Critical": {
+        "Local": 0.6009557945041816,
+        "Edge": 0.07168458781362007,
+        "Cloud": 0.32735961768219835
+      },
+      "High": {
+        "Local": 0.6454873646209386,
+        "Edge": 0.05054151624548736,
+        "Cloud": 0.303971119133574
+      },
+      "Routine": {
+        "Local": 0.609704641350211,
+        "Edge": 0.07946554149085795,
+        "Cloud": 0.3108298171589311
+      }
+    },
+    "action_proportions_by_source": {
+      "Emergency": {
+        "Local": 0.6301775147928994,
+        "Edge": 0.03106508875739645,
+        "Cloud": 0.33875739644970415
+      },
+      "General_Ward": {
+        "Local": 0.6858685868586859,
+        "Edge": 0.05670567056705671,
+        "Cloud": 0.25742574257425743
+      },
+      "ICU": {
+        "Local": 0.550381033022862,
+        "Edge": 0.11685012701100762,
+        "Cloud": 0.3327688399661304
+      }
+    }
+  },
+  "q_vs_mc": {
+    "dqn_best": {
+      "gamma": 0.95,
+      "reward_scale": 0.01,
+      "decisions": 3644,
+      "mean_q": -0.3767206312231842,
+      "mean_mc_return": -0.36855310038136313,
+      "mean_bias": -0.008167530841821062,
+      "rmse": 0.04972445438744506,
+      "correlation": 0.8150277722756235,
+      "unscaled": {
+        "mean_q": -37.67206312231842,
+        "mean_mc_return": -36.85531003813631,
+        "mean_bias": -0.8167530841821061,
+        "rmse": 4.972445438744506
+      },
+      "first_decision": {
+        "mean_q": -0.1863137776652972,
+        "mean_mc_return": -0.17858333721107283
+      }
+    },
+    "dqn_final": {
+      "gamma": 0.95,
+      "reward_scale": 0.01,
+      "decisions": 3644,
+      "mean_q": -0.8355662732514932,
+      "mean_mc_return": -1.771193743669479,
+      "mean_bias": 0.9356274704179856,
+      "rmse": 2.331634682791221,
+      "correlation": 0.8946258655852923,
+      "unscaled": {
+        "mean_q": -83.55662732514932,
+        "mean_mc_return": -177.11937436694788,
+        "mean_bias": 93.56274704179856,
+        "rmse": 233.1634682791221
+      },
+      "first_decision": {
+        "mean_q": -0.20349600315093994,
+        "mean_mc_return": -0.17047368082177747
+      }
+    }
+  },
+  "baselines": {
+    "FCFS": {
+      "seeds": [
+        1000,
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010,
+        1011,
+        1012,
+        1013,
+        1014,
+        1015,
+        1016,
+        1017,
+        1018,
+        1019,
+        1020,
+        1021,
+        1022,
+        1023,
+        1024,
+        1025,
+        1026,
+        1027,
+        1028,
+        1029
+      ],
+      "mean_return": -691.1666666666666,
+      "std_return": 314.07237067750566,
+      "means": {
+        "avg_latency": 3.4223410834940187,
+        "throughput_in_window": 4.685,
+        "deadline_violation_rate": 0.21104858541476654,
+        "critical_deadline_violation_rate": 0.575823240428761,
+        "unfinished_after_drain": 0,
+        "neighbour_transfers": 98.6,
+        "cloud_transfers": 15.333333333333334,
+        "synthetic_payload_units_total": 380.07023957730377
+      },
+      "action_proportions": {
+        "Local": 0.062019758507135016,
+        "Edge": 0.8117453347969265,
+        "Cloud": 0.12623490669593854
+      },
+      "action_proportions_by_priority": {
+        "Critical": {
+          "Local": 0.06690561529271206,
+          "Edge": 0.9330943847072879,
+          "Cloud": 0.0
+        },
+        "High": {
+          "Local": 0.07870036101083032,
+          "Edge": 0.9212996389891697,
+          "Cloud": 0.0
+        },
+        "Routine": {
+          "Local": 0.04289732770745429,
+          "Edge": 0.6336146272855133,
+          "Cloud": 0.3234880450070324
+        }
+      },
+      "action_proportions_by_source": {
+        "Emergency": {
+          "Local": 0.06360946745562131,
+          "Edge": 0.8187869822485208,
+          "Cloud": 0.11760355029585799
+        },
+        "General_Ward": {
+          "Local": 0.050405040504050404,
+          "Edge": 0.7488748874887489,
+          "Cloud": 0.2007200720072007
+        },
+        "ICU": {
+          "Local": 0.07112616426756986,
+          "Edge": 0.8628281117696867,
+          "Cloud": 0.06604572396274344
+        }
+      }
+    },
+    "always Local": {
+      "seeds": [
+        1000,
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010,
+        1011,
+        1012,
+        1013,
+        1014,
+        1015,
+        1016,
+        1017,
+        1018,
+        1019,
+        1020,
+        1021,
+        1022,
+        1023,
+        1024,
+        1025,
+        1026,
+        1027,
+        1028,
+        1029
+      ],
+      "mean_return": -1616.1666666666667,
+      "std_return": 527.6756503326859,
+      "means": {
+        "avg_latency": 8.186046260897777,
+        "throughput_in_window": 3.645,
+        "deadline_violation_rate": 0.48607378200145757,
+        "critical_deadline_violation_rate": 0.7051884538313757,
+        "unfinished_after_drain": 0.03333333333333333,
+        "neighbour_transfers": 0,
+        "cloud_transfers": 0,
+        "synthetic_payload_units_total": 0.0
+      },
+      "action_proportions": {
+        "Local": 1.0,
+        "Edge": 0.0,
+        "Cloud": 0.0
+      },
+      "action_proportions_by_priority": {
+        "Critical": {
+          "Local": 1.0,
+          "Edge": 0.0,
+          "Cloud": 0.0
+        },
+        "High": {
+          "Local": 1.0,
+          "Edge": 0.0,
+          "Cloud": 0.0
+        },
+        "Routine": {
+          "Local": 1.0,
+          "Edge": 0.0,
+          "Cloud": 0.0
+        }
+      },
+      "action_proportions_by_source": {
+        "Emergency": {
+          "Local": 1.0,
+          "Edge": 0.0,
+          "Cloud": 0.0
+        },
+        "General_Ward": {
+          "Local": 1.0,
+          "Edge": 0.0,
+          "Cloud": 0.0
+        },
+        "ICU": {
+          "Local": 1.0,
+          "Edge": 0.0,
+          "Cloud": 0.0
+        }
+      }
+    },
+    "always Edge": {
+      "seeds": [
+        1000,
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010,
+        1011,
+        1012,
+        1013,
+        1014,
+        1015,
+        1016,
+        1017,
+        1018,
+        1019,
+        1020,
+        1021,
+        1022,
+        1023,
+        1024,
+        1025,
+        1026,
+        1027,
+        1028,
+        1029
+      ],
+      "mean_return": -1691.2333333333333,
+      "std_return": 541.9352094709918,
+      "means": {
+        "avg_latency": 8.209575930013939,
+        "throughput_in_window": 3.395,
+        "deadline_violation_rate": 0.5449443589188925,
+        "critical_deadline_violation_rate": 0.834869371422949,
+        "unfinished_after_drain": 0,
+        "neighbour_transfers": 121.46666666666667,
+        "cloud_transfers": 0,
+        "synthetic_payload_units_total": 400.11054752655986
+      },
+      "action_proportions": {
+        "Local": 0.0,
+        "Edge": 1.0,
+        "Cloud": 0.0
+      },
+      "action_proportions_by_priority": {
+        "Critical": {
+          "Local": 0.0,
+          "Edge": 1.0,
+          "Cloud": 0.0
+        },
+        "High": {
+          "Local": 0.0,
+          "Edge": 1.0,
+          "Cloud": 0.0
+        },
+        "Routine": {
+          "Local": 0.0,
+          "Edge": 1.0,
+          "Cloud": 0.0
+        }
+      },
+      "action_proportions_by_source": {
+        "Emergency": {
+          "Local": 0.0,
+          "Edge": 1.0,
+          "Cloud": 0.0
+        },
+        "General_Ward": {
+          "Local": 0.0,
+          "Edge": 1.0,
+          "Cloud": 0.0
+        },
+        "ICU": {
+          "Local": 0.0,
+          "Edge": 1.0,
+          "Cloud": 0.0
+        }
+      }
+    },
+    "always Cloud": {
+      "seeds": [
+        1000,
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010,
+        1011,
+        1012,
+        1013,
+        1014,
+        1015,
+        1016,
+        1017,
+        1018,
+        1019,
+        1020,
+        1021,
+        1022,
+        1023,
+        1024,
+        1025,
+        1026,
+        1027,
+        1028,
+        1029
+      ],
+      "mean_return": -243.5,
+      "std_return": 23.630415817842433,
+      "means": {
+        "avg_latency": 2.001712713160841,
+        "throughput_in_window": 5.451666666666666,
+        "deadline_violation_rate": 0.0002469135802469136,
+        "critical_deadline_violation_rate": 0.0011904761904761904,
+        "unfinished_after_drain": 0,
+        "neighbour_transfers": 0,
+        "cloud_transfers": 121.46666666666667,
+        "synthetic_payload_units_total": 400.11054752655986
+      },
+      "action_proportions": {
+        "Local": 0.0,
+        "Edge": 0.0,
+        "Cloud": 1.0
+      },
+      "action_proportions_by_priority": {
+        "Critical": {
+          "Local": 0.0,
+          "Edge": 0.0,
+          "Cloud": 1.0
+        },
+        "High": {
+          "Local": 0.0,
+          "Edge": 0.0,
+          "Cloud": 1.0
+        },
+        "Routine": {
+          "Local": 0.0,
+          "Edge": 0.0,
+          "Cloud": 1.0
+        }
+      },
+      "action_proportions_by_source": {
+        "Emergency": {
+          "Local": 0.0,
+          "Edge": 0.0,
+          "Cloud": 1.0
+        },
+        "General_Ward": {
+          "Local": 0.0,
+          "Edge": 0.0,
+          "Cloud": 1.0
+        },
+        "ICU": {
+          "Local": 0.0,
+          "Edge": 0.0,
+          "Cloud": 1.0
+        }
+      }
+    },
+    "random": {
+      "seeds": [
+        1000,
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010,
+        1011,
+        1012,
+        1013,
+        1014,
+        1015,
+        1016,
+        1017,
+        1018,
+        1019,
+        1020,
+        1021,
+        1022,
+        1023,
+        1024,
+        1025,
+        1026,
+        1027,
+        1028,
+        1029
+      ],
+      "mean_return": -471.23333333333335,
+      "std_return": 220.44933475835734,
+      "means": {
+        "avg_latency": 2.7851777898613292,
+        "throughput_in_window": 5.028333333333333,
+        "deadline_violation_rate": 0.10061183779642395,
+        "critical_deadline_violation_rate": 0.2789361680241213,
+        "unfinished_after_drain": 0,
+        "neighbour_transfers": 41.13333333333333,
+        "cloud_transfers": 40.9,
+        "synthetic_payload_units_total": 269.21372425612867
+      },
+      "action_proportions": {
+        "Local": 0.3246432491767289,
+        "Edge": 0.3386388583973655,
+        "Cloud": 0.3367178924259056
+      },
+      "action_proportions_by_priority": {
+        "Critical": {
+          "Local": 0.3118279569892473,
+          "Edge": 0.3333333333333333,
+          "Cloud": 0.3548387096774194
+        },
+        "High": {
+          "Local": 0.33140794223826714,
+          "Edge": 0.3328519855595668,
+          "Cloud": 0.33574007220216606
+        },
+        "Routine": {
+          "Local": 0.32559774964838256,
+          "Edge": 0.34739803094233473,
+          "Cloud": 0.3270042194092827
+        }
+      },
+      "action_proportions_by_source": {
+        "Emergency": {
+          "Local": 0.33579881656804733,
+          "Edge": 0.32988165680473375,
+          "Cloud": 0.3343195266272189
+        },
+        "General_Ward": {
+          "Local": 0.3096309630963096,
+          "Edge": 0.3546354635463546,
+          "Cloud": 0.3357335733573357
+        },
+        "ICU": {
+          "Local": 0.3259949195596952,
+          "Edge": 0.3336155800169348,
+          "Cloud": 0.34038950042337
+        }
+      }
+    },
+    "ECT": {
+      "seeds": [
+        1000,
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+        1008,
+        1009,
+        1010,
+        1011,
+        1012,
+        1013,
+        1014,
+        1015,
+        1016,
+        1017,
+        1018,
+        1019,
+        1020,
+        1021,
+        1022,
+        1023,
+        1024,
+        1025,
+        1026,
+        1027,
+        1028,
+        1029
+      ],
+      "mean_return": -200.16666666666666,
+      "std_return": 30.710082959873276,
+      "means": {
+        "avg_latency": 1.624169340045893,
+        "throughput_in_window": 5.538333333333333,
+        "deadline_violation_rate": 0.0015575153155261688,
+        "critical_deadline_violation_rate": 0.006508275353152014,
+        "unfinished_after_drain": 0,
+        "neighbour_transfers": 7.666666666666667,
+        "cloud_transfers": 32.53333333333333,
+        "synthetic_payload_units_total": 175.97444738191038
+      },
+      "action_proportions": {
+        "Local": 0.6690450054884742,
+        "Edge": 0.06311745334796927,
+        "Cloud": 0.2678375411635565
+      },
+      "action_proportions_by_priority": {
+        "Critical": {
+          "Local": 0.8422939068100358,
+          "Edge": 0.07168458781362007,
+          "Cloud": 0.08602150537634409
+        },
+        "High": {
+          "Local": 0.7696750902527075,
+          "Edge": 0.06425992779783393,
+          "Cloud": 0.16606498194945848
+        },
+        "Routine": {
+          "Local": 0.46905766526019693,
+          "Edge": 0.056962025316455694,
+          "Cloud": 0.4739803094233474
+        }
+      },
+      "action_proportions_by_source": {
+        "Emergency": {
+          "Local": 0.7344674556213018,
+          "Edge": 0.05029585798816568,
+          "Cloud": 0.21523668639053253
+        },
+        "General_Ward": {
+          "Local": 0.5076507650765076,
+          "Edge": 0.09360936093609361,
+          "Cloud": 0.39873987398739874
+        },
+        "ICU": {
+          "Local": 0.745977984758679,
+          "Edge": 0.04911092294665537,
+          "Cloud": 0.20491109229466553
+        }
+      }
+    }
+  }
+}

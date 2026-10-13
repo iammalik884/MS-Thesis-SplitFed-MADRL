@@ -29,7 +29,7 @@ def load(group_dir):
         score = lambda r: (r - r_rand) / (r_ect - r_rand)
         rows.append({
             "exp": exp, "scenario": scenario, "seed": manifest["train_seed"],
-            "overrides": manifest["dqn_overrides"], "commit": manifest["provenance"]["git_commit"][:7],
+            "overrides": manifest["dqn_overrides"], "total_steps": manifest["total_steps"], "commit": manifest["provenance"]["git_commit"][:7],
             "dirty": manifest["provenance"]["git_dirty"],
             "best_return": summary["dqn_best"]["mean_return"], "final_return": summary["dqn_final"]["mean_return"],
             "best_step": summary["dqn_best"]["step"],
@@ -56,11 +56,11 @@ def main(group_dir):
     for r in rows:
         by_exp[r["exp"]].append(r)
     print("\nPer experiment (mean over scenarios x training seeds):")
-    print(f"{'exp':4s} {'override':28s} {'runs':>4s} {'mean final score':>17s} {'mean best score':>16s} {'mean drop':>10s}")
+    print(f"{'exp':4s} {'override':28s} {'runs':>4s} {'steps':>7s} {'mean final score':>17s} {'mean best score':>16s} {'mean drop':>10s}")
     for exp, rs in sorted(by_exp.items()):
         final = statistics.mean(r["final_score"] for r in rs)
         best = statistics.mean(r["best_score"] for r in rs)
-        print(f"{exp:4s} {json.dumps(rs[0]['overrides']):28s} {len(rs):4d} {final:17.3f} {best:16.3f} {best - final:10.3f}")
+        print(f"{exp:4s} {json.dumps(rs[0]['overrides']):28s} {len(rs):4d} {rs[0]['total_steps']:7d} {final:17.3f} {best:16.3f} {best - final:10.3f}")
     commits = {(r["commit"], r["dirty"]) for r in rows}
     print(f"\nprovenance (commit, dirty): {sorted(commits)}")
 
