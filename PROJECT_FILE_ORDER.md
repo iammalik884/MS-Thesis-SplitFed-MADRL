@@ -51,6 +51,8 @@ step that later touched it.
 |---|---|---|
 | [demo_simulation.py](demo_simulation.py) | Steps 1-4 demo | Runs the full pipeline once with seed=42 and prints a readable summary |
 | [check_simple_policies.py](check_simple_policies.py) | **Step 6** (ECT added in Step 7) | Sanity check: FCFS / always Local / Edge / Cloud / random / ECT played through the Gym env |
+| [run_dqn_experiments.py](run_dqn_experiments.py) | **Step 7 (debugging)** | Runs pre-registered experiments (one override each) in parallel |
+| [summarize_dqn_experiments.py](summarize_dqn_experiments.py) | **Step 7 (debugging)** | Applies the pre-registered normalised score (0 = random, 1 = ECT) |
 | [train_dqn_pilot.py](train_dqn_pilot.py) | **Step 7 (pilot)** | Trains a DQN (training/validation seed split), saves learning curves and baseline comparison to `results/runs/` |
 | [run_baseline_fcfs.py](run_baseline_fcfs.py) | **Step 5** | Runs the FCFS baseline (`--seed`, `--seeds 0-29`, `--config`), saves a run folder under `results/runs/` |
 

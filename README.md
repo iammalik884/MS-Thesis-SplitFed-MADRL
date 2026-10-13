@@ -24,7 +24,7 @@ Requires Python ≥ 3.10 (tested with 3.14.6 on Windows 11).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest -q                      # 93 tests, all should pass
+python -m pytest -q                      # 95 tests, all should pass
 python demo_simulation.py                # one readable run (seed 42)
 python run_baseline_fcfs.py --seeds 0-29 # FCFS baseline, 30 seeds
 python run_baseline_fcfs.py --config configs/scenarios/overload.yaml --seeds 0-29
@@ -200,6 +200,15 @@ training seed, 40,000 decisions, validation return, runs in
 Diagnosis and next debugging steps are in the note, Section 6. No thesis claim
 is made from the pilot.
 
+**Debugging round 1** ([Step7_DQN_Debugging.md](Step_Documentation/Step7_DQN_Debugging.md),
+plan committed before the runs). Settings were changed one at a time
+(reward scale, observation scale, learning rate, then γ) with 2 training seeds,
+on validation seeds only; the runs are in [results/debug/](results/debug/). The
+best setting (reward × 0.01, γ = 0.95) is still unstable. In overload the Q
+estimates are far above the matching Monte Carlo returns, which points to
+overestimation. No setting is frozen, the test seeds have not been used, and
+Step 7 remains open.
+
 ## FCFS baseline results (seeds 0–29, mean)
 
 From [results/baselines/](results/baselines/), produced at commit `83e7f3f`
@@ -226,7 +235,7 @@ New runs go to `results/runs/` (git-ignored); a run folder is never overwritten.
 
 ## Verification
 
-93 automated tests (`python -m pytest -q`):
+95 automated tests (`python -m pytest -q`):
 
 | File | What it checks |
 |---|---|
@@ -239,7 +248,7 @@ New runs go to `results/runs/` (git-ignored); a run folder is never overwritten.
 | `test_v2_metrics_protocol.py` | deadline categories, window/drain protocol, run records |
 | `test_v2_validation_scenarios.py` | config validation (30+ invalid cases), scenarios, roadmap Step 3 checkpoints, seeds 0–29 invariants |
 | `test_ect_heuristic.py` | ECT estimates by hand, exact on idle nodes, tie order, no future information |
-| `test_dqn_pilot.py` | replay buffer, no bootstrapping at episode end, ε schedule, reproducible training, shared evaluation = Step 5 FCFS |
+| `test_dqn_pilot.py` | replay buffer, no bootstrapping at episode end, ε schedule, reproducible training, shared evaluation = Step 5 FCFS, scaling knobs, Q vs Monte Carlo |
 | `test_step6_gym_env.py` | Gymnasium `check_env`, roadmap Step 6 checkpoints, exact FCFS reproduction on 6 configs × seeds 0–29, reward bookkeeping, action meanings, determinism, empty episode, invalid usage |
 
 ## Folder structure
@@ -265,16 +274,19 @@ MS_Thesis_Project/
 │   ├── heuristics.py             # Step 7: ECT heuristic baseline
 │   ├── policy_eval.py            # Step 7: one evaluation routine for all policies
 │   └── dqn.py                    # Step 7 pilot: DQN (replay buffer, target network)
-├── tests/                        # 93 tests (see Verification)
+├── tests/                        # 95 tests (see Verification)
 ├── results/
 │   ├── baselines/                # committed FCFS v2 results
 │   ├── pilot/                    # Step 7 DQN pilot runs (preliminary)
+│   ├── debug/                    # Step 7 DQN debugging runs (compact artefacts)
 │   └── legacy/                   # pre-audit result, not comparable
 ├── Step_Documentation/           # per-step Word write-ups (Roman Urdu), see note below
 ├── demo_simulation.py            # one readable run with seed 42
 ├── run_baseline_fcfs.py          # FCFS baseline runner (--seed / --seeds / --config)
 ├── check_simple_policies.py      # Step 6 sanity check with simple fixed policies (+ ECT)
-├── train_dqn_pilot.py            # Step 7 pilot: DQN training with seed splits
+├── train_dqn_pilot.py            # Step 7: DQN training with seed splits (--set for one override)
+├── run_dqn_experiments.py        # Step 7: runs the pre-registered debugging experiments
+├── summarize_dqn_experiments.py  # Step 7: pre-registered score per experiment
 └── requirements.txt
 ```
 

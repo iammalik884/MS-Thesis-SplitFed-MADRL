@@ -66,4 +66,113 @@ the reserved test set used.
 
 ## Results
 
-(to be filled in after the runs)
+All runs are on validation seeds 1,000–1,029. **Test seeds were not used.**
+The compact artefacts of every run (manifest, summary, per-seed results incl.
+offloading metrics, learning/validation curves, best and final checkpoints)
+are in [results/debug/](../results/debug/). Reproduce the tables with
+`python summarize_dqn_experiments.py results/debug/phase1` (or `phase2`).
+The full per-seed protocol reports (~155 MB) are kept locally in
+`results/runs/` (git-ignored). The same commands regenerate them, because
+runs are deterministic.
+
+**Provenance.**
+
+- Phase 1 runs come from commits `78e8474` and `d7abd02`; Phase 2 from `cbe84ed`.
+  All are clean trees, and the agent, training and environment code is identical
+  across them (only the experiment runner changed).
+- 10 of the first 30 Phase 1 runs failed with `MemoryError`: 10 parallel runs ×
+  ~300 MB did not fit in this PC's free RAM. They were re-run one at a time.
+  Nothing else changed.
+- E0 seed 0 reproduced the pilot (−20.4 / −340.7 / −478.3).
+
+### Phase 1 — one change at a time from E0
+
+Score: 0 = random baseline, 1 = ECT. Each score is a mean over 3 scenarios × 2
+training seeds.
+
+| Exp. | Change | Mean final score | Mean best score | Best → final drop |
+|---|---|---|---|---|
+| E0 | — (pilot settings) | −1.879 | 0.457 | 2.337 |
+| E1 | reward × 0.1 | −1.831 | −0.120 | 1.711 |
+| **E2** | **reward × 0.01** | **−1.291** | 0.130 | 1.421 |
+| E3 | unbounded obs × 0.1 | −2.685 | 0.273 | 2.958 |
+| E4 | learning rate 1e-4 | −3.792 | 0.254 | 4.046 |
+
+E2 is selected by the pre-registered rule. It only reduces the instability; it
+does not remove it.
+
+### Phase 2 — γ, starting from E2 (reward × 0.01)
+
+| γ | Mean final score | Mean best score | Best → final drop |
+|---|---|---|---|
+| **0.95** | **−0.565** | 0.306 | 0.871 |
+| 0.99 (= E2) | −1.291 | 0.130 | 1.421 |
+| 1.0 | −1.640 | 0.015 | 1.655 |
+
+Per scenario, with γ = 0.95 (final checkpoint; seed 0 / seed 1):
+
+- default: score 0.84 / 0.80 (return −17.5 / −18.1; ECT −14.6);
+- overload: −4.16 / −0.15;
+- slow network: −0.79 / 0.08.
+
+### Q estimates vs discounted Monte Carlo returns
+
+Means over both training seeds, greedy policy, in unscaled latency-steps:
+
+| Setting | Overload: Q vs MC (best ckpt) | Overload: Q vs MC (final ckpt) | Default: Q vs MC (final) |
+|---|---|---|---|
+| E0 | 0.0 vs −178.6 | −6.5 vs −1014.4 | −12.0 vs −12.4 |
+| E2 (reward × 0.01) | +34.3 vs −310.6 | +83.1 vs −921.7 | −10.1 vs −11.7 |
+| γ = 0.95 (+ E2) | −5.3 vs −78.5 | −15.3 vs −162.1 | −7.2 vs −7.8 |
+| γ = 1.0 (+ E2) | +56.0 vs −580.3 | +58.8 vs −1752.5 | −10.9 vs −12.4 |
+
+- In the **default** scenario the DQN learns the value scale (Q ≈ MC).
+- In **overload** (and slow network) Q is far too high. In several settings it is
+  even **positive**, which is impossible because every reward is ≤ 0. This is the
+  pattern of DQN's max-operator **overestimation**.
+- γ = 0.95 gives the smallest bias and the highest Q–MC correlation (0.68 best /
+  0.85 final in overload), but the bias is still large.
+
+### Reward timing (measurement, environment unchanged)
+
+On validation seeds under overload, the share of the episode return paid at the
+**last** step was:
+
+| Policy | Share of return at the last step |
+|---|---|
+| always Local | 73% |
+| FCFS | 46% |
+| ECT | 16% |
+| always Cloud | 15% |
+
+The worse the policy, the more of its cost arrives in one rare terminal
+transition (drain completions and unfinished tasks), about once per 124
+decisions. This is how the Step 6 reward is defined. It is not changed here, but
+it helps explain why the value of congested states is learned so poorly.
+
+### Conclusion of this round
+
+- **No stable configuration was found.** The best setting by the
+  pre-registered rule is reward × 0.01 with γ = 0.95, and its mean final score is
+  still below the random baseline (−0.565), with overload seed 0 at −4.16.
+- Following the plan, there was **no multi-seed verification and no test-set
+  evaluation**. Step 7 stays open, and Step 8 has not started.
+- γ = 0.95 contradicts the design note's preference for γ = 0.99, which was
+  argued from reward delays. The data favours 0.95 for stability with the
+  current training setup. Which γ to use is still an open choice; nothing is
+  frozen yet.
+- **No DQN checkpoint beats ECT in any scenario.** Some best checkpoints beat
+  FCFS: in overload, e.g. E0 seed 0 scored −340.7 against FCFS −691.2; in slow
+  network, E0 seed 1 scored −367.3 against −416.6. All 14 overload final
+  checkpoints (7 settings × 2 seeds) score below random (score < 0).
+
+### Proposed next round (one change at a time, from reward × 0.01 and γ = 0.95)
+
+1. **Double DQN** targets: Q-values above the possible maximum (0) point to
+   overestimation.
+2. A longer training budget (e.g. 120,000 decisions), to see whether the drop
+   comes from training length.
+3. n-step returns (e.g. n = 5), for the delayed completion rewards.
+
+The same pre-registered score and rules would apply. The environment, the
+reward definition and the cloud capacity stay unchanged.
