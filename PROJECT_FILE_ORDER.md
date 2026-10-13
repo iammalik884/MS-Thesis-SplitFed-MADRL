@@ -42,8 +42,8 @@ step that later touched it.
 | File | Created | Also edited in | What it does |
 |---|---|---|---|
 | [heuristics.py](agents/heuristics.py) | **Step 7 (design note)** | — | ECT heuristic: smallest estimated completion time, observation-level information only |
-| [policy_eval.py](agents/policy_eval.py) | **Step 7** | — | `evaluate()` — one evaluation routine (undiscounted return, protocol metrics, action proportions) for DQN and every baseline |
-| [dqn.py](agents/dqn.py) | **Step 7 (pilot)** | — | DQN: Q-network, replay buffer, target network, epsilon-greedy |
+| [policy_eval.py](agents/policy_eval.py) | **Step 7** | Step 7 debugging (+`q_vs_monte_carlo`, full reports, offloading metrics) | `evaluate()` — one evaluation routine (undiscounted return, protocol metrics, action proportions) for DQN and every baseline |
+| [dqn.py](agents/dqn.py) | **Step 7 (pilot)** | Step 7 debugging (+`reward_scale`, `obs_scale`; Round 2: +`double_dqn`) | DQN: Q-network, replay buffer, target network, epsilon-greedy; optional Double DQN target |
 
 ## Root folder — runnable scripts
 
@@ -53,7 +53,8 @@ step that later touched it.
 | [check_simple_policies.py](check_simple_policies.py) | **Step 6** (ECT added in Step 7) | Sanity check: FCFS / always Local / Edge / Cloud / random / ECT played through the Gym env |
 | [run_dqn_experiments.py](run_dqn_experiments.py) | **Step 7 (debugging)** | Runs pre-registered experiments (one override each) in parallel |
 | [summarize_dqn_experiments.py](summarize_dqn_experiments.py) | **Step 7 (debugging)** | Applies the pre-registered normalised score (0 = random, 1 = ECT) |
-| [train_dqn_pilot.py](train_dqn_pilot.py) | **Step 7 (pilot)** | Trains a DQN (training/validation seed split), saves learning curves and baseline comparison to `results/runs/` |
+| [train_dqn_pilot.py](train_dqn_pilot.py) | **Step 7 (pilot; also used for debugging and close-out training)** | Trains a DQN (training/validation seed split, `--set` for one override), saves best/final checkpoints, curves, Q vs MC and the baseline comparison on validation seeds to `results/runs/` |
+| [evaluate_dqn_test.py](evaluate_dqn_test.py) | **Step 7 (close-out)** | One-time evaluation of the frozen DQN (5 training seeds) and all baselines on the reserved test seeds; mean ± 95% CI, per-seed results, full reports, learning-curve figure |
 | [run_baseline_fcfs.py](run_baseline_fcfs.py) | **Step 5** | Runs the FCFS baseline (`--seed`, `--seeds 0-29`, `--config`), saves a run folder under `results/runs/` |
 
 ## `configs/environment.yaml` — one file, grew every step
@@ -83,7 +84,7 @@ Stress scenarios live in `configs/scenarios/*.yaml`; each one `extends:` this fi
 | [test_v2_validation_scenarios.py](tests/test_v2_validation_scenarios.py) | V2 audit (c) |
 | [test_step6_gym_env.py](tests/test_step6_gym_env.py) | Step 6 |
 | [test_ect_heuristic.py](tests/test_ect_heuristic.py) | Step 7 (design note) |
-| [test_dqn_pilot.py](tests/test_dqn_pilot.py) | Step 7 (pilot) |
+| [test_dqn_pilot.py](tests/test_dqn_pilot.py) | Step 7 (pilot, debugging, Double DQN) |
 
 ---
 
