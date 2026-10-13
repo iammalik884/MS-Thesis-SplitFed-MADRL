@@ -30,8 +30,7 @@ def main(argv=None):
     parser.add_argument("--exp", action="append", required=True,
                         help="NAME=OVERRIDE (one KEY=VALUE, or empty for the reference)")
     parser.add_argument("--base", default="",
-                        help="KEY=VALUE applied to EVERY experiment of the group (the reference chosen in an
-"
+                        help="KEY=VALUE applied to EVERY experiment of the group (the reference chosen in an "
                              "earlier phase); each --exp then changes one more field")
     parser.add_argument("--seeds", type=int, nargs="+", default=[0, 1])
     parser.add_argument("--scenarios", nargs="+", default=list(SCENARIOS))
