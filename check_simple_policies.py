@@ -3,13 +3,14 @@ Step 6 - Sanity check: simple fixed policies played through the Gymnasium enviro
 ================================================================================
 ROMAN URDU: Yeh training NAHI hai aur thesis ka result bhi nahi. Sirf yeh
 dekhne ke liye ke environment ka reward policy ke faislon par sahi tarah
-react karta hai: FCFS, "hamesha Local / Edge / Cloud", aur random policy ko
-same seeds par chala kar average return, latency aur Critical violation
-print karta hai (evaluation protocol wahi Step 5 wala).
+react karta hai: FCFS, "hamesha Local / Edge / Cloud", random policy aur
+proposed ECT heuristic ko same seeds par chala kar average return, latency
+aur Critical violation print karta hai (evaluation protocol wahi Step 5 wala).
 
-ENGLISH: plays FCFS, always-Local, always-Edge, always-Cloud and a seeded
-random policy through env/gym_env.py on the same seeds and prints the mean
-episode return, average latency and Critical deadline-violation rate.
+ENGLISH: plays FCFS, always-Local, always-Edge, always-Cloud, a seeded
+random policy and the proposed ECT heuristic (agents/heuristics.py) through
+env/gym_env.py on the same seeds and prints the mean episode return,
+average latency and Critical deadline-violation rate.
 
 Run:  py check_simple_policies.py [--config configs/scenarios/overload.yaml] [--seeds 0-29]
 """
@@ -20,6 +21,7 @@ import statistics
 
 import numpy as np
 
+from agents.heuristics import ect_action
 from env.gym_env import HospitalSchedulingEnv
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -38,6 +40,7 @@ def run(config_path: str, seeds):
         "always Edge": lambda e, rng: 1,
         "always Cloud": lambda e, rng: 2,
         "random": lambda e, rng: int(rng.integers(0, 3)),
+        "ECT heuristic": lambda e, rng: ect_action(e),
     }
     rows = []
     for name, policy in policies.items():

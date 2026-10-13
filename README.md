@@ -151,25 +151,26 @@ from the agent instead of the FCFS router.
 **Sanity check, not a result** (`python check_simple_policies.py`, seeds 0–29,
 mean):
 
-| Scenario | FCFS | always Local | always Edge | always Cloud | random |
-|---|---|---|---|---|---|
-| Default — return | −15.9 | −23.9 | −39.0 | −52.3 | −34.3 |
-| Department imbalance — return | −78.7 | −701.9 | −219.4 | −130.8 | −109.9 |
-| Overload — return | −720.0 | −1809.2 | −1916.6 | **−248.5** | −504.9 |
-| Overload — Critical violation | 59.6% | 75.6% | 87.9% | **0.0%** | 30.6% |
-| Slow network — return | −428.7 | **−385.6** | −666.3 | −881.6 | −507.8 |
-| Slow network — Critical violation | 83.4% | **24.2%** | 100.0% | 100.0% | 68.4% |
+| Scenario | FCFS | always Local | always Edge | always Cloud | random | ECT (Step 7 note) |
+|---|---|---|---|---|---|---|
+| Default — return | −15.9 | −23.9 | −39.0 | −52.3 | −34.3 | −15.9 |
+| Department imbalance — return | −78.7 | −701.9 | −219.4 | −130.8 | −109.9 | −80.2 |
+| Overload — return | −720.0 | −1809.2 | −1916.6 | −248.5 | −504.9 | **−210.1** |
+| Overload — Critical violation | 59.6% | 75.6% | 87.9% | **0.0%** | 30.6% | 0.7% |
+| Slow network — return | −428.7 | −385.6 | −666.3 | −881.6 | −507.8 | **−253.3** |
+| Slow network — Critical violation | 83.4% | 24.2% | 100.0% | 100.0% | 68.4% | 31.8% |
 
-The reward responds to the decisions as expected, but two points matter for
-Step 7. First, under overload, sending **every** task to the cloud beats FCFS by
-a wide margin, because the placeholder cloud (capacity 50) almost never fills
+The reward responds to the decisions as expected. Which policy is best depends
+on the scenario. Under overload, always-Cloud beats FCFS by a wide margin: the
+2-step network delay is in the reward, but there is no separate usage or
+communication cost, and the placeholder cloud (capacity 50) almost never fills
 up (with always-Cloud under overload, 1 of 3,727 tasks over seeds 0–29 had to
-wait; all others finished after exactly the 2-step network delay) and the
-reward contains no cost for using it. A learned agent may therefore simply
-learn "always Cloud". Second, FCFS is beaten by trivial fixed policies in some
-scenarios, so it is a weak reference on its own. Whether to add a cloud or
-communication cost, change the cloud capacity, or add a stronger heuristic
-baseline is a research design decision that has **not** been made here.
+wait). Always-Cloud is still not optimal: the adaptive ECT heuristic beats it
+there, and it is the worst policy in the default and slow-network scenarios.
+FCFS is beaten by simple policies in some scenarios, so it is a weak reference
+on its own. Possible modelling changes, the γ choice and the Step 7 protocol
+are in the [Step 7 design note](Step_Documentation/Step7_Design_Note.md). No
+change to the cloud or the reward has been made.
 
 ## FCFS baseline results (seeds 0–29, mean)
 

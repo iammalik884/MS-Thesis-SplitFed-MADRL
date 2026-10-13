@@ -31,18 +31,27 @@ step that later touched it.
 | [cloud_node.py](env/cloud_node.py) | **Step 3** | V2 audit (delay stored per task) | `CloudNode` — shared hospital-wide node with network delay |
 | [metrics.py](env/metrics.py) | **Step 5** | V2 audit (rewritten) | `compute_metrics()` — latency, throughput, 4 deadline categories, tier/route breakdowns |
 | [evaluation.py](env/evaluation.py) | **Step 5 (V2 audit)** | Step 6 (+drain_and_report, shared with the Gym env) | Common window + drain evaluation protocol for every policy |
-| [run_records.py](env/run_records.py) | **Step 5 (V2 audit)** | Step 6 (+gymnasium version in provenance) | Unique run folders, manifest with config snapshot and git/package provenance |
+| [run_records.py](env/run_records.py) | **Step 5 (V2 audit)** | Step 6/7 (+gymnasium, torch versions in provenance) | Unique run folders, manifest with config snapshot and git/package provenance |
 | [config_validation.py](env/config_validation.py) | **Step 5 (V2 audit)** | Step 6 (+rl_environment section) | Validates every config before a simulation is built |
 | [gym_env.py](env/gym_env.py) | **Step 6** | — | `HospitalSchedulingEnv` — Gymnasium reset()/step() around the simulator (Local / Edge / Cloud action) |
 
 *(Step 4 added no new file — only edited `task.py` and `hospital_env.py` above.)*
+
+## `agents/` folder — policies (Step 7)
+
+| File | Created | Also edited in | What it does |
+|---|---|---|---|
+| [heuristics.py](agents/heuristics.py) | **Step 7 (design note)** | — | ECT heuristic: smallest estimated completion time, observation-level information only |
+| [policy_eval.py](agents/policy_eval.py) | **Step 7** | — | `evaluate()` — one evaluation routine (undiscounted return, protocol metrics, action proportions) for DQN and every baseline |
+| [dqn.py](agents/dqn.py) | **Step 7 (pilot)** | — | DQN: Q-network, replay buffer, target network, epsilon-greedy |
 
 ## Root folder — runnable scripts
 
 | File | Step | What it does |
 |---|---|---|
 | [demo_simulation.py](demo_simulation.py) | Steps 1-4 demo | Runs the full pipeline once with seed=42 and prints a readable summary |
-| [check_simple_policies.py](check_simple_policies.py) | **Step 6** | Sanity check: FCFS / always Local / Edge / Cloud / random played through the Gym env |
+| [check_simple_policies.py](check_simple_policies.py) | **Step 6** (ECT added in Step 7) | Sanity check: FCFS / always Local / Edge / Cloud / random / ECT played through the Gym env |
+| [train_dqn_pilot.py](train_dqn_pilot.py) | **Step 7 (pilot)** | Trains a DQN (training/validation seed split), saves learning curves and baseline comparison to `results/runs/` |
 | [run_baseline_fcfs.py](run_baseline_fcfs.py) | **Step 5** | Runs the FCFS baseline (`--seed`, `--seeds 0-29`, `--config`), saves a run folder under `results/runs/` |
 
 ## `configs/environment.yaml` — one file, grew every step
@@ -71,6 +80,8 @@ Stress scenarios live in `configs/scenarios/*.yaml`; each one `extends:` this fi
 | [test_v2_metrics_protocol.py](tests/test_v2_metrics_protocol.py) | V2 audit (b) |
 | [test_v2_validation_scenarios.py](tests/test_v2_validation_scenarios.py) | V2 audit (c) |
 | [test_step6_gym_env.py](tests/test_step6_gym_env.py) | Step 6 |
+| [test_ect_heuristic.py](tests/test_ect_heuristic.py) | Step 7 (design note) |
+| [test_dqn_pilot.py](tests/test_dqn_pilot.py) | Step 7 (pilot) |
 
 ---
 

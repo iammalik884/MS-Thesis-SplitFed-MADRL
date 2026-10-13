@@ -61,7 +61,7 @@ def collect_provenance() -> Dict:
         "python_executable": sys.executable,
         "python_version": platform.python_version(),
         "platform": platform.platform(),
-        "packages": {name: _version(name) for name in ("numpy", "PyYAML", "pytest", "gymnasium")},
+        "packages": {name: _version(name) for name in ("numpy", "PyYAML", "pytest", "gymnasium", "torch")},
         "created_utc": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
 
