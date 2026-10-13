@@ -13,6 +13,8 @@ time-step par har node ek step aage badhta hai.
   - route_task()             (Step 3/5): TaskRouter (fixed FCFS rule, AI nahi)
                               se faisla: Local / Edge (padosi) / Cloud.
   - route_generated_arrivals(): Poisson arrivals, har ek route_task() se.
+  - place_task()             (Step 6): tier ka faisla bahar se (RL policy)
+                              aata hai; baqi placement route_task() jaisa.
 
 V2 (AUDIT FIX) -- roadmap/synopsis ke mutabiq action space:
   Local = task source department ke APNE edge node par process ho.
@@ -219,6 +221,25 @@ class HospitalSimulator:
         self._require_router()
         self._check_batch(arrivals)
         return [self.route_task(a.department, a.compute_demand, a.priority) for a in arrivals]
+
+    def place_task(self, department_name: str, compute_demand: float, priority: Optional[str], tier: str) -> Task:
+        """STEP 6 - place a task on a tier chosen by a POLICY (e.g. an RL agent)
+        instead of the FCFS router. Local = own node, Cloud = shared cloud,
+        Edge = the neighbour chosen by TaskRouter.least_loaded_neighbour()
+        (the same neighbour rule the FCFS router uses). Placement, delays and
+        bookkeeping are the same _place() used by route_task()."""
+        self._require_router()
+        self._check_new_task(department_name, compute_demand, priority)
+        if tier == "Local":
+            destination = department_name
+        elif tier == "Cloud":
+            destination = CLOUD_NODE_NAME
+        elif tier == "Edge":
+            backlogs = {name: node.backlog_demand for name, node in self.nodes.items()}
+            destination = self.router.least_loaded_neighbour(department_name, backlogs)
+        else:
+            raise ValueError(f"place_task: tier must be 'Local', 'Edge' or 'Cloud', got {tier!r}")
+        return self._place(department_name, compute_demand, priority, tier, destination)
 
     def step(self) -> Dict[str, dict]:
         """Advance every node by one time-step. Department nodes do not share

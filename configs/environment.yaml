@@ -177,3 +177,26 @@ deadlines:
 evaluation:
   drain_limit: 50
   synthetic_payload_units_per_compute_unit: 1.0
+
+# =============================================================================
+# Step 6 Configuration - Gymnasium RL environment (env/gym_env.py)
+# -----------------------------------------------------------------------------
+# ROMAN URDU: Har task ka reward, us task ke khatam hone par milta hai:
+#     reward = -(latency) - deadline_miss_penalty * (1 agar deadline miss hui)
+# latency = completion_time - arrival_time (steps). Is liye ek episode ka
+# total reward = -(sab tasks ki latency ka jama) - penalty * (deadline misses),
+# yani seedha wohi cheezein jo evaluation protocol naapta hai.
+# deadline_miss_penalty: 10.0 = sab se lambi deadline offset (Routine, 10
+#   steps) -- ek deadline miss kam az kam utni mehngi jitna sab se lamba
+#   allowed intezar. Yeh ek DESIGN CHOICE / PLACEHOLDER hai, kisi paper ya
+#   data se nahi liya gaya; Step 7 (DQN) mein is ka asar check karna hai.
+#   Priority ke hisaab se weighting (Critical > High > Routine) Step 10 ka
+#   kaam hai -- abhi har priority ka penalty barabar hai.
+# ENGLISH: per-task reward, delivered when the task finishes:
+#   -(latency) - deadline_miss_penalty * [deadline missed]. Episode return =
+#   -(total latency) - penalty * (number of deadline misses). The value 10.0
+#   is a design choice (= the largest deadline offset), not taken from data
+#   or literature; priority weighting is deferred to roadmap Step 10.
+# =============================================================================
+rl_environment:
+  deadline_miss_penalty: 10.0

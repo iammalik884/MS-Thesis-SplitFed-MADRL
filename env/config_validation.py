@@ -20,7 +20,8 @@ from typing import Iterable, Optional
 from env.task import CLOUD_NODE_NAME, PRIORITY_CLASSES, is_finite_number, is_int
 
 TOP_LEVEL_KEYS = {"seed", "simulation", "departments", "task_generation", "offloading",
-                  "deadlines", "evaluation", "scenario"}
+                  "deadlines", "evaluation", "scenario", "rl_environment"}
+RL_ENVIRONMENT_KEYS = {"deadline_miss_penalty"}
 OFFLOADING_KEYS = {"cloud_capacity", "cloud_network_delay", "neighbour_network_delay",
                    "cloud_threshold", "offload_threshold", "neighbour_tie_break_order"}
 REMOVED_OFFLOADING_KEYS = ("local_capacity", "local_threshold", "edge_threshold")
@@ -162,3 +163,10 @@ def validate_config(config) -> None:
         if "synthetic_payload_units_per_compute_unit" in evaluation:
             _number(evaluation["synthetic_payload_units_per_compute_unit"],
                     "evaluation.synthetic_payload_units_per_compute_unit", positive=False)
+
+    rl_environment = config.get("rl_environment")
+    if rl_environment is not None:
+        _check_keys(rl_environment, RL_ENVIRONMENT_KEYS, "rl_environment")
+        if "deadline_miss_penalty" not in rl_environment:
+            raise ValueError("Config 'rl_environment' is missing key 'deadline_miss_penalty'")
+        _number(rl_environment["deadline_miss_penalty"], "rl_environment.deadline_miss_penalty", positive=False)

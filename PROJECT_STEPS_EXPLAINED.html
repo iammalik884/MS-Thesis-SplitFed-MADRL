@@ -187,7 +187,7 @@
     <!-- ============================= RESEARCH OVERVIEW ============================= -->
     <section id="roadmap">
       <h2 class="section-head">1. Where This Fits in the Whole Research</h2>
-      <p class="section-sub">Before looking at individual steps, here is the entire research plan grouped into three phases. Steps 0–5 are complete; Step 6 is next.</p>
+      <p class="section-sub">Before looking at individual steps, here is the entire research plan grouped into three phases. Steps 0–6 are complete; Step 7 is next.</p>
 
       <div class="roadmap">
         <div class="phase done">
@@ -202,21 +202,21 @@
             <span class="chip done">Step 3 · Local / Edge / Cloud routing</span>
           </div>
         </div>
-        <div class="phase">
+        <div class="phase done">
           <div class="phase-head">
             Phase B — Add Real Scheduling Rules
-            <span class="phase-status">Steps 4–5 done · Step 6 next</span>
+            <span class="phase-status">✓ Done (Steps 4–6)</span>
           </div>
           <div class="phase-steps">
             <span class="chip done">Step 4 · Priority + deadlines</span>
             <span class="chip done">Step 5 · FCFS baseline (for comparison)</span>
-            <span class="chip">Step 6 · RL-ready environment wrapper</span>
+            <span class="chip done">Step 6 · RL-ready environment wrapper</span>
           </div>
         </div>
         <div class="phase">
           <div class="phase-head">
             Phase C — Teach an AI to Schedule
-            <span class="phase-status">Later</span>
+            <span class="phase-status">Next</span>
           </div>
           <div class="phase-steps">
             <span class="chip">Step 7+ · Learning agents (DQN, then MAPPO)</span>
@@ -490,14 +490,17 @@ for _ in range(count):
         return "Cloud", CLOUD_NODE_NAME
     if backlogs[source] &lt;= self.offload_threshold:
         return "Local", source
+    return "Edge", self.least_loaded_neighbour(source, backlogs)
+def least_loaded_neighbour(self, source: str, backlogs: Mapping[str, float]) -&gt; str:
+    if source not in self._rank:
+        raise ValueError(f"TaskRouter: unknown source department {source!r}")
     neighbours = [d for d in self.neighbour_order if d != source]
-    destination = min(neighbours, key=lambda d: (backlogs[d], self._rank[d]))
-    return "Edge", destination</code></pre>
+    return min(neighbours, key=lambda d: (backlogs[d], self._rank[d]))</code></pre>
         </div>
       </div>
     </section>
 
-    <p class="closing-note">Steps 4 (priority deadlines) and 5 (FCFS baseline, evaluation protocol and results) are described in <code>README.md</code> and <code>Step_Documentation/</code>. Next up: Step 6 — wrapping the simulator as a Gymnasium environment so a learning agent can make the Local / Edge / Cloud decision.</p>
+    <p class="closing-note">Steps 4 (priority deadlines), 5 (FCFS baseline, evaluation protocol and results) and 6 (Gymnasium environment for the Local / Edge / Cloud decision) are described in <code>README.md</code> and <code>Step_Documentation/</code>. Next up: Step 7 — a single-agent DQN baseline trained in that environment.</p>
 
   </div>
 </div>

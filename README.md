@@ -7,9 +7,9 @@ University of Sargodha).
 The code follows the 18-step practical roadmap (`My Research Practical ROADMAP.docx`).
 Each step adds one new idea and is verified before the next step starts.
 
-**Current status: Steps 1–5 complete** (hospital simulator + FCFS baseline).
-No AI or learning yet. Steps 6–18 (Gymnasium wrapper, DQN, MAPPO, SplitFed,
-privacy, robustness) have not been started.
+**Current status: Steps 1–6 complete** (hospital simulator, FCFS baseline,
+Gymnasium environment). No agent has been trained yet. Steps 7–18 (DQN,
+MAPPO, SplitFed, privacy, robustness) have not been started.
 
 > **Data note:** all workload numbers (arrival rates, compute demands,
 > deadlines) are **synthetic placeholders**, not MIMIC-IV statistics.
@@ -22,10 +22,11 @@ Requires Python ≥ 3.10 (tested with 3.14.6 on Windows 11).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest -q                      # 74 tests, all should pass
+python -m pytest -q                      # 83 tests, all should pass
 python demo_simulation.py                # one readable run (seed 42)
 python run_baseline_fcfs.py --seeds 0-29 # FCFS baseline, 30 seeds
 python run_baseline_fcfs.py --config configs/scenarios/overload.yaml --seeds 0-29
+python check_simple_policies.py --config configs/scenarios/overload.yaml  # Step 6 sanity check
 ```
 
 Each test file can also be run on its own, e.g. `python -m tests.test_step3_routing`.
@@ -76,7 +77,12 @@ and removed pre-v2 keys raise clear errors).
 - [x] **Step 5 — Baseline 1: FCFS.** A common evaluation protocol (below),
       metrics, multi-seed runs, verification scenarios, and saved run records
       with full provenance.
-- [ ] Steps 6–18 — see the roadmap document. Next: Step 6, Gymnasium wrapper.
+- [x] **Step 6 — Gymnasium environment.** `HospitalSchedulingEnv`
+      ([env/gym_env.py](env/gym_env.py)): `reset()` / `step(action)` around the
+      simulator, with the observation, action, reward and termination defined
+      below. With the FCFS router's actions it reproduces the Step 5 baseline
+      exactly.
+- [ ] Steps 7–18 — see the roadmap document. Next: Step 7, single-agent DQN.
 
 The design was revised after an audit (commits `470a079`, `acdb3d4`,
 `83e7f3f`). The pre-audit version is preserved under the git tag
@@ -107,6 +113,64 @@ SplitFed-MAPPO) so the comparison is fair. Implemented in
   communication (transfer counts and *synthetic* payload units, not bytes).
   Training communication (FedAvg/SplitFed) is not implemented yet.
 
+## Step 6: Gymnasium environment
+
+`HospitalSchedulingEnv(config)` in [env/gym_env.py](env/gym_env.py) (Gymnasium 1.4.0).
+Nothing in the simulator changes; only the Local / Edge / Cloud decision comes
+from the agent instead of the FCFS router.
+
+- **Decision point:** one decision per arriving task. The tasks of a step are
+  shown one by one, in the same seeded order FCFS routes them; after the last
+  one the simulator runs the step. Steps with no arrivals run automatically.
+- **Action:** `Discrete(3)` — 0 = Local (own node), 1 = Edge, 2 = Cloud. For
+  Edge, the neighbour is chosen by the same rule FCFS uses (smallest backlog,
+  fixed tie-break order; `TaskRouter.least_loaded_neighbour`). No action is
+  masked.
+- **Observation:** `Box` float32, 13 values for 3 departments: backlog/capacity
+  of each department node and of the cloud, the task's demand / its own node's
+  capacity, source department one-hot, priority one-hot, deadline offset /
+  largest offset, and current time / `n_steps`. Backlogs include tasks in
+  transit, as in the FCFS router. Backlog and demand features have no upper
+  bound (`inf`), which Gymnasium's checker reports as a warning. The
+  observation does not contain every queued task, so the problem is partially
+  observable.
+- **Reward:** each task gives `-(latency) - deadline_miss_penalty × [deadline missed]`
+  once, when it finishes. A task still unfinished after the drain gives
+  `-(final_cutoff - arrival + 1)` and the penalty if its deadline has passed.
+  The episode return therefore equals `-(total latency) - penalty × (number of
+  deadline misses)`. `deadline_miss_penalty` = 10.0 in
+  [configs/environment.yaml](configs/environment.yaml) (`rl_environment`) is a
+  design choice (equal to the largest deadline offset), not derived from data;
+  priority weighting is roadmap Step 10.
+- **Termination:** after the measurement window there are no more decisions;
+  the drain runs and the episode ends with `terminated=True` (`truncated` is
+  always `False`). The last `info["report"]` is the same Step 5 protocol report.
+- **Seeds:** `reset(seed=s)` uses `s` as the workload seed, so it produces the same
+  tasks as `run_fcfs_evaluation(config, s)`.
+
+**Sanity check, not a result** (`python check_simple_policies.py`, seeds 0–29,
+mean):
+
+| Scenario | FCFS | always Local | always Edge | always Cloud | random |
+|---|---|---|---|---|---|
+| Default — return | −15.9 | −23.9 | −39.0 | −52.3 | −34.3 |
+| Department imbalance — return | −78.7 | −701.9 | −219.4 | −130.8 | −109.9 |
+| Overload — return | −720.0 | −1809.2 | −1916.6 | **−248.5** | −504.9 |
+| Overload — Critical violation | 59.6% | 75.6% | 87.9% | **0.0%** | 30.6% |
+| Slow network — return | −428.7 | **−385.6** | −666.3 | −881.6 | −507.8 |
+| Slow network — Critical violation | 83.4% | **24.2%** | 100.0% | 100.0% | 68.4% |
+
+The reward responds to the decisions as expected, but two points matter for
+Step 7. First, under overload, sending **every** task to the cloud beats FCFS by
+a wide margin, because the placeholder cloud (capacity 50) almost never fills
+up (with always-Cloud under overload, 1 of 3,727 tasks over seeds 0–29 had to
+wait; all others finished after exactly the 2-step network delay) and the
+reward contains no cost for using it. A learned agent may therefore simply
+learn "always Cloud". Second, FCFS is beaten by trivial fixed policies in some
+scenarios, so it is a weak reference on its own. Whether to add a cloud or
+communication cost, change the cloud capacity, or add a stronger heuristic
+baseline is a research design decision that has **not** been made here.
+
 ## FCFS baseline results (seeds 0–29, mean)
 
 From [results/baselines/](results/baselines/), produced at commit `83e7f3f`
@@ -133,7 +197,7 @@ New runs go to `results/runs/` (git-ignored); a run folder is never overwritten.
 
 ## Verification
 
-74 automated tests (`python -m pytest -q`):
+83 automated tests (`python -m pytest -q`):
 
 | File | What it checks |
 |---|---|
@@ -145,6 +209,7 @@ New runs go to `results/runs/` (git-ignored); a run folder is never overwritten.
 | `test_v2_routing_timing.py` | neighbour routing, ready-time FCFS, latency decomposition, utilization |
 | `test_v2_metrics_protocol.py` | deadline categories, window/drain protocol, run records |
 | `test_v2_validation_scenarios.py` | config validation (30+ invalid cases), scenarios, roadmap Step 3 checkpoints, seeds 0–29 invariants |
+| `test_step6_gym_env.py` | Gymnasium `check_env`, roadmap Step 6 checkpoints, exact FCFS reproduction on 6 configs × seeds 0–29, reward bookkeeping, action meanings, determinism, empty episode, invalid usage |
 
 ## Folder structure
 
@@ -163,19 +228,21 @@ MS_Thesis_Project/
 │   ├── config_validation.py      # config checks run before anything is built
 │   ├── metrics.py                # latency, throughput, deadline categories, breakdowns
 │   ├── evaluation.py             # common window + drain evaluation protocol
-│   └── run_records.py            # run folders, manifests, provenance
-├── tests/                        # 74 tests (see Verification)
+│   ├── run_records.py            # run folders, manifests, provenance
+│   └── gym_env.py                # Step 6: Gymnasium environment (HospitalSchedulingEnv)
+├── tests/                        # 83 tests (see Verification)
 ├── results/
 │   ├── baselines/                # committed FCFS v2 results
 │   └── legacy/                   # pre-audit result, not comparable
 ├── Step_Documentation/           # per-step Word write-ups (Roman Urdu), see note below
 ├── demo_simulation.py            # one readable run with seed 42
 ├── run_baseline_fcfs.py          # FCFS baseline runner (--seed / --seeds / --config)
+├── check_simple_policies.py      # Step 6 sanity check with simple fixed policies
 └── requirements.txt
 ```
 
 **Note on `Step_Documentation/`:** the Step 3 and Step 5 write-ups were
-rewritten for the current (v2) design. Steps 1, 2 and 4 start with a
+rewritten for the current (v2) design, and Step 6 has its own write-up. Steps 1, 2 and 4 start with a
 "V2 UPDATE" box listing what changed; their code listings are simplified
 versions of the code in `env/`.
 
@@ -184,4 +251,7 @@ versions of the code in `env/`.
 - Workload and deadline values are placeholders, not MIMIC-IV derived.
 - Time is discrete (whole steps); network delays are fixed integers.
 - Offloading payload is a synthetic unit proportional to compute demand, not bytes.
-- No learning yet. FCFS routing ignores priority and deadlines by design.
+- No agent trained yet. FCFS routing ignores priority and deadlines by design.
+- In the stressed scenarios the cloud almost never fills up and is free to use
+  (see the Step 6 sanity check); this should be settled before Step 7 results
+  are interpreted.

@@ -76,7 +76,14 @@ class TaskRouter:
             return "Cloud", CLOUD_NODE_NAME
         if backlogs[source] <= self.offload_threshold:
             return "Local", source
+        return "Edge", self.least_loaded_neighbour(source, backlogs)
+
+    def least_loaded_neighbour(self, source: str, backlogs: Mapping[str, float]) -> str:
+        """The neighbour an Edge offload goes to: smallest backlog, ties broken
+        by neighbour_order. Shared by the FCFS rule and the Step 6 RL action
+        "Edge", so both pick the neighbour in exactly the same way."""
+        if source not in self._rank:
+            raise ValueError(f"TaskRouter: unknown source department {source!r}")
         # Source khud candidate nahi; (backlog, fixed rank) se sab se halka padosi.
         neighbours = [d for d in self.neighbour_order if d != source]
-        destination = min(neighbours, key=lambda d: (backlogs[d], self._rank[d]))
-        return "Edge", destination
+        return min(neighbours, key=lambda d: (backlogs[d], self._rank[d]))

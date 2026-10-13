@@ -127,14 +127,25 @@ def run_fcfs_evaluation(config, seed: int) -> EvaluationResult:
     for _ in range(settings["window_steps"]):          # 1. measurement window
         sim.route_generated_arrivals(generator.generate_for_step(sim.current_time))
         sim.step()
-    backlog_at_window_end = backlog_snapshot(sim)
+    report = drain_and_report(sim, settings, backlog_snapshot(sim))
+    return EvaluationResult(simulator=sim, report=report)
 
+
+def drain_and_report(sim: HospitalSimulator, settings: Dict, backlog_at_window_end: Dict) -> Dict:
+    """Run the drain phase on a simulator whose measurement window has just
+    ended, then build the protocol report. Shared by every policy (FCFS here,
+    the Step 6 Gymnasium environment for learned policies)."""
+    if sim.current_time != settings["window_steps"]:
+        raise ValueError(
+            f"drain_and_report: the window must have just ended (current_time "
+            f"{sim.current_time} != window_steps {settings['window_steps']})"
+        )
     drain_steps = 0                                      # 2. drain (no arrivals)
     while drain_steps < settings["drain_limit"] and any(node.queue for node in sim.all_nodes):
         sim.step()
         drain_steps += 1
 
-    report = summarize_protocol(
+    return summarize_protocol(
         sim.tasks,
         window_steps=settings["window_steps"],
         final_cutoff=sim.current_time - 1,
@@ -143,4 +154,3 @@ def run_fcfs_evaluation(config, seed: int) -> EvaluationResult:
         backlog_after_drain=backlog_snapshot(sim),
         payload_units_per_compute_unit=settings["payload_units_per_compute_unit"],
     )
-    return EvaluationResult(simulator=sim, report=report)

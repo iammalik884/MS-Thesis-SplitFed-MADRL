@@ -1,16 +1,16 @@
-# Current phase (Steps 1-5, simulator + FCFS baseline).
+# Current phase (Steps 1-6, simulator + FCFS baseline + Gymnasium environment).
 # Install with:  py -m pip install -r requirements.txt
 #
-# Verified on 2026-10-11 by actually running: Windows 11, Python 3.14.6
+# Verified on 2026-10-13 by actually running: Windows 11, Python 3.14.6
 # (C:\Users\USr\AppData\Local\Python\pythoncore-3.14-64\python.exe via the
 # `py` launcher). Python >= 3.10 is required (bisect.bisect_right(key=...)).
-# The versions in comments are the ones the 74 tests passed with; the lower
+# The versions in comments are the ones the 83 tests passed with; the lower
 # bounds are not separately tested.
 numpy>=2.0       # tested 2.5.3
 PyYAML>=6.0      # tested 6.0.3
+gymnasium>=1.0   # tested 1.4.0 (Step 6, env/gym_env.py)
 pytest>=8.0      # tested 9.1.1 (test runner only)
 
 # FUTURE steps -- NOT installed or verified in this environment yet:
-#   gymnasium  (Step 6, Gymnasium environment wrapper)
 #   torch      (Step 7+, DQN / MAPPO)
-# Add them here with tested versions when those steps start.
+# Add it here with the tested version when that step starts.
