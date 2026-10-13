@@ -24,12 +24,15 @@ step that later touched it.
 | File | Created | Also edited in | What it does |
 |---|---|---|---|
 | [task.py](env/task.py) | **Step 1** | Step 2 (+priority), Step 3 (+tier), Step 4 (+deadline, met_deadline) | `Task` — one medical job (id, arrival time, compute demand, priority, tier, deadline) |
-| [edge_node.py](env/edge_node.py) | **Step 1** | Post-Step-3 fix (utilization bug) | `EdgeNode` — one department's limited-capacity FIFO queue |
-| [hospital_env.py](env/hospital_env.py) | **Step 1** | Step 2 (+add_generated_arrivals), Step 3 (+route_task, Local/Cloud tiers), Step 4 (+deadline calc) | `HospitalSimulator` — ties all departments + tiers together, runs the clock |
-| [task_generator.py](env/task_generator.py) | **Step 2** | — | `MedicalTaskGenerator` — Poisson-process arrivals per dept/priority |
-| [task_router.py](env/task_router.py) | **Step 3** | — | `TaskRouter` — fixed (non-AI) rule: compute_demand → Local/Edge/Cloud |
-| [cloud_node.py](env/cloud_node.py) | **Step 3** | — | `CloudNode` — shared hospital-wide node with network delay |
-| [metrics.py](env/metrics.py) | **Step 5** | — | `compute_baseline_metrics()` — turns a finished run into throughput/latency/deadline numbers |
+| [edge_node.py](env/edge_node.py) | **Step 1** | Post-Step-3 fix (utilization bug), V2 audit (destination-ready FCFS) | `EdgeNode` — one department's limited-capacity queue (ready-time FCFS) |
+| [hospital_env.py](env/hospital_env.py) | **Step 1** | Step 2 (+add_generated_arrivals), Step 3 (+route_task), Step 4 (+deadline calc), V2 audit (neighbour Edge, config validation) | `HospitalSimulator` — ties all departments + cloud together, runs the clock |
+| [task_generator.py](env/task_generator.py) | **Step 2** | V2 audit (seeded same-step shuffle, shared validation) | `MedicalTaskGenerator` — Poisson-process arrivals per dept/priority |
+| [task_router.py](env/task_router.py) | **Step 3** | V2 audit (neighbour Edge) | `TaskRouter` — fixed (non-AI) rule: demand → Cloud, else source backlog → Local / least-loaded neighbour Edge |
+| [cloud_node.py](env/cloud_node.py) | **Step 3** | V2 audit (delay stored per task) | `CloudNode` — shared hospital-wide node with network delay |
+| [metrics.py](env/metrics.py) | **Step 5** | V2 audit (rewritten) | `compute_metrics()` — latency, throughput, 4 deadline categories, tier/route breakdowns |
+| [evaluation.py](env/evaluation.py) | **Step 5 (V2 audit)** | — | Common window + drain evaluation protocol for every policy |
+| [run_records.py](env/run_records.py) | **Step 5 (V2 audit)** | — | Unique run folders, manifest with config snapshot and git/package provenance |
+| [config_validation.py](env/config_validation.py) | **Step 5 (V2 audit)** | — | Validates every config before a simulation is built |
 
 *(Step 4 added no new file — only edited `task.py` and `hospital_env.py` above.)*
 
@@ -38,7 +41,7 @@ step that later touched it.
 | File | Step | What it does |
 |---|---|---|
 | [demo_simulation.py](demo_simulation.py) | Steps 1-4 demo | Runs the full pipeline once with seed=42 and prints a readable summary |
-| [run_baseline_fcfs.py](run_baseline_fcfs.py) | **Step 5** | Runs the FCFS baseline experiment, saves metrics to `results/` |
+| [run_baseline_fcfs.py](run_baseline_fcfs.py) | **Step 5** | Runs the FCFS baseline (`--seed`, `--seeds 0-29`, `--config`), saves a run folder under `results/runs/` |
 
 ## `configs/environment.yaml` — one file, grew every step
 
@@ -48,6 +51,9 @@ step that later touched it.
 | `task_generation` | Step 2 |
 | `offloading` | Step 3 |
 | `deadlines` | Step 4 |
+| `evaluation` | Step 5 (V2 audit) |
+
+Stress scenarios live in `configs/scenarios/*.yaml`; each one `extends:` this file and overrides only what it tests (V2 audit).
 
 ## `tests/` folder — one test file per step (this pattern IS chronological)
 
@@ -58,6 +64,9 @@ step that later touched it.
 | [test_step3_routing.py](tests/test_step3_routing.py) | Step 3 |
 | [test_step4_deadlines.py](tests/test_step4_deadlines.py) | Step 4 |
 | [test_step5_fcfs_baseline.py](tests/test_step5_fcfs_baseline.py) | Step 5 |
+| [test_v2_routing_timing.py](tests/test_v2_routing_timing.py) | V2 audit (a) |
+| [test_v2_metrics_protocol.py](tests/test_v2_metrics_protocol.py) | V2 audit (b) |
+| [test_v2_validation_scenarios.py](tests/test_v2_validation_scenarios.py) | V2 audit (c) |
 
 ---
 
