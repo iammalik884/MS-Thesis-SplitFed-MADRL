@@ -158,10 +158,60 @@ outcome. Training success is judged by validation and test return and metrics
 relative to all baselines, including always-X and ECT, not by the action
 distribution alone.
 
-## 6. Preliminary DQN pilot
+## 6. Preliminary DQN pilot (done; preliminary, not a thesis result)
 
-Next, a pilot DQN is trained on the current environment, without changing the
-model. It exists to debug the training pipeline and see the learning dynamics.
-It uses one training seed and a small budget, and reports validation seeds
-only. Pilot numbers are preliminary. Thesis claims will be made only after the
-modelling decisions in Section 3 and the full protocol in Section 5.
+Run on the unchanged Step 6 environment with `train_dqn_pilot.py` (commit
+`5cea007`, clean tree). It used 1 training seed (0) and 40,000 decisions per
+scenario, with the untuned standard DQN settings in
+[agents/dqn.py](../agents/dqn.py) (γ = 0.99, Adam 5e-4, batch 64, replay
+50k, target copy every 1,000 updates, ε 1 → 0.05 over half the run). The best
+checkpoint was chosen on validation seeds 1,000–1,029, and all numbers below
+are on those seeds. Test seeds were not used. Run folders are in
+[results/pilot/](../results/pilot/). Re-running the same command reproduced
+every output file byte-for-byte.
+
+| Scenario | DQN best checkpoint | DQN at end of training | ECT | FCFS | always Cloud | always Local | random |
+|---|---|---|---|---|---|---|---|
+| Default | −20.4 | −22.2 | **−14.6** | **−14.6** | −48.5 | −22.0 | −33.0 |
+| Overload | −340.7 | −2082.5 | **−200.2** | −691.2 | −243.5 | −1616.2 | −450.8 |
+| Slow network | −478.3 | −819.2 | **−240.8** | −416.6 | −872.8 | −397.2 | −491.3 |
+
+Values are undiscounted validation return. The best-checkpoint action shares
+(Local/Edge/Cloud) were 0.89/0.10/0.01 (default), 0.36/0.10/0.54 (overload)
+and 0.39/0.33/0.28 (slow network).
+
+What the pilot shows:
+
+- The pipeline works and is reproducible: training, checkpoint selection on
+  validation seeds, learning curves, action shares, and the same evaluation
+  protocol for the DQN and all baselines.
+- **The pilot DQN beats no strong baseline.** It is worse than ECT and FCFS
+  in all three scenarios, except that in overload it beats FCFS and random
+  but not always-Cloud or ECT.
+- **Training is unstable in overload and slow network.** Validation return
+  peaks early and then gets worse as ε falls. In overload the training return
+  by fifth of the run is −508, −722, −1191, −1550, −1911, and the TD loss rises
+  from 3.9 to 8.5. The best overload model predicts Q ≈ +0.8 at the start
+  state, while true returns are hundreds of steps negative, so it has not
+  learned the value scale.
+
+Possible causes (hypotheses, not yet tested):
+
+- Unscaled, very uneven rewards and inputs. Under overload (validation seeds
+  1,000–1,009), 84% of steps give reward 0 and 1% are below about −43. The
+  lowest single-step reward was −507 (random) to −1,806 (always Local),
+  because drain completions and unfinished tasks are paid at the last step.
+  Observation features reach 44.
+- Delayed, shared credit (Section 4) combined with partial observability.
+- A feedback loop: worse decisions → longer queues → states never seen before.
+- The small, untuned budget.
+
+Next debugging steps, all to be chosen on validation seeds only:
+
+- reward and observation scaling;
+- a lower learning rate and longer training;
+- Double DQN or n-step targets;
+- comparing Q estimates with Monte Carlo returns.
+
+These are fixes to training, not modelling changes. No thesis claim should be
+made from this pilot.

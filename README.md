@@ -8,8 +8,10 @@ The code follows the 18-step practical roadmap (`My Research Practical ROADMAP.d
 Each step adds one new idea and is verified before the next step starts.
 
 **Current status: Steps 1–6 complete** (hospital simulator, FCFS baseline,
-Gymnasium environment). No agent has been trained yet. Steps 7–18 (DQN,
-MAPPO, SplitFed, privacy, robustness) have not been started.
+Gymnasium environment). **Step 7 has started:** the
+[design note](Step_Documentation/Step7_Design_Note.md) and a preliminary
+DQN pilot are done, and the pilot does not beat the strong baselines yet.
+Steps 8–18 (MAPPO, SplitFed, privacy, robustness) have not been started.
 
 > **Data note:** all workload numbers (arrival rates, compute demands,
 > deadlines) are **synthetic placeholders**, not MIMIC-IV statistics.
@@ -22,7 +24,7 @@ Requires Python ≥ 3.10 (tested with 3.14.6 on Windows 11).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest -q                      # 83 tests, all should pass
+python -m pytest -q                      # 93 tests, all should pass
 python demo_simulation.py                # one readable run (seed 42)
 python run_baseline_fcfs.py --seeds 0-29 # FCFS baseline, 30 seeds
 python run_baseline_fcfs.py --config configs/scenarios/overload.yaml --seeds 0-29
@@ -82,7 +84,11 @@ and removed pre-v2 keys raise clear errors).
       simulator, with the observation, action, reward and termination defined
       below. With the FCFS router's actions it reproduces the Step 5 baseline
       exactly.
-- [ ] Steps 7–18 — see the roadmap document. Next: Step 7, single-agent DQN.
+- [ ] **Step 7 — Baseline 2: single-agent DQN (in progress).** Design note
+      (cloud finding, baselines incl. the ECT heuristic, γ, seed/evaluation
+      plan) and a preliminary pilot are done; see below. Open: the modelling
+      decisions in the note (with the supervisor) and stable DQN training.
+- [ ] Steps 8–18 — see the roadmap document.
 
 The design was revised after an audit (commits `470a079`, `acdb3d4`,
 `83e7f3f`). The pre-audit version is preserved under the git tag
@@ -172,6 +178,28 @@ on its own. Possible modelling changes, the γ choice and the Step 7 protocol
 are in the [Step 7 design note](Step_Documentation/Step7_Design_Note.md). No
 change to the cloud or the reward has been made.
 
+## Step 7 (in progress): design note and DQN pilot
+
+[Step_Documentation/Step7_Design_Note.md](Step_Documentation/Step7_Design_Note.md) covers:
+
+- the scenario-specific cloud finding;
+- the baselines, including the proposed **ECT** heuristic
+  ([agents/heuristics.py](agents/heuristics.py)): smallest estimated completion
+  time, using only observation-level information;
+- possible modelling changes with units and sensitivity plans (**none applied**);
+- the choice of γ for per-task, completion-time rewards;
+- the Step 7 protocol: training seeds 10,000–19,999, validation 1,000–1,029,
+  test 2,000–2,029 (reserved), 5 training seeds, learning curves, action
+  proportions, and the same evaluation protocol for all policies.
+
+**Pilot, preliminary** (`python train_dqn_pilot.py --config <scenario>`, 1
+training seed, 40,000 decisions, validation return, runs in
+[results/pilot/](results/pilot/)). The best checkpoints scored −20.4 (default),
+−340.7 (overload) and −478.3 (slow network). ECT scored −14.6, −200.2 and
+−240.8 on the same seeds. Training was unstable in overload and slow network.
+Diagnosis and next debugging steps are in the note, Section 6. No thesis claim
+is made from the pilot.
+
 ## FCFS baseline results (seeds 0–29, mean)
 
 From [results/baselines/](results/baselines/), produced at commit `83e7f3f`
@@ -198,7 +226,7 @@ New runs go to `results/runs/` (git-ignored); a run folder is never overwritten.
 
 ## Verification
 
-83 automated tests (`python -m pytest -q`):
+93 automated tests (`python -m pytest -q`):
 
 | File | What it checks |
 |---|---|
@@ -210,6 +238,8 @@ New runs go to `results/runs/` (git-ignored); a run folder is never overwritten.
 | `test_v2_routing_timing.py` | neighbour routing, ready-time FCFS, latency decomposition, utilization |
 | `test_v2_metrics_protocol.py` | deadline categories, window/drain protocol, run records |
 | `test_v2_validation_scenarios.py` | config validation (30+ invalid cases), scenarios, roadmap Step 3 checkpoints, seeds 0–29 invariants |
+| `test_ect_heuristic.py` | ECT estimates by hand, exact on idle nodes, tie order, no future information |
+| `test_dqn_pilot.py` | replay buffer, no bootstrapping at episode end, ε schedule, reproducible training, shared evaluation = Step 5 FCFS |
 | `test_step6_gym_env.py` | Gymnasium `check_env`, roadmap Step 6 checkpoints, exact FCFS reproduction on 6 configs × seeds 0–29, reward bookkeeping, action meanings, determinism, empty episode, invalid usage |
 
 ## Folder structure
@@ -231,14 +261,20 @@ MS_Thesis_Project/
 │   ├── evaluation.py             # common window + drain evaluation protocol
 │   ├── run_records.py            # run folders, manifests, provenance
 │   └── gym_env.py                # Step 6: Gymnasium environment (HospitalSchedulingEnv)
-├── tests/                        # 83 tests (see Verification)
+├── agents/
+│   ├── heuristics.py             # Step 7: ECT heuristic baseline
+│   ├── policy_eval.py            # Step 7: one evaluation routine for all policies
+│   └── dqn.py                    # Step 7 pilot: DQN (replay buffer, target network)
+├── tests/                        # 93 tests (see Verification)
 ├── results/
 │   ├── baselines/                # committed FCFS v2 results
+│   ├── pilot/                    # Step 7 DQN pilot runs (preliminary)
 │   └── legacy/                   # pre-audit result, not comparable
 ├── Step_Documentation/           # per-step Word write-ups (Roman Urdu), see note below
 ├── demo_simulation.py            # one readable run with seed 42
 ├── run_baseline_fcfs.py          # FCFS baseline runner (--seed / --seeds / --config)
-├── check_simple_policies.py      # Step 6 sanity check with simple fixed policies
+├── check_simple_policies.py      # Step 6 sanity check with simple fixed policies (+ ECT)
+├── train_dqn_pilot.py            # Step 7 pilot: DQN training with seed splits
 └── requirements.txt
 ```
 
@@ -252,7 +288,8 @@ versions of the code in `env/`.
 - Workload and deadline values are placeholders, not MIMIC-IV derived.
 - Time is discrete (whole steps); network delays are fixed integers.
 - Offloading payload is a synthetic unit proportional to compute demand, not bytes.
-- No agent trained yet. FCFS routing ignores priority and deadlines by design.
+- Only a preliminary DQN pilot has been trained, and it does not beat ECT.
+  FCFS routing ignores priority and deadlines by design.
 - In the stressed scenarios the cloud almost never fills up and is free to use
   (see the Step 6 sanity check); this should be settled before Step 7 results
   are interpreted.
