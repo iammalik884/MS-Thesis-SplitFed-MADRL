@@ -187,7 +187,7 @@
     <!-- ============================= RESEARCH OVERVIEW ============================= -->
     <section id="roadmap">
       <h2 class="section-head">1. Where This Fits in the Whole Research</h2>
-      <p class="section-sub">Before looking at individual steps, here is the entire research plan grouped into three phases. This project is currently at the end of Phase A.</p>
+      <p class="section-sub">Before looking at individual steps, here is the entire research plan grouped into three phases. Steps 0–5 are complete; Step 6 is next.</p>
 
       <div class="roadmap">
         <div class="phase done">
@@ -205,11 +205,11 @@
         <div class="phase">
           <div class="phase-head">
             Phase B — Add Real Scheduling Rules
-            <span class="phase-status">Next</span>
+            <span class="phase-status">Steps 4–5 done · Step 6 next</span>
           </div>
           <div class="phase-steps">
-            <span class="chip">Step 4 · Priority + deadlines</span>
-            <span class="chip">Step 5 · FCFS baseline (for comparison)</span>
+            <span class="chip done">Step 4 · Priority + deadlines</span>
+            <span class="chip done">Step 5 · FCFS baseline (for comparison)</span>
             <span class="chip">Step 6 · RL-ready environment wrapper</span>
           </div>
         </div>
@@ -250,24 +250,21 @@
               <div class="cond">Emergency</div>
               <div class="stem"></div>
               <div class="dept-card" style="--acc:#2563eb;">
-                <div class="pill">Local<span class="filetag">edge_node.py</span></div>
-                <div class="pill">Edge<span class="filetag">edge_node.py</span></div>
+                <div class="pill">Edge node<span class="filetag">edge_node.py</span></div>
               </div>
             </div>
             <div class="branch">
               <div class="cond">ICU</div>
               <div class="stem"></div>
               <div class="dept-card" style="--acc:#2563eb;">
-                <div class="pill">Local<span class="filetag">edge_node.py</span></div>
-                <div class="pill">Edge<span class="filetag">edge_node.py</span></div>
+                <div class="pill">Edge node<span class="filetag">edge_node.py</span></div>
               </div>
             </div>
             <div class="branch">
               <div class="cond">General Ward</div>
               <div class="stem"></div>
               <div class="dept-card" style="--acc:#2563eb;">
-                <div class="pill">Local<span class="filetag">edge_node.py</span></div>
-                <div class="pill">Edge<span class="filetag">edge_node.py</span></div>
+                <div class="pill">Edge node<span class="filetag">edge_node.py</span></div>
               </div>
             </div>
             <div class="branch">
@@ -278,7 +275,7 @@
           </div>
         </div>
 
-        <p class="diagram-note">Every box (Local / Edge / Cloud) is its own small waiting-line with a fixed amount of work it can do per time-step — that rule was proven correct in Step 1 and reused everywhere. <code>task.py</code> defines the task object that flows through every box.</p>
+        <p class="diagram-note">Each department has <strong>one</strong> edge node. A task is <strong>Local</strong> when it runs on its own department's node, <strong>Edge</strong> when it is offloaded to a <em>neighbour</em> department's node (1 step network delay), and <strong>Cloud</strong> when it goes to the shared cloud (2 steps delay). Every node is a waiting-line with a fixed amount of work it can do per time-step — the rule proven in Step 1 and reused everywhere. <code>task.py</code> defines the task object that flows through every box.</p>
       </div>
 
       <div class="callout" style="--acc:#334155;">
@@ -321,7 +318,7 @@
 
       <div class="explain">
         <p>This step builds the foundation the rest of the project stands on. Three hospital departments — Emergency, ICU, and General Ward — are each modelled as an <strong>EdgeNode</strong>: a small computer with a fixed amount of processing power available per time-step. Tasks are added one at a time and wait in a first-in-first-out queue. On every tick of the simulation clock, a node works through its queue from the front, spending its capacity on whichever task is waiting; if a task needs more work than the remaining capacity allows, it is left partially finished and automatically continues from where it left off on the next step.</p>
-        <p>No intelligence or decision-making exists yet — the goal here is only to prove the basic bookkeeping is correct before anything more advanced is added on top. Five automated tests confirm that tasks are never lost, capacity is never exceeded, departments never interfere with one another, and invalid input is rejected with a clear error message.</p>
+        <p>No intelligence or decision-making exists yet — the goal here is only to prove the basic bookkeeping is correct before anything more advanced is added on top. Six automated tests confirm that tasks are never lost, capacity is never exceeded, departments never interfere with one another, and invalid input is rejected with a clear error message.</p>
 
         <table class="keyfiles">
           <tr><th>File</th><th>What it is responsible for</th></tr>
@@ -331,28 +328,34 @@
         </table>
 
         <div class="codeblock">
-          <div class="filebar">env/edge_node.py — the core per-step processing loop</div>
+          <div class="filebar">env/edge_node.py — the core per-step processing loop (current code)</div>
           <pre><code>def step(self, current_time: int) -&gt; None:
-    available_capacity = self.capacity
+    if current_time &lt; self.clock:
+        raise ValueError(
+            f"EdgeNode '{self.name}': step({current_time}) would move time backwards "
+            f"(node already ran up to step {self.clock - 1})"
+        )
+    available = self.capacity
     still_in_queue = []
-
     for task in self.queue:
-        if available_capacity &lt;= 0:
-            still_in_queue.append(task)   # no compute left, task simply waits
+        if task.ready_time &gt; current_time or available &lt;= CAPACITY_EPSILON:
+            still_in_queue.append(task)
             continue
-
-        work_done = min(available_capacity, task.remaining_demand)
+        work_done = min(available, task.remaining_demand)
+        if task.start_time is None:
+            task.start_time = current_time  # pehli baar CPU mila
         task.remaining_demand -= work_done
-        available_capacity -= work_done
-
+        available -= work_done
         if task.is_complete:
             task.completion_time = current_time
             self.completed_tasks.append(task)
         else:
-            still_in_queue.append(task)   # partially done, carries over
-
-    self.queue = still_in_queue</code></pre>
+            still_in_queue.append(task)
+    self.queue = still_in_queue
+    self.last_step_work_done = self.capacity - available
+    self.clock = current_time + 1</code></pre>
         </div>
+        <p>The <code>ready_time</code> check was added later (Step 3, V2): a task that is still travelling over the network to this node is skipped without using capacity. A department's own tasks are ready immediately (<code>ready_time = arrival_time</code>), so Step 1's behaviour is unchanged.</p>
       </div>
     </section>
 
@@ -396,7 +399,7 @@
 
       <div class="explain">
         <p>Step 1 required every task to be added by hand. Real hospitals do not work that way — patients and workloads arrive on their own, unpredictably, but around some average rate. This step introduces the <strong>MedicalTaskGenerator</strong>, which reproduces that behaviour using a Poisson process: a standard statistical model for "how many random events happen in a fixed interval." Each department and priority combination — for example, Critical cases in the ICU — runs its own independent Poisson process, because a Critical event in the ICU is naturally far more likely than the same event in the General Ward.</p>
-        <p>Whenever a task is generated, its workload is also drawn randomly, from a range that matches its priority level. Once created, the task is handed to the exact same simulator built in Step 1, so every queueing and capacity rule already proven continues to apply unchanged. The same random seed always reproduces the identical sequence of tasks, which matters for debugging and for defending results later. The specific arrival-rate numbers used right now are clinically-plausible placeholders, pending approved access to the MIMIC-IV clinical dataset — only those numbers will change later, not this code.</p>
+        <p>Whenever a task is generated, its workload is also drawn randomly, from a range that matches its priority level. Once created, the task is handed to the exact same simulator built in Step 1, so every queueing and capacity rule already proven continues to apply unchanged. The same random seed always reproduces the identical sequence of tasks, which matters for debugging and for defending results later. Arrivals that happen in the same step are put in a seeded random order, so no department is always served first. The specific arrival-rate numbers used right now are clinically-plausible placeholders, pending approved access to the MIMIC-IV clinical dataset — only those numbers will change later, not this code.</p>
 
         <table class="keyfiles">
           <tr><th>File</th><th>What it is responsible for</th></tr>
@@ -427,71 +430,74 @@ for _ in range(count):
       <h2>Local / Edge / Cloud Routing <span class="status-pill">Complete</span></h2>
 
       <div class="callout" style="--acc:var(--s3);">
-        <strong>In plain words:</strong> every task now also gets to pick <em>where</em> it runs — small jobs stay on-device, medium jobs go to the department computer, big jobs go to one shared, more powerful, but slower-to-reach computer.
+        <strong>In plain words:</strong> every task now also gets to pick <em>where</em> it runs — on its own department's computer, on a neighbouring department's computer, or on one shared, more powerful but slower-to-reach cloud computer.
       </div>
 
       <div class="diagram" style="--acc:#7c3aed;">
         <div class="flow-row">
-          <div class="node"><span class="tag">Input</span>New task<br>(compute_demand)</div>
+          <div class="node"><span class="tag">Input</span>New task<br>(source department, compute_demand)</div>
           <div class="arrow-h"><span class="label">route_task()</span><span class="shaft"></span></div>
-          <div class="node decision"><span class="tag">Fixed rule</span>TaskRouter<br>choose_tier()<br><em>(not AI yet)</em><span class="filetag">task_router.py</span></div>
+          <div class="node decision"><span class="tag">Fixed rule</span>TaskRouter<br>choose_destination()<br><em>(not AI yet)</em><span class="filetag">task_router.py</span></div>
         </div>
         <div class="down-connector"><div class="stem"></div></div>
         <div class="branches">
           <div class="branch">
-            <div class="cond">demand ≤ 1.5</div>
-            <div class="stem"></div>
-            <div class="node terminal">LOCAL<br><small style="font-weight:400;">on-device, zero delay, tiny capacity</small></div>
-          </div>
-          <div class="branch">
-            <div class="cond">1.5 &lt; demand ≤ 6.0</div>
-            <div class="stem"></div>
-            <div class="node terminal">EDGE<br><small style="font-weight:400;">department's own node — same as Step 1/2</small></div>
-          </div>
-          <div class="branch">
             <div class="cond">demand &gt; 6.0</div>
             <div class="stem"></div>
-            <div class="node terminal">CLOUD<br><small style="font-weight:400;">one shared node, big capacity</small><span class="filetag">cloud_node.py</span></div>
+            <div class="node terminal">CLOUD<br><small style="font-weight:400;">one shared node, capacity 50, 2-step delay</small><span class="filetag">cloud_node.py</span></div>
+          </div>
+          <div class="branch">
+            <div class="cond">otherwise, own backlog ≤ 3.0</div>
+            <div class="stem"></div>
+            <div class="node terminal">LOCAL<br><small style="font-weight:400;">the department's own edge node, no delay</small></div>
+          </div>
+          <div class="branch">
+            <div class="cond">otherwise (own node busy)</div>
+            <div class="stem"></div>
+            <div class="node terminal">EDGE<br><small style="font-weight:400;">least-loaded neighbour's node, 1-step delay</small></div>
           </div>
         </div>
-        <p class="diagram-note">All three tiers then process the task using the same proven FIFO + capacity mechanics from Step 1 — Cloud additionally makes the task wait <strong>network_delay</strong> (2) steps "in transit" before it may start.</p>
+        <p class="diagram-note">"Backlog" is the remaining work already assigned to a node, including tasks still in transit to it. Ties between neighbours are broken in a fixed order (Emergency → ICU → General Ward). Every node then processes its queue with Step 1's capacity rule; a task in transit waits until its <strong>ready_time</strong> and does not block other tasks.</p>
       </div>
 
       <div class="explain">
-        <p>Every task now faces a choice of <em>where</em> it gets executed, not just <em>when</em>. The <strong>TaskRouter</strong> looks only at a task's compute_demand and, using two configured thresholds, sends it to one of three tiers: <strong>Local</strong> (a tiny on-device resource — instant, but very limited capacity), <strong>Edge</strong> (the department's own node, unchanged from Steps 1 and 2), or <strong>Cloud</strong> (one powerful resource shared by the entire hospital, reached only after a configurable network delay). This mirrors the real "offloading" trade-off found in edge-computing systems: keep work close and fast, or send it somewhere more powerful but slower to reach.</p>
-        <p>It is important to be explicit that this routing rule is <strong>fixed and hand-written, not learned</strong>. Its only job is to prove that the three-tier queueing, capacity, and network-delay mechanics behave correctly before any intelligence is introduced. From Step 7 onward, a reinforcement-learning agent will occupy this exact decision point and learn to route tasks more effectively than this simple rule. Just as importantly, the original Step 1/2 behaviour was left completely untouched — <code>add_task()</code> still always goes straight to the Edge node — so nothing earlier in the project could break by adding this feature.</p>
+        <p>Every task now faces a choice of <em>where</em> it gets executed, not just <em>when</em>. The <strong>TaskRouter</strong> applies a fixed rule: very large tasks go to the <strong>Cloud</strong> (one powerful server shared by the whole hospital, reached after a 2-step network delay); otherwise the task stays <strong>Local</strong> on its own department's node if that node is not too busy; if it is busy, the task is offloaded to the <strong>Edge</strong> — the least-loaded <em>neighbouring</em> department's node, which it reaches after a 1-step delay. Offloaded work really uses the neighbour's queue and capacity, so one department's decision affects another department — the situation the later multi-agent learning is about.</p>
+        <p>It is important to be explicit that this routing rule is <strong>fixed and hand-written, not learned</strong>, and it ignores priority on purpose: it is the FCFS baseline. From Step 7 onward, a reinforcement-learning agent will occupy this exact decision point and learn to route tasks more effectively. The direct <code>add_task()</code> method from Steps 1–2 never asks the router; it always keeps the task on its own department's node (labelled Local).</p>
+        <p><em>Revision note:</em> an earlier version used a separate tiny "on-device" Local node and routed only by task size. It was replaced after an audit (October 2026) by the neighbour-edge model above; the old version is kept under the git tag <code>v0.5-pre-audit-fixes</code>.</p>
 
         <table class="keyfiles">
           <tr><th>File</th><th>What it is responsible for</th></tr>
-          <tr><td><code>env/task_router.py</code></td><td><code>TaskRouter</code> — the fixed Local/Edge/Cloud decision rule (two threshold numbers, nothing more).</td></tr>
-          <tr><td><code>env/cloud_node.py</code></td><td><code>CloudNode</code> — same processing loop as Step 1's EdgeNode, plus the network-delay wait.</td></tr>
-          <tr><td><code>env/hospital_env.py</code></td><td><code>route_task()</code> / <code>route_generated_arrivals()</code> — asks the router for a tier, then hands the task to the matching node.</td></tr>
-          <tr><td><code>configs/environment.yaml</code></td><td><code>offloading</code> section — Local/Cloud capacities, thresholds, and the network delay.</td></tr>
+          <tr><td><code>env/task_router.py</code></td><td><code>TaskRouter</code> — the fixed Local / Edge / Cloud rule, using the current backlogs.</td></tr>
+          <tr><td><code>env/edge_node.py</code></td><td>Sets each task's <code>ready_time</code> (arrival + network delay) and serves ready tasks in order.</td></tr>
+          <tr><td><code>env/cloud_node.py</code></td><td><code>CloudNode</code> — an EdgeNode whose default delay is the cloud network delay.</td></tr>
+          <tr><td><code>env/hospital_env.py</code></td><td><code>route_task()</code> / <code>route_generated_arrivals()</code> — passes current backlogs to the router, then places the task on the chosen node with the right delay.</td></tr>
+          <tr><td><code>configs/environment.yaml</code></td><td><code>offloading</code> section — cloud capacity, cloud and neighbour delays, the two thresholds, and the tie-break order.</td></tr>
         </table>
 
         <div class="codeblock">
-          <div class="filebar">env/task_router.py — the fixed routing rule</div>
-          <pre><code>def choose_tier(self, compute_demand: float) -&gt; str:
-    if compute_demand &lt;= self.local_threshold:
-        tier = "Local"
-    elif compute_demand &lt;= self.edge_threshold:
-        tier = "Edge"
-    else:
-        tier = "Cloud"
-    return tier</code></pre>
-        </div>
-
-        <div class="codeblock">
-          <div class="filebar">env/cloud_node.py — the network-delay gate</div>
-          <pre><code>still_in_transit = (current_time - task.arrival_time) &lt; self.network_delay
-if still_in_transit or available_capacity &lt;= 0:
-    still_in_queue.append(task)   # not reachable yet, or no cloud capacity left
-    continue</code></pre>
+          <div class="filebar">env/task_router.py — the fixed routing rule (current code)</div>
+          <pre><code>def choose_destination(
+    self, source: str, compute_demand: float, backlogs: Mapping[str, float]
+) -&gt; Tuple[str, str]:
+    if source not in self._rank:
+        raise ValueError(f"TaskRouter: unknown source department {source!r}")
+    if not is_finite_number(compute_demand) or compute_demand &lt;= 0:
+        raise ValueError(
+            f"TaskRouter.choose_destination: compute_demand must be a finite number &gt; 0, "
+            f"got {compute_demand!r}"
+        )
+    if compute_demand &gt; self.cloud_threshold:
+        return "Cloud", CLOUD_NODE_NAME
+    if backlogs[source] &lt;= self.offload_threshold:
+        return "Local", source
+    neighbours = [d for d in self.neighbour_order if d != source]
+    destination = min(neighbours, key=lambda d: (backlogs[d], self._rank[d]))
+    return "Edge", destination</code></pre>
         </div>
       </div>
     </section>
 
-    <p class="closing-note">Next up: Step 4 — adding priority and deadlines, so Critical tasks are expected to finish faster than Routine ones.</p>
+    <p class="closing-note">Steps 4 (priority deadlines) and 5 (FCFS baseline, evaluation protocol and results) are described in <code>README.md</code> and <code>Step_Documentation/</code>. Next up: Step 6 — wrapping the simulator as a Gymnasium environment so a learning agent can make the Local / Edge / Cloud decision.</p>
 
   </div>
 </div>

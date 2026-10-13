@@ -168,16 +168,16 @@ MS_Thesis_Project/
 ├── results/
 │   ├── baselines/                # committed FCFS v2 results
 │   └── legacy/                   # pre-audit result, not comparable
-├── Step_Documentation/           # per-step Word write-ups (see note below)
+├── Step_Documentation/           # per-step Word write-ups (Roman Urdu), see note below
 ├── demo_simulation.py            # one readable run with seed 42
 ├── run_baseline_fcfs.py          # FCFS baseline runner (--seed / --seeds / --config)
 └── requirements.txt
 ```
 
-**Note on `Step_Documentation/`:** these write-ups were made before the
-audit revision. Where they differ from this README (mainly Step 3's tier
-definitions and Step 5's metric and output-file names), this README and the
-code are current.
+**Note on `Step_Documentation/`:** the Step 3 and Step 5 write-ups were
+rewritten for the current (v2) design. Steps 1, 2 and 4 start with a
+"V2 UPDATE" box listing what changed; their code listings are simplified
+versions of the code in `env/`.
 
 ## Known limitations
 
