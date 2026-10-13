@@ -176,3 +176,38 @@ it helps explain why the value of congested states is learned so poorly.
 
 The same pre-registered score and rules would apply. The environment, the
 reward definition and the cloud capacity stay unchanged.
+
+## Round 2 and Step 7 close-out — plan (committed before these runs)
+
+Base for Round 2 = the Round 1 choice: `reward_scale = 0.01`, `γ = 0.95`.
+Everything else is fixed as in Round 1: 3 scenarios, training seeds 0 and 1,
+validation seeds only, environment / reward / cloud unchanged.
+
+| Exp. | Single change from the base | Compared with |
+|---|---|---|
+| R2a `DDQN` | `double_dqn = 1` (Double DQN target, van Hasselt et al. 2016) | G095 (Round 1) |
+| R2b `LONG` | 120,000 instead of 40,000 decisions, applied to the better of G095 / DDQN by the score | that setting at 40,000 |
+
+**Stable** (defined now, before the runs) means both of these hold for a setting:
+
+- its final-checkpoint score is ≥ 0 (not worse than random) in all 6 runs;
+- its mean best → final drop is ≤ 0.25.
+
+**Frozen Step 7 configuration.** The tested setting with the highest mean
+final-checkpoint score, over all settings of Round 1 and Round 2.
+
+**Close-out protocol.** It runs once, whether or not the frozen setting is
+stable, so that Step 7 ends with an honest DQN baseline instead of a tuned
+"winner":
+
+- Train the frozen setting with training seeds 0–4 on each of the 3 scenarios.
+- The checkpoint is chosen on the validation seeds (best validation return); the
+  final checkpoint is reported too.
+- Evaluate once on the **test seeds 2,000–2,029**: the DQN (5 training seeds)
+  and every baseline (FCFS, always Local / Edge / Cloud, random, ECT).
+- Report the mean ± 95% CI over the 5 training seeds (t-distribution, 4 degrees
+  of freedom); per-seed results; full reports incl. offloading communication;
+  action shares; learning curves.
+- If the setting is not stable, Step 7 says so explicitly. The result is then
+  "DQN as the single-agent baseline in this environment", not a claim that DQN
+  works well. No further tuning is done after the test seeds have been used.

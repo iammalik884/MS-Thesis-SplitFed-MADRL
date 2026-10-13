@@ -9,6 +9,7 @@ results/runs/<group>/<experiment>/...
 ENGLISH: e.g.
   py run_dqn_experiments.py --group phase1 --exp E0= --exp E1=reward_scale=0.1 --seeds 0 1
   py run_dqn_experiments.py --group phase2 --base reward_scale=0.01 --exp G095=gamma=0.95
+  py run_dqn_experiments.py --group round2 --base reward_scale=0.01 --base gamma=0.95 --exp DDQN=double_dqn=1
 """
 
 import argparse
@@ -29,10 +30,11 @@ def main(argv=None):
     parser.add_argument("--group", required=True)
     parser.add_argument("--exp", action="append", required=True,
                         help="NAME=OVERRIDE (one KEY=VALUE, or empty for the reference)")
-    parser.add_argument("--base", default="",
+    parser.add_argument("--base", action="append", default=[],
                         help="KEY=VALUE applied to EVERY experiment of the group (the reference chosen in an "
                              "earlier phase); each --exp then changes one more field")
     parser.add_argument("--seeds", type=int, nargs="+", default=[0, 1])
+    parser.add_argument("--total-steps", type=int, default=40_000)
     parser.add_argument("--scenarios", nargs="+", default=list(SCENARIOS))
     parser.add_argument("--workers", type=int, default=2,
                         help="parallel runs; each needs ~300 MB RAM (10 at once ran out of memory on this PC)")
@@ -52,9 +54,9 @@ def main(argv=None):
                     continue
                 cmd = [sys.executable, os.path.join(ROOT, "train_dqn_pilot.py"), "--config", SCENARIOS[scenario],
                        "--train-seed", str(seed), "--name", f"{name}_{scenario}_seed{seed}",
-                       "--out-dir", out_dir]
-                if args.base:
-                    cmd += ["--set", args.base]
+                       "--out-dir", out_dir, "--total-steps", str(args.total_steps)]
+                for base in args.base:
+                    cmd += ["--set", base]
                 if override:
                     cmd += ["--set", override]
                 jobs.append((f"{name}/{scenario}/seed{seed}", cmd))

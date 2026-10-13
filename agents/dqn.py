@@ -39,6 +39,7 @@ class DQNConfig:
     # Debugging knobs (Step 7, one at a time; 1.0 = pilot behaviour):
     reward_scale: float = 1.0   # POSITIVE constant applied to rewards used for training (no clipping)
     obs_scale: float = 1.0      # factor on the unbounded observation features before the network
+    double_dqn: bool = False    # Double DQN target (van Hasselt et al. 2016): online net picks a', target net values it
 
     def __post_init__(self):
         for name in ("reward_scale", "obs_scale", "learning_rate"):
@@ -134,10 +135,16 @@ class DQNAgent:
         return self.greedy_action(obs)
 
     def td_targets(self, rewards, next_obs, terminated):
-        """r + gamma * (1 - terminated) * max_a' Q_target(s', a'); no bootstrap at the end."""
+        """r + gamma * (1 - terminated) * Q_target(s', a'); no bootstrap at the end.
+        DQN: a' = argmax Q_target(s', .). Double DQN: a' = argmax Q_online(s', .)."""
         with torch.no_grad():
-            next_max = self.q_target(self.net_input(next_obs)).max(dim=1).values
-        return rewards + self.config.gamma * (1.0 - terminated) * next_max
+            x = self.net_input(next_obs)
+            if self.config.double_dqn:
+                next_actions = self.q(x).argmax(dim=1, keepdim=True)
+                next_value = self.q_target(x).gather(1, next_actions).squeeze(1)
+            else:
+                next_value = self.q_target(x).max(dim=1).values
+        return rewards + self.config.gamma * (1.0 - terminated) * next_value
 
     def update(self) -> float:
         obs, actions, rewards, next_obs, terminated = self.buffer.sample(self.config.batch_size)

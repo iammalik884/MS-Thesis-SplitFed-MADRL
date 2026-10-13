@@ -121,7 +121,13 @@ def main(argv=None):
         key, _, value = item.partition("=")
         if key not in fields:
             raise SystemExit(f"--set: unknown DQNConfig field {key!r}; known: {sorted(fields)}")
-        overrides[key] = (int if fields[key] in (int, "int") else float)(value)
+        kind = fields[key]
+        if kind in (bool, "bool"):
+            if value not in ("0", "1", "true", "false"):
+                raise SystemExit(f"--set {key}: use 1/0 or true/false, got {value!r}")
+            overrides[key] = value in ("1", "true")
+        else:
+            overrides[key] = (int if kind in (int, "int") else float)(value)
     dqn_config = DQNConfig(**overrides)
     scenario = os.path.splitext(os.path.basename(args.config))[0]
     name = args.name or f"dqn_pilot_{scenario}_trainseed{args.train_seed}"

@@ -48,6 +48,21 @@ def test_td_target_does_not_bootstrap_at_episode_end():
     print("[PASS] test_td_target_does_not_bootstrap_at_episode_end")
 
 
+def test_double_dqn_target_uses_online_argmax_and_target_value():
+    """Double DQN: a' = argmax of the ONLINE net, valued by the TARGET net."""
+    agent = DQNAgent(obs_dim=2, n_actions=3, config=DQNConfig(gamma=0.9, double_dqn=True), seed=0)
+    with torch.no_grad():
+        for p in agent.q_target.parameters():
+            p.add_(0.5 * torch.randn_like(p))  # make the two nets differ
+    next_obs = torch.tensor([[0.3, -1.0], [2.0, 0.5]])
+    with torch.no_grad():
+        a_online = agent.q(next_obs).argmax(dim=1, keepdim=True)
+        expected = -1.0 + 0.9 * agent.q_target(next_obs).gather(1, a_online).squeeze(1)
+    targets = agent.td_targets(torch.tensor([-1.0, -1.0]), next_obs, torch.tensor([0.0, 0.0]))
+    assert torch.allclose(targets, expected)
+    print("[PASS] test_double_dqn_target_uses_online_argmax_and_target_value")
+
+
 def test_epsilon_schedule_and_greedy_action():
     agent = DQNAgent(obs_dim=2, n_actions=3, config=DQNConfig(epsilon_decay_fraction=0.5), seed=0)
     assert agent.epsilon(0, 100) == 1.0 and abs(agent.epsilon(25, 100) - 0.525) < 1e-12
