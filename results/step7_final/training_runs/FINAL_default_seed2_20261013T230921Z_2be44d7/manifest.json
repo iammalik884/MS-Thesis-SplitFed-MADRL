@@ -1,0 +1,174 @@
+{
+  "method": "DQN (Step 7 training script; evaluation here on validation seeds only)",
+  "config_path": "configs\\environment.yaml",
+  "config_snapshot": {
+    "seed": 42,
+    "simulation": {
+      "n_steps": 20
+    },
+    "departments": [
+      {
+        "name": "Emergency",
+        "capacity": 5.0
+      },
+      {
+        "name": "ICU",
+        "capacity": 4.0
+      },
+      {
+        "name": "General_Ward",
+        "capacity": 3.0
+      }
+    ],
+    "task_generation": {
+      "departments": {
+        "Emergency": {
+          "Critical": {
+            "arrival_rate": 0.1,
+            "compute_demand_range": [
+              1.0,
+              2.5
+            ]
+          },
+          "High": {
+            "arrival_rate": 0.2,
+            "compute_demand_range": [
+              1.5,
+              3.5
+            ]
+          },
+          "Routine": {
+            "arrival_rate": 0.15,
+            "compute_demand_range": [
+              2.0,
+              8.0
+            ]
+          }
+        },
+        "ICU": {
+          "Critical": {
+            "arrival_rate": 0.15,
+            "compute_demand_range": [
+              1.0,
+              2.5
+            ]
+          },
+          "High": {
+            "arrival_rate": 0.15,
+            "compute_demand_range": [
+              1.5,
+              3.5
+            ]
+          },
+          "Routine": {
+            "arrival_rate": 0.1,
+            "compute_demand_range": [
+              2.0,
+              8.0
+            ]
+          }
+        },
+        "General_Ward": {
+          "Critical": {
+            "arrival_rate": 0.03,
+            "compute_demand_range": [
+              1.0,
+              2.5
+            ]
+          },
+          "High": {
+            "arrival_rate": 0.1,
+            "compute_demand_range": [
+              1.5,
+              3.5
+            ]
+          },
+          "Routine": {
+            "arrival_rate": 0.25,
+            "compute_demand_range": [
+              2.0,
+              8.0
+            ]
+          }
+        }
+      }
+    },
+    "offloading": {
+      "cloud_capacity": 50.0,
+      "cloud_network_delay": 2,
+      "neighbour_network_delay": 1,
+      "cloud_threshold": 6.0,
+      "offload_threshold": 3.0,
+      "neighbour_tie_break_order": [
+        "Emergency",
+        "ICU",
+        "General_Ward"
+      ]
+    },
+    "deadlines": {
+      "Critical": 2,
+      "High": 5,
+      "Routine": 10
+    },
+    "evaluation": {
+      "drain_limit": 50,
+      "synthetic_payload_units_per_compute_unit": 1.0
+    },
+    "rl_environment": {
+      "deadline_miss_penalty": 10.0
+    }
+  },
+  "dqn_config": {
+    "gamma": 0.95,
+    "learning_rate": 0.0005,
+    "batch_size": 64,
+    "buffer_size": 50000,
+    "learning_starts": 1000,
+    "target_update_every": 1000,
+    "hidden_size": 128,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "epsilon_decay_fraction": 0.5,
+    "max_grad_norm": 10.0,
+    "reward_scale": 0.01,
+    "obs_scale": 1.0,
+    "double_dqn": true
+  },
+  "dqn_overrides": {
+    "reward_scale": 0.01,
+    "gamma": 0.95,
+    "double_dqn": true
+  },
+  "train_seed": 2,
+  "total_steps": 40000,
+  "eval_every": 4000,
+  "training_workload_seed_range": [
+    10000,
+    19999
+  ],
+  "validation_seeds": [
+    1000,
+    1029
+  ],
+  "test_seeds_reserved_unused": [
+    2000,
+    2029
+  ],
+  "provenance": {
+    "git_commit": "2be44d7e8adb6d58d1b9ebc66480b3c9f30fb3da",
+    "git_branch": "main",
+    "git_dirty": false,
+    "dirty_tracked_files": [],
+    "python_executable": "C:\\Users\\USr\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+    "python_version": "3.14.6",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "numpy": "2.5.3",
+      "PyYAML": "6.0.3",
+      "pytest": "9.1.1",
+      "gymnasium": "1.4.0",
+      "torch": "2.14.1+cpu"
+    },
+    "created_utc": "2026-10-13T23:09:21Z"
+  }
+}
