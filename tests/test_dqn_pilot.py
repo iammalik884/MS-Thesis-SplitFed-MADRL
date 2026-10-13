@@ -84,6 +84,46 @@ def test_evaluate_matches_step5_fcfs():
     print("[PASS] test_evaluate_matches_step5_fcfs")
 
 
+def test_scaling_knobs_are_validated_and_applied_only_where_intended():
+    """reward_scale / obs_scale must be positive constants (no clipping, no zero);
+    obs_scale touches only the masked (unbounded) features."""
+    for bad in ({"reward_scale": 0.0}, {"reward_scale": -0.1}, {"obs_scale": float("inf")}, {"gamma": 1.5}):
+        try:
+            DQNConfig(**bad)
+            raise AssertionError(f"Expected ValueError for {bad}")
+        except ValueError:
+            pass
+    agent = DQNAgent(obs_dim=3, n_actions=3, config=DQNConfig(obs_scale=0.1), seed=0,
+                     unbounded_mask=[True, False, True])
+    out = agent.net_input(torch.tensor([[10.0, 1.0, 20.0]]))
+    assert torch.allclose(out, torch.tensor([[1.0, 1.0, 2.0]]))
+    plain = DQNAgent(obs_dim=3, n_actions=3, config=DQNConfig(), seed=0, unbounded_mask=[True, False, True])
+    x = torch.tensor([[10.0, 1.0, 20.0]])
+    assert plain.net_input(x) is x, "obs_scale 1.0 leaves the input untouched (pilot behaviour)"
+    print("[PASS] test_scaling_knobs_are_validated_and_applied_only_where_intended")
+
+
+def test_q_vs_monte_carlo_uses_the_training_gamma_and_reward_scale():
+    """Recompute the discounted MC return of the first decision by hand for one
+    seed and compare; also check the unscaled values are divided by the scale."""
+    from agents.policy_eval import q_vs_monte_carlo
+    from env.gym_env import HospitalSchedulingEnv
+    agent = DQNAgent(obs_dim=13, n_actions=3, config=DQNConfig(gamma=0.9, reward_scale=0.5), seed=0,
+                     unbounded_mask=[True] * 5 + [False] * 8)
+    result = q_vs_monte_carlo(CONFIG_PATH, agent, [42])
+    env = HospitalSchedulingEnv(CONFIG_PATH)
+    obs, _ = env.reset(seed=42)
+    rewards, done = [], False
+    while not done:
+        obs, r, done, _, _ = env.step(agent.greedy_action(obs))
+        rewards.append(r)
+    g0 = sum(0.9 ** k * 0.5 * r for k, r in enumerate(rewards))
+    assert abs(result["first_decision"]["mean_mc_return"] - g0) < 1e-9
+    assert result["decisions"] == len(rewards)
+    assert abs(result["unscaled"]["mean_mc_return"] - result["mean_mc_return"] / 0.5) < 1e-9
+    print("[PASS] test_q_vs_monte_carlo_uses_the_training_gamma_and_reward_scale")
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_") and callable(fn):

@@ -36,6 +36,17 @@ class DQNConfig:
     epsilon_end: float = 0.05
     epsilon_decay_fraction: float = 0.5  # of total training steps
     max_grad_norm: float = 10.0
+    # Debugging knobs (Step 7, one at a time; 1.0 = pilot behaviour):
+    reward_scale: float = 1.0   # POSITIVE constant applied to rewards used for training (no clipping)
+    obs_scale: float = 1.0      # factor on the unbounded observation features before the network
+
+    def __post_init__(self):
+        for name in ("reward_scale", "obs_scale", "learning_rate"):
+            value = getattr(self, name)
+            if not (isinstance(value, float) and np.isfinite(value) and value > 0):
+                raise ValueError(f"DQNConfig.{name} must be a finite float > 0, got {value!r}")
+        if not (0.0 <= self.gamma <= 1.0):
+            raise ValueError(f"DQNConfig.gamma must be in [0, 1], got {self.gamma!r}")
 
     def to_dict(self):
         return asdict(self)
@@ -81,8 +92,13 @@ class ReplayBuffer:
 
 
 class DQNAgent:
-    def __init__(self, obs_dim: int, n_actions: int, config: DQNConfig, seed: int):
+    def __init__(self, obs_dim: int, n_actions: int, config: DQNConfig, seed: int, unbounded_mask=None):
         self.config, self.n_actions = config, n_actions
+        # Which observation features obs_scale applies to (the env's unbounded ones).
+        mask = np.zeros(obs_dim, dtype=bool) if unbounded_mask is None else np.asarray(unbounded_mask, dtype=bool)
+        self._obs_factor = torch.ones(obs_dim)
+        self._obs_factor[torch.from_numpy(mask)] = config.obs_scale
+        self._scale_obs = config.obs_scale != 1.0
         torch.manual_seed(seed)
         self.rng = np.random.default_rng(seed)
         self.q = QNetwork(obs_dim, n_actions, config.hidden_size)
@@ -99,9 +115,17 @@ class DQNAgent:
             return c.epsilon_end
         return c.epsilon_start + (step / decay_steps) * (c.epsilon_end - c.epsilon_start)
 
+    def net_input(self, obs: torch.Tensor) -> torch.Tensor:
+        """Observation as fed to the network (obs_scale on unbounded features)."""
+        return obs * self._obs_factor if self._scale_obs else obs
+
+    def q_values(self, obs) -> torch.Tensor:
+        with torch.no_grad():
+            return self.q(self.net_input(torch.as_tensor(obs, dtype=torch.float32).unsqueeze(0)))[0]
+
     def greedy_action(self, obs) -> int:
         with torch.no_grad():
-            q = self.q(torch.as_tensor(obs, dtype=torch.float32).unsqueeze(0))
+            q = self.q(self.net_input(torch.as_tensor(obs, dtype=torch.float32).unsqueeze(0)))
         return int(torch.argmax(q, dim=1).item())  # ties -> lowest index (Local, Edge, Cloud)
 
     def act(self, obs, epsilon: float) -> int:
@@ -112,13 +136,13 @@ class DQNAgent:
     def td_targets(self, rewards, next_obs, terminated):
         """r + gamma * (1 - terminated) * max_a' Q_target(s', a'); no bootstrap at the end."""
         with torch.no_grad():
-            next_max = self.q_target(next_obs).max(dim=1).values
+            next_max = self.q_target(self.net_input(next_obs)).max(dim=1).values
         return rewards + self.config.gamma * (1.0 - terminated) * next_max
 
     def update(self) -> float:
         obs, actions, rewards, next_obs, terminated = self.buffer.sample(self.config.batch_size)
         targets = self.td_targets(rewards, next_obs, terminated)
-        q_taken = self.q(obs).gather(1, actions.unsqueeze(1)).squeeze(1)
+        q_taken = self.q(self.net_input(obs)).gather(1, actions.unsqueeze(1)).squeeze(1)
         loss = nn.functional.smooth_l1_loss(q_taken, targets)
         self.optimizer.zero_grad()
         loss.backward()

@@ -15,11 +15,13 @@ saare baselines (FCFS, always Local/Edge/Cloud, random, ECT) same validation
 seeds par.
 
 Run:  py train_dqn_pilot.py --config configs/scenarios/overload.yaml --train-seed 0 --total-steps 40000
+      [--set reward_scale=0.01]   (one DQNConfig override per experiment)
 Output: results/runs/<name>_<UTC time>_<commit>/ (git-ignored)
 """
 
 import argparse
 import csv
+import dataclasses
 import json
 import os
 import time
@@ -28,7 +30,7 @@ import numpy as np
 import torch
 
 from agents.dqn import DQNAgent, DQNConfig
-from agents.policy_eval import baseline_policies, evaluate
+from agents.policy_eval import baseline_policies, evaluate, q_vs_monte_carlo
 from env.gym_env import HospitalSchedulingEnv
 from env.hospital_env import load_config
 from env.run_records import collect_provenance, unique_run_dir, write_json
@@ -41,7 +43,8 @@ TEST_SEEDS = range(2_000, 2_030)  # reserved for final Step 7 results; never use
 
 def train(config_path, train_seed, total_steps, eval_every, dqn_config, log=print):
     env = HospitalSchedulingEnv(config_path)
-    agent = DQNAgent(env.observation_space.shape[0], env.action_space.n, dqn_config, seed=train_seed)
+    agent = DQNAgent(env.observation_space.shape[0], env.action_space.n, dqn_config, seed=train_seed,
+                     unbounded_mask=np.isinf(env.observation_space.high))
     workload_rng = np.random.default_rng([train_seed, 7])  # separate stream for training workload seeds
     learning_curve, validation_curve = [], []
     best = {"mean_return": -np.inf, "state_dict": None, "step": None}
@@ -72,7 +75,9 @@ def train(config_path, train_seed, total_steps, eval_every, dqn_config, log=prin
             epsilon = agent.epsilon(step, total_steps)
             action = agent.act(obs, epsilon)
             next_obs, reward, terminated, truncated, info = env.step(action)
-            agent.buffer.add(obs, action, reward, next_obs, terminated)
+            # Only the TRAINING signal is scaled (positive constant, no clipping);
+            # all reported returns/metrics stay in original units.
+            agent.buffer.add(obs, action, reward * dqn_config.reward_scale, next_obs, terminated)
             obs, episode_return, step = next_obs, episode_return + reward, step + 1
             if step >= dqn_config.learning_starts:
                 losses.append(agent.update())
@@ -92,7 +97,7 @@ def _write_csv(path, rows):
     if not rows:
         return
     with open(path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(f, fieldnames=list(rows[0]), extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -105,10 +110,19 @@ def main(argv=None):
     parser.add_argument("--eval-every", type=int, default=4_000)
     parser.add_argument("--out-dir", default=os.path.join(ROOT, "results", "runs"))
     parser.add_argument("--name", default=None)
+    parser.add_argument("--set", action="append", default=[], metavar="KEY=VALUE",
+                        help="override one DQNConfig field, e.g. --set reward_scale=0.01")
     args = parser.parse_args(argv)
 
     torch.set_num_threads(1)  # deterministic, and the network is small
-    dqn_config = DQNConfig()
+    fields = {f.name: f.type for f in dataclasses.fields(DQNConfig)}
+    overrides = {}
+    for item in args.set:
+        key, _, value = item.partition("=")
+        if key not in fields:
+            raise SystemExit(f"--set: unknown DQNConfig field {key!r}; known: {sorted(fields)}")
+        overrides[key] = (int if fields[key] in (int, "int") else float)(value)
+    dqn_config = DQNConfig(**overrides)
     scenario = os.path.splitext(os.path.basename(args.config))[0]
     name = args.name or f"dqn_pilot_{scenario}_trainseed{args.train_seed}"
     print(f"PILOT DQN [{scenario}] train seed {args.train_seed}, {args.total_steps} steps (decisions)")
@@ -116,21 +130,37 @@ def main(argv=None):
     agent, learning_curve, validation_curve, best = train(
         args.config, args.train_seed, args.total_steps, args.eval_every, dqn_config)
 
-    print("Baselines on the same validation seeds:")
+    final_state = {k: v.clone() for k, v in agent.q.state_dict().items()}
+    dqn_eval = {}
+    for label, state in (("dqn_best", best["state_dict"]), ("dqn_final", final_state)):
+        agent.q.load_state_dict(state)
+        dqn_eval[label] = {
+            "evaluation": evaluate(args.config, lambda e, obs: agent.greedy_action(obs), VALIDATION_SEEDS,
+                                   keep_reports=True),
+            "q_vs_mc": q_vs_monte_carlo(args.config, agent, VALIDATION_SEEDS),
+        }
+    agent.q.load_state_dict(final_state)
+
+    print("Validation seeds 1000-1029 (undiscounted return):")
     baselines = {}
     for bname, policy in baseline_policies(random_seed=args.train_seed).items():
-        baselines[bname] = evaluate(args.config, policy, VALIDATION_SEEDS)
-        print(f"  {bname:13s} return {baselines[bname]['mean_return']:9.1f}")
-    print(f"Best DQN checkpoint: step {best['step']}, validation return {best['mean_return']:.1f} "
-          f"({time.time() - start:.0f} s)")
+        baselines[bname] = evaluate(args.config, policy, VALIDATION_SEEDS, keep_reports=True)
+    for policy_name, result in [(k, v["evaluation"]) for k, v in dqn_eval.items()] + list(baselines.items()):
+        print(f"  {policy_name:13s} return {result['mean_return']:9.1f}")
+    for label in ("dqn_best", "dqn_final"):
+        qm = dqn_eval[label]["q_vs_mc"]["unscaled"]
+        print(f"  {label} Q vs MC (unscaled): mean Q {qm['mean_q']:.1f}, mean MC return {qm['mean_mc_return']:.1f}, "
+              f"bias {qm['mean_bias']:.1f}, RMSE {qm['rmse']:.1f}")
+    print(f"Best DQN checkpoint: step {best['step']} ({time.time() - start:.0f} s)")
 
     provenance = collect_provenance()
     out = unique_run_dir(args.out_dir, name, provenance["git_commit"])
     write_json(os.path.join(out, "manifest.json"), {
-        "method": "DQN (PILOT, preliminary -- not a thesis result)",
+        "method": "DQN (PILOT / debugging, preliminary -- not a thesis result)",
         "config_path": os.path.relpath(os.path.abspath(args.config), ROOT),
         "config_snapshot": load_config(args.config),
         "dqn_config": dqn_config.to_dict(),
+        "dqn_overrides": overrides,
         "train_seed": args.train_seed, "total_steps": args.total_steps, "eval_every": args.eval_every,
         "training_workload_seed_range": TRAIN_SEED_RANGE,
         "validation_seeds": [VALIDATION_SEEDS.start, VALIDATION_SEEDS.stop - 1],
@@ -140,12 +170,29 @@ def main(argv=None):
     _write_csv(os.path.join(out, "learning_curve.csv"), learning_curve)
     _write_csv(os.path.join(out, "validation_curve.csv"), validation_curve)
     torch.save(best["state_dict"], os.path.join(out, "model_best.pt"))
+    torch.save(final_state, os.path.join(out, "model_final.pt"))
+
+    all_results = {**{k: v["evaluation"] for k, v in dqn_eval.items()}, **baselines}
+    os.makedirs(os.path.join(out, "evaluation"), exist_ok=True)
+    per_seed = []
+    for policy_name, result in all_results.items():
+        write_json(os.path.join(out, "evaluation", policy_name.replace(" ", "_") + ".json"), result)
+        per_seed += [{"policy": policy_name, **{k: v for k, v in row.items() if k != "report"}}
+                     for row in result["per_seed"]]
+    _write_csv(os.path.join(out, "per_seed.csv"), per_seed)
+    strip = lambda r: {k: v for k, v in r.items() if k != "per_seed"}
     write_json(os.path.join(out, "summary.json"), {
-        "note": "PILOT on validation seeds only; undiscounted returns",
-        "dqn_best": {"step": best["step"], **{k: v for k, v in best["result"].items() if k != "per_seed"}},
-        "baselines": {k: {kk: vv for kk, vv in v.items() if kk != "per_seed"} for k, v in baselines.items()},
+        "note": "Validation seeds only; undiscounted returns in original units",
+        "dqn_best": {"step": best["step"], **strip(dqn_eval["dqn_best"]["evaluation"])},
+        "dqn_final": {"step": step_of(learning_curve), **strip(dqn_eval["dqn_final"]["evaluation"])},
+        "q_vs_mc": {k: v["q_vs_mc"] for k, v in dqn_eval.items()},
+        "baselines": {k: strip(v) for k, v in baselines.items()},
     })
     print(f"Saved to {out}")
+
+
+def step_of(learning_curve):
+    return learning_curve[-1]["step"] if learning_curve else 0
 
 
 if __name__ == "__main__":
