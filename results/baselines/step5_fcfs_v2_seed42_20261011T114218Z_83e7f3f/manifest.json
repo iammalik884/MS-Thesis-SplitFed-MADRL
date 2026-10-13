@@ -1,0 +1,141 @@
+{
+  "method": "FCFS",
+  "architecture": "v2 neighbour-edge (Local=own dept, Edge=neighbour dept, Cloud=shared)",
+  "config_path": "configs\\environment.yaml",
+  "config_snapshot": {
+    "seed": 42,
+    "simulation": {
+      "n_steps": 20
+    },
+    "departments": [
+      {
+        "name": "Emergency",
+        "capacity": 5.0
+      },
+      {
+        "name": "ICU",
+        "capacity": 4.0
+      },
+      {
+        "name": "General_Ward",
+        "capacity": 3.0
+      }
+    ],
+    "task_generation": {
+      "departments": {
+        "Emergency": {
+          "Critical": {
+            "arrival_rate": 0.1,
+            "compute_demand_range": [
+              1.0,
+              2.5
+            ]
+          },
+          "High": {
+            "arrival_rate": 0.2,
+            "compute_demand_range": [
+              1.5,
+              3.5
+            ]
+          },
+          "Routine": {
+            "arrival_rate": 0.15,
+            "compute_demand_range": [
+              2.0,
+              8.0
+            ]
+          }
+        },
+        "ICU": {
+          "Critical": {
+            "arrival_rate": 0.15,
+            "compute_demand_range": [
+              1.0,
+              2.5
+            ]
+          },
+          "High": {
+            "arrival_rate": 0.15,
+            "compute_demand_range": [
+              1.5,
+              3.5
+            ]
+          },
+          "Routine": {
+            "arrival_rate": 0.1,
+            "compute_demand_range": [
+              2.0,
+              8.0
+            ]
+          }
+        },
+        "General_Ward": {
+          "Critical": {
+            "arrival_rate": 0.03,
+            "compute_demand_range": [
+              1.0,
+              2.5
+            ]
+          },
+          "High": {
+            "arrival_rate": 0.1,
+            "compute_demand_range": [
+              1.5,
+              3.5
+            ]
+          },
+          "Routine": {
+            "arrival_rate": 0.25,
+            "compute_demand_range": [
+              2.0,
+              8.0
+            ]
+          }
+        }
+      }
+    },
+    "offloading": {
+      "cloud_capacity": 50.0,
+      "cloud_network_delay": 2,
+      "neighbour_network_delay": 1,
+      "cloud_threshold": 6.0,
+      "offload_threshold": 3.0,
+      "neighbour_tie_break_order": [
+        "Emergency",
+        "ICU",
+        "General_Ward"
+      ]
+    },
+    "deadlines": {
+      "Critical": 2,
+      "High": 5,
+      "Routine": 10
+    },
+    "evaluation": {
+      "drain_limit": 50,
+      "synthetic_payload_units_per_compute_unit": 1.0
+    }
+  },
+  "protocol_settings": {
+    "window_steps": 20,
+    "drain_limit": 50,
+    "payload_units_per_compute_unit": 1.0
+  },
+  "provenance": {
+    "git_commit": "83e7f3f8ea559fd87948b676282c3f7977f2f3b8",
+    "git_branch": "main",
+    "git_dirty": false,
+    "dirty_tracked_files": [],
+    "python_executable": "C:\\Users\\USr\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+    "python_version": "3.14.6",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "numpy": "2.5.3",
+      "PyYAML": "6.0.3",
+      "pytest": "9.1.1"
+    },
+    "created_utc": "2026-10-11T11:42:18Z"
+  },
+  "data_note": "SYNTHETIC placeholder workload (not MIMIC-IV); not clinical validation",
+  "seed": 42
+}

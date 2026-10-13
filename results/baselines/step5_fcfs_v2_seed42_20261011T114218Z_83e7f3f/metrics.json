@@ -1,0 +1,402 @@
+{
+  "protocol": {
+    "version": "v2-window-drain",
+    "measurement_window": [
+      0,
+      19
+    ],
+    "window_steps": 20,
+    "drain_limit": 50,
+    "drain_steps_used": 0,
+    "final_cutoff": 19,
+    "time_unit": "simulation step; latency 0 = finished in its arrival step"
+  },
+  "headline": {
+    "throughput_in_window": 1.05,
+    "avg_latency": 0.5238095238095238,
+    "avg_queue_wait": 0.0,
+    "critical_deadline_violation_rate": 0.0,
+    "deadline_violation_rate": 0.0,
+    "tasks": 21,
+    "unfinished_after_drain": 0,
+    "run_complete": true
+  },
+  "window": {
+    "cutoff_time": 19,
+    "tasks_arrived": 21,
+    "completed": 21,
+    "unfinished": 0,
+    "avg_latency": 0.5238095238095238,
+    "max_latency": 2,
+    "avg_transmission_delay": 0.38095238095238093,
+    "avg_queue_wait": 0.0,
+    "avg_execution_span": 0.14285714285714285,
+    "deadlines": {
+      "overall": {
+        "on_time": 21,
+        "completed_late": 0,
+        "overdue_unfinished": 0,
+        "not_yet_due": 0,
+        "with_deadline": 21,
+        "decided": 21,
+        "deadline_violation_rate": 0.0,
+        "completed_only_late_rate": 0.0
+      },
+      "per_priority": {
+        "Critical": {
+          "on_time": 8,
+          "completed_late": 0,
+          "overdue_unfinished": 0,
+          "not_yet_due": 0,
+          "with_deadline": 8,
+          "decided": 8,
+          "deadline_violation_rate": 0.0,
+          "completed_only_late_rate": 0.0
+        },
+        "High": {
+          "on_time": 6,
+          "completed_late": 0,
+          "overdue_unfinished": 0,
+          "not_yet_due": 0,
+          "with_deadline": 6,
+          "decided": 6,
+          "deadline_violation_rate": 0.0,
+          "completed_only_late_rate": 0.0
+        },
+        "Routine": {
+          "on_time": 7,
+          "completed_late": 0,
+          "overdue_unfinished": 0,
+          "not_yet_due": 0,
+          "with_deadline": 7,
+          "decided": 7,
+          "deadline_violation_rate": 0.0,
+          "completed_only_late_rate": 0.0
+        }
+      }
+    },
+    "critical_deadline_violation_rate": 0.0,
+    "by_tier": {
+      "Cloud": {
+        "tasks": 4,
+        "completed": 4,
+        "avg_latency": 2.0,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 2.0
+      },
+      "Local": {
+        "tasks": 17,
+        "completed": 17,
+        "avg_latency": 0.17647058823529413,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      }
+    },
+    "by_source": {
+      "Emergency": {
+        "tasks": 6,
+        "completed": 6,
+        "avg_latency": 0.0,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      },
+      "General_Ward": {
+        "tasks": 8,
+        "completed": 8,
+        "avg_latency": 0.875,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.75
+      },
+      "ICU": {
+        "tasks": 7,
+        "completed": 7,
+        "avg_latency": 0.5714285714285714,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.2857142857142857
+      }
+    },
+    "by_destination": {
+      "Cloud": {
+        "tasks": 4,
+        "completed": 4,
+        "avg_latency": 2.0,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 2.0
+      },
+      "Emergency": {
+        "tasks": 6,
+        "completed": 6,
+        "avg_latency": 0.0,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      },
+      "General_Ward": {
+        "tasks": 5,
+        "completed": 5,
+        "avg_latency": 0.2,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      },
+      "ICU": {
+        "tasks": 6,
+        "completed": 6,
+        "avg_latency": 0.3333333333333333,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      }
+    },
+    "by_route": {
+      "Emergency->Emergency": {
+        "tasks": 6,
+        "completed": 6,
+        "avg_latency": 0.0,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      },
+      "General_Ward->Cloud": {
+        "tasks": 3,
+        "completed": 3,
+        "avg_latency": 2.0,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 2.0
+      },
+      "General_Ward->General_Ward": {
+        "tasks": 5,
+        "completed": 5,
+        "avg_latency": 0.2,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      },
+      "ICU->Cloud": {
+        "tasks": 1,
+        "completed": 1,
+        "avg_latency": 2.0,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 2.0
+      },
+      "ICU->ICU": {
+        "tasks": 6,
+        "completed": 6,
+        "avg_latency": 0.3333333333333333,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      }
+    },
+    "offloading_communication": {
+      "local_tasks_no_transfer": 17,
+      "neighbour_transfers": 0,
+      "cloud_transfers": 4,
+      "total_transfers": 4,
+      "synthetic_payload_units": {
+        "neighbour": 0.0,
+        "cloud": 25.945130601875427,
+        "total": 25.945130601875427
+      },
+      "payload_model": "SYNTHETIC: payload = compute_demand x 1.0 SPU (synthetic payload units, not bytes); result-return messages not modelled"
+    },
+    "throughput": 1.05
+  },
+  "final": {
+    "cutoff_time": 19,
+    "tasks_arrived": 21,
+    "completed": 21,
+    "unfinished": 0,
+    "avg_latency": 0.5238095238095238,
+    "max_latency": 2,
+    "avg_transmission_delay": 0.38095238095238093,
+    "avg_queue_wait": 0.0,
+    "avg_execution_span": 0.14285714285714285,
+    "deadlines": {
+      "overall": {
+        "on_time": 21,
+        "completed_late": 0,
+        "overdue_unfinished": 0,
+        "not_yet_due": 0,
+        "with_deadline": 21,
+        "decided": 21,
+        "deadline_violation_rate": 0.0,
+        "completed_only_late_rate": 0.0
+      },
+      "per_priority": {
+        "Critical": {
+          "on_time": 8,
+          "completed_late": 0,
+          "overdue_unfinished": 0,
+          "not_yet_due": 0,
+          "with_deadline": 8,
+          "decided": 8,
+          "deadline_violation_rate": 0.0,
+          "completed_only_late_rate": 0.0
+        },
+        "High": {
+          "on_time": 6,
+          "completed_late": 0,
+          "overdue_unfinished": 0,
+          "not_yet_due": 0,
+          "with_deadline": 6,
+          "decided": 6,
+          "deadline_violation_rate": 0.0,
+          "completed_only_late_rate": 0.0
+        },
+        "Routine": {
+          "on_time": 7,
+          "completed_late": 0,
+          "overdue_unfinished": 0,
+          "not_yet_due": 0,
+          "with_deadline": 7,
+          "decided": 7,
+          "deadline_violation_rate": 0.0,
+          "completed_only_late_rate": 0.0
+        }
+      }
+    },
+    "critical_deadline_violation_rate": 0.0,
+    "by_tier": {
+      "Cloud": {
+        "tasks": 4,
+        "completed": 4,
+        "avg_latency": 2.0,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 2.0
+      },
+      "Local": {
+        "tasks": 17,
+        "completed": 17,
+        "avg_latency": 0.17647058823529413,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      }
+    },
+    "by_source": {
+      "Emergency": {
+        "tasks": 6,
+        "completed": 6,
+        "avg_latency": 0.0,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      },
+      "General_Ward": {
+        "tasks": 8,
+        "completed": 8,
+        "avg_latency": 0.875,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.75
+      },
+      "ICU": {
+        "tasks": 7,
+        "completed": 7,
+        "avg_latency": 0.5714285714285714,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.2857142857142857
+      }
+    },
+    "by_destination": {
+      "Cloud": {
+        "tasks": 4,
+        "completed": 4,
+        "avg_latency": 2.0,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 2.0
+      },
+      "Emergency": {
+        "tasks": 6,
+        "completed": 6,
+        "avg_latency": 0.0,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      },
+      "General_Ward": {
+        "tasks": 5,
+        "completed": 5,
+        "avg_latency": 0.2,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      },
+      "ICU": {
+        "tasks": 6,
+        "completed": 6,
+        "avg_latency": 0.3333333333333333,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      }
+    },
+    "by_route": {
+      "Emergency->Emergency": {
+        "tasks": 6,
+        "completed": 6,
+        "avg_latency": 0.0,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      },
+      "General_Ward->Cloud": {
+        "tasks": 3,
+        "completed": 3,
+        "avg_latency": 2.0,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 2.0
+      },
+      "General_Ward->General_Ward": {
+        "tasks": 5,
+        "completed": 5,
+        "avg_latency": 0.2,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      },
+      "ICU->Cloud": {
+        "tasks": 1,
+        "completed": 1,
+        "avg_latency": 2.0,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 2.0
+      },
+      "ICU->ICU": {
+        "tasks": 6,
+        "completed": 6,
+        "avg_latency": 0.3333333333333333,
+        "avg_queue_wait": 0.0,
+        "avg_transmission_delay": 0.0
+      }
+    },
+    "offloading_communication": {
+      "local_tasks_no_transfer": 17,
+      "neighbour_transfers": 0,
+      "cloud_transfers": 4,
+      "total_transfers": 4,
+      "synthetic_payload_units": {
+        "neighbour": 0.0,
+        "cloud": 25.945130601875427,
+        "total": 25.945130601875427
+      },
+      "payload_model": "SYNTHETIC: payload = compute_demand x 1.0 SPU (synthetic payload units, not bytes); result-return messages not modelled"
+    }
+  },
+  "drain": {
+    "completions_during_drain": 0,
+    "backlog_at_window_end": {
+      "tasks": 0,
+      "remaining_demand": 0,
+      "per_node": {
+        "Emergency": 0,
+        "ICU": 0,
+        "General_Ward": 0,
+        "Cloud": 0
+      }
+    },
+    "backlog_after_drain": {
+      "tasks": 0,
+      "remaining_demand": 0,
+      "per_node": {
+        "Emergency": 0,
+        "ICU": 0,
+        "General_Ward": 0,
+        "Cloud": 0
+      }
+    },
+    "drain_limit_reached": false,
+    "run_complete": true
+  },
+  "training_communication": {
+    "status": "not implemented in this phase",
+    "note": "future FedAvg/SplitFed steps: model updates, smashed activations, gradients -- kept separate from offloading_communication"
+  }
+}
