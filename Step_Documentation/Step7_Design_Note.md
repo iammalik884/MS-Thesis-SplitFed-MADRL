@@ -1,7 +1,11 @@
 # Step 7 Design Note — before the DQN baseline
 
-Status: draft for discussion with the supervisor. Nothing in this note has
-been applied to the simulator, the reward or the saved Step 5 results.
+Status: written before the DQN work; the modelling options in Section 3 are
+still for discussion with the supervisor. Nothing in this note has been
+applied to the simulator, the reward or the saved Step 5 results. The DQN
+debugging, the frozen setting and the final test results are in
+[Step7_DQN_Debugging.md](Step7_DQN_Debugging.md); where they differ from this
+note (γ = 0.95 instead of 0.99, Double DQN), that file is the current one.
 The Step 6 environment (commit `24d87f6`) is kept as the current verified
 implementation.
 

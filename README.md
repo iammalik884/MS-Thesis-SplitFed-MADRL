@@ -7,11 +7,12 @@ University of Sargodha).
 The code follows the 18-step practical roadmap (`My Research Practical ROADMAP.docx`).
 Each step adds one new idea and is verified before the next step starts.
 
-**Current status: Steps 1–6 complete** (hospital simulator, FCFS baseline,
-Gymnasium environment). **Step 7 has started:** the
-[design note](Step_Documentation/Step7_Design_Note.md) and a preliminary
-DQN pilot are done, and the pilot does not beat the strong baselines yet.
-Steps 8–18 (MAPPO, SplitFed, privacy, robustness) have not been started.
+**Current status: Steps 1–7 complete** (hospital simulator, FCFS baseline,
+Gymnasium environment, single-agent DQN baseline). The DQN was evaluated once
+on reserved test seeds; it beats FCFS under overload but does not beat the
+ECT heuristic in any scenario, and its training is not stable (see Step 7
+below). Steps 8–18 (MAPPO, SplitFed, privacy, robustness) have not been
+started.
 
 > **Data note:** all workload numbers (arrival rates, compute demands,
 > deadlines) are **synthetic placeholders**, not MIMIC-IV statistics.
@@ -24,7 +25,7 @@ Requires Python ≥ 3.10 (tested with 3.14.6 on Windows 11).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest -q                      # 95 tests, all should pass
+python -m pytest -q                      # 96 tests, all should pass
 python demo_simulation.py                # one readable run (seed 42)
 python run_baseline_fcfs.py --seeds 0-29 # FCFS baseline, 30 seeds
 python run_baseline_fcfs.py --config configs/scenarios/overload.yaml --seeds 0-29
@@ -84,10 +85,12 @@ and removed pre-v2 keys raise clear errors).
       simulator, with the observation, action, reward and termination defined
       below. With the FCFS router's actions it reproduces the Step 5 baseline
       exactly.
-- [ ] **Step 7 — Baseline 2: single-agent DQN (in progress).** Design note
-      (cloud finding, baselines incl. the ECT heuristic, γ, seed/evaluation
-      plan) and a preliminary pilot are done; see below. Open: the modelling
-      decisions in the note (with the supervisor) and stable DQN training.
+- [x] **Step 7 — Baseline 2: single-agent DQN.** Design note (cloud
+      finding, ECT heuristic, γ, seed/evaluation plan), pilot, two
+      pre-registered debugging rounds on validation seeds, and a one-time
+      evaluation of the frozen setting (Double DQN) on test seeds; see below.
+      Still open with the supervisor: the modelling options in the design
+      note (none applied).
 - [ ] Steps 8–18 — see the roadmap document.
 
 The design was revised after an audit (commits `470a079`, `acdb3d4`,
@@ -178,7 +181,7 @@ on its own. Possible modelling changes, the γ choice and the Step 7 protocol
 are in the [Step 7 design note](Step_Documentation/Step7_Design_Note.md). No
 change to the cloud or the reward has been made.
 
-## Step 7 (in progress): design note and DQN pilot
+## Step 7: single-agent DQN baseline
 
 [Step_Documentation/Step7_Design_Note.md](Step_Documentation/Step7_Design_Note.md) covers:
 
@@ -200,14 +203,48 @@ training seed, 40,000 decisions, validation return, runs in
 Diagnosis and next debugging steps are in the note, Section 6. No thesis claim
 is made from the pilot.
 
-**Debugging round 1** ([Step7_DQN_Debugging.md](Step_Documentation/Step7_DQN_Debugging.md),
-plan committed before the runs). Settings were changed one at a time
-(reward scale, observation scale, learning rate, then γ) with 2 training seeds,
-on validation seeds only; the runs are in [results/debug/](results/debug/). The
-best setting (reward × 0.01, γ = 0.95) is still unstable. In overload the Q
-estimates are far above the matching Monte Carlo returns, which points to
-overestimation. No setting is frozen, the test seeds have not been used, and
-Step 7 remains open.
+**Debugging** ([Step7_DQN_Debugging.md](Step_Documentation/Step7_DQN_Debugging.md),
+each plan committed before its runs). Settings were changed one at a time,
+with 2 training seeds, on validation seeds only (runs in
+[results/debug/](results/debug/)). Score: 0 = random, 1 = ECT, mean over the
+final checkpoints of 3 scenarios × 2 seeds.
+
+| Round | Best setting of the round | Mean final score |
+|---|---|---|
+| 1 (reward scale, obs. scale, learning rate, γ) | reward × 0.01, γ = 0.95 | −0.565 |
+| 2 (Double DQN; 120,000 decisions) | + Double DQN, 40,000 decisions | **0.486** |
+
+In Round 1 the overload Q estimates were far above the matching Monte Carlo
+returns (overestimation); Double DQN reduced this most. No setting met the
+pre-registered stability rule. The frozen setting is the one with the highest
+mean final score: `reward_scale = 0.01`, `gamma = 0.95`, `double_dqn = true`,
+40,000 decisions.
+
+**Close-out** (`python run_dqn_experiments.py --group final --base reward_scale=0.01 --base gamma=0.95 --base double_dqn=1 --exp FINAL= --seeds 0 1 2 3 4 --workers 1`,
+copy the run folders without their large `evaluation/` subfolders to
+`results/step7_final/training_runs/`, then
+`python evaluate_dqn_test.py --runs results/step7_final/training_runs --out results/step7_final`).
+5 training seeds per scenario, checkpoint chosen on validation seeds, then
+**one** evaluation on test seeds 2,000–2,029 ([results/step7_final/](results/step7_final/)).
+DQN = mean ± 95% CI over the 5 training seeds.
+
+| Test seeds, return | Default | Overload | Slow network |
+|---|---|---|---|
+| DQN (best checkpoint) | −20.1 ± 0.7 | −278.6 ± 71.5 | −411.9 ± 49.3 |
+| DQN (final checkpoint) | −20.8 ± 1.1 | −584.2 ± 512.1 | −463.8 ± 72.7 |
+| **ECT** | **−15.5** | **−215.2** | **−246.0** |
+| FCFS | −15.7 | −772.7 | −409.6 |
+| always Local | −19.9 | −1,932.2 | −402.9 |
+| always Cloud | −52.7 | −253.5 | −868.7 |
+| random | −34.7 | −555.2 | −492.6 |
+
+ECT is the best policy in every scenario. The DQN beats FCFS and random under
+overload, is about equal to FCFS and always Local in the slow network, and is
+worse than FCFS in the default scenario. Its final checkpoints are much worse
+than the validation-selected ones under overload. All metrics (latency,
+Critical violations, offloading communication, action shares) are in
+`results/step7_final/summary.json` (short table: `results_table.md`); the analysis is in
+[Step7_DQN_Debugging.md](Step_Documentation/Step7_DQN_Debugging.md).
 
 ## FCFS baseline results (seeds 0–29, mean)
 
@@ -235,7 +272,7 @@ New runs go to `results/runs/` (git-ignored); a run folder is never overwritten.
 
 ## Verification
 
-95 automated tests (`python -m pytest -q`):
+96 automated tests (`python -m pytest -q`):
 
 | File | What it checks |
 |---|---|
@@ -248,7 +285,7 @@ New runs go to `results/runs/` (git-ignored); a run folder is never overwritten.
 | `test_v2_metrics_protocol.py` | deadline categories, window/drain protocol, run records |
 | `test_v2_validation_scenarios.py` | config validation (30+ invalid cases), scenarios, roadmap Step 3 checkpoints, seeds 0–29 invariants |
 | `test_ect_heuristic.py` | ECT estimates by hand, exact on idle nodes, tie order, no future information |
-| `test_dqn_pilot.py` | replay buffer, no bootstrapping at episode end, ε schedule, reproducible training, shared evaluation = Step 5 FCFS, scaling knobs, Q vs Monte Carlo |
+| `test_dqn_pilot.py` | replay buffer, no bootstrapping at episode end, Double DQN target, ε schedule, reproducible training, shared evaluation = Step 5 FCFS, scaling knobs, Q vs Monte Carlo |
 | `test_step6_gym_env.py` | Gymnasium `check_env`, roadmap Step 6 checkpoints, exact FCFS reproduction on 6 configs × seeds 0–29, reward bookkeeping, action meanings, determinism, empty episode, invalid usage |
 
 ## Folder structure
@@ -273,25 +310,29 @@ MS_Thesis_Project/
 ├── agents/
 │   ├── heuristics.py             # Step 7: ECT heuristic baseline
 │   ├── policy_eval.py            # Step 7: one evaluation routine for all policies
-│   └── dqn.py                    # Step 7 pilot: DQN (replay buffer, target network)
-├── tests/                        # 95 tests (see Verification)
+│   └── dqn.py                    # Step 7: DQN (replay buffer, target network, optional Double DQN)
+├── tests/                        # 96 tests (see Verification)
 ├── results/
 │   ├── baselines/                # committed FCFS v2 results
 │   ├── pilot/                    # Step 7 DQN pilot runs (preliminary)
-│   ├── debug/                    # Step 7 DQN debugging runs (compact artefacts)
+│   ├── debug/                    # Step 7 DQN debugging runs, rounds 1-2 (compact artefacts)
+│   ├── step7_final/              # Step 7 close-out: frozen DQN, test-seed results
 │   └── legacy/                   # pre-audit result, not comparable
 ├── Step_Documentation/           # per-step Word write-ups (Roman Urdu), see note below
 ├── demo_simulation.py            # one readable run with seed 42
 ├── run_baseline_fcfs.py          # FCFS baseline runner (--seed / --seeds / --config)
 ├── check_simple_policies.py      # Step 6 sanity check with simple fixed policies (+ ECT)
 ├── train_dqn_pilot.py            # Step 7: DQN training with seed splits (--set for one override)
-├── run_dqn_experiments.py        # Step 7: runs the pre-registered debugging experiments
+├── run_dqn_experiments.py        # Step 7: runs the pre-registered experiments (one override each)
 ├── summarize_dqn_experiments.py  # Step 7: pre-registered score per experiment
+├── evaluate_dqn_test.py          # Step 7: one-time test-seed evaluation of the frozen DQN
 └── requirements.txt
 ```
 
 **Note on `Step_Documentation/`:** the Step 3 and Step 5 write-ups were
-rewritten for the current (v2) design, and Step 6 has its own write-up. Steps 1, 2 and 4 start with a
+rewritten for the current (v2) design; Steps 6 and 7 have their own write-ups
+(Step 7: `Step7_DQN_Baseline.docx`, with the design note and the debugging/close-out
+record as Markdown next to it). Steps 1, 2 and 4 start with a
 "V2 UPDATE" box listing what changed; their code listings are simplified
 versions of the code in `env/`.
 
@@ -300,8 +341,10 @@ versions of the code in `env/`.
 - Workload and deadline values are placeholders, not MIMIC-IV derived.
 - Time is discrete (whole steps); network delays are fixed integers.
 - Offloading payload is a synthetic unit proportional to compute demand, not bytes.
-- Only a preliminary DQN pilot has been trained, and it does not beat ECT.
-  FCFS routing ignores priority and deadlines by design.
+- The DQN baseline does not beat the ECT heuristic, and its training is not
+  stable across training seeds (checkpoint selection on validation seeds is
+  needed). FCFS routing ignores priority and deadlines by design.
 - In the stressed scenarios the cloud almost never fills up and is free to use
-  (see the Step 6 sanity check); this should be settled before Step 7 results
-  are interpreted.
+  (see the Step 6 sanity check). Whether to add a cloud usage cost or change
+  the capacity is still to be decided with the supervisor; any such change
+  requires re-running all baselines and the DQN.

@@ -1,9 +1,9 @@
-# Step 7 — DQN debugging experiments
+# Step 7 — DQN debugging experiments and close-out
 
-Status: Step 7 is **not** complete; Step 8 has not started. The simulator, the
-reward definition, the cloud capacity and the Step 6 environment are
-unchanged. The pilot in [results/pilot/](../results/pilot/) is kept as the
-reference.
+Status: **Step 7 is complete** (see "Close-out — results" at the end). Step 8
+has not started. The simulator, the reward definition, the cloud capacity and
+the Step 6 environment are unchanged. The pilot in
+[results/pilot/](../results/pilot/) is kept as the reference.
 
 This plan was written and committed **before** any experiment was run.
 
@@ -241,8 +241,9 @@ training seeds, unscaled):
 | LONG | −37.6 vs −36.1 | −67.7 vs −116.1 | −7.3 vs −7.6 |
 
 - **Double DQN** was the largest improvement in all rounds: the mean final
-  score rose from −0.565 to 0.486, and the drop fell from 0.871 to 0.221. No
-  Q estimate is positive any more. Q is still above MC in overload and slow
+  score rose from −0.565 to 0.486, and the drop fell from 0.871 to 0.221. The
+  mean Q of every run is now negative (in Round 1 it was positive in several
+  settings). Q is still above MC in overload and slow
   network, but much less so than in Round 1 (G095 final: −15.3 vs −162.1).
 - **The longer run** found better *best* checkpoints, all late in training
   (between 96,000 and 120,077 decisions), but its final checkpoints were worse.
@@ -262,3 +263,71 @@ of Round 1 and Round 2): **DDQN** = `reward_scale = 0.01`, `gamma = 0.95`,
 frozen as it is, **not stable** by the definition above. As pre-registered,
 the close-out below runs anyway, and Step 7 reports DQN as the single-agent
 baseline in this environment, not as a method that works well.
+
+## Close-out — results (test seeds, evaluated once)
+
+**Training.** The frozen DDQN setting was trained with training seeds 0–4 on
+each of the 3 scenarios (15 runs) at the clean commit `2be44d7`. Seeds 0 and 1
+are byte-identical to the Round 2 DDQN runs (models, curves and summaries), so
+training is reproducible. Compact artefacts:
+[results/step7_final/training_runs/](../results/step7_final/training_runs/).
+On the validation seeds the 15 runs have mean final score 0.160, mean best
+score 0.652 and drop 0.491. Final checkpoints of overload seeds 3 and 4 and
+slow network seeds 0 and 4 score below random: training is **not stable**.
+
+**Test evaluation.** `python evaluate_dqn_test.py --runs results/step7_final/training_runs --out results/step7_final`
+was run once at commit `40a3de6`, on test seeds 2,000–2,029. Results:
+[results/step7_final/](../results/step7_final/) (`summary.json`,
+`results_table.md`, `per_seed.csv`, full reports in `reports/*.json.gz` incl.
+offloading communication, `learning_curves.png`). DQN = mean ± 95% CI over the
+5 training seeds (t, 4 degrees of freedom); the baselines are deterministic
+(random uses its own fixed seed 0). The **best** checkpoint is the one chosen
+on the validation seeds; the final checkpoint is reported next to it.
+
+Undiscounted return on the test seeds (higher is better):
+
+| Policy | Default | Overload | Slow network |
+|---|---|---|---|
+| **DQN (best checkpoint)** | −20.1 ± 0.7 | −278.6 ± 71.5 | −411.9 ± 49.3 |
+| DQN (final checkpoint) | −20.8 ± 1.1 | −584.2 ± 512.1 | −463.8 ± 72.7 |
+| **ECT** | **−15.5** | **−215.2** | **−246.0** |
+| FCFS | −15.7 | −772.7 | −409.6 |
+| always Local | −19.9 | −1,932.2 | −402.9 |
+| always Edge | −38.2 | −2,007.6 | −667.0 |
+| always Cloud | −52.7 | −253.5 | −868.7 |
+| random | −34.7 | −555.2 | −492.6 |
+
+Critical-task deadline violation rate (test seeds):
+
+| Policy | Default | Overload | Slow network |
+|---|---|---|---|
+| DQN (best) | 0.1% ± 0.2 pp | 5.7% ± 6.3 pp | 55.0% ± 15.0 pp |
+| ECT | 0.0% | 1.2% | 30.8% |
+| FCFS | 0.0% | 64.8% | 84.0% |
+| always Local | 0.7% | 70.2% | 26.3% |
+| always Cloud | 0.0% | 0.2% | 100.0% |
+
+**Findings (honest comparison):**
+
+- **ECT is the best policy in all three scenarios.** The DQN does not beat it
+  anywhere, with either checkpoint.
+- **Overload:** the DQN (best) is far better than FCFS (−278.6 vs −772.7) and
+  random, but not better than always Cloud (−253.5, inside the DQN's CI) and
+  worse than ECT. It sends 65% of tasks to the cloud (ECT 29%).
+- **Slow network:** the DQN (best) is about equal to FCFS and always Local
+  (−411.9 ± 49.3 vs −409.6 and −402.9). It has fewer Critical violations than
+  FCFS (55.0% vs 84.0%) but more than always Local (26.3%) and ECT (30.8%).
+- **Default:** the DQN is worse than FCFS and ECT (−20.1 vs −15.7 / −15.5),
+  about equal to always Local (−19.9).
+- **Final vs best checkpoint:** in overload the final checkpoints are much
+  worse and vary widely (−584.2 ± 512.1; per training seed −254.9 to −1,303.5).
+  Without validation-based checkpoint selection this DQN would be unreliable.
+
+**Conclusion of Step 7.** The single-agent DQN baseline is trained, frozen and
+evaluated with the pre-registered protocol. It learns policies far better than
+random and FCFS under overload, but it is not stable across training and does
+not reach the simple ECT heuristic in any scenario. This is reported as the
+Step 7 baseline result; no further tuning was done after the test seeds were
+used. The open modelling questions of the design note (cloud usage cost, cloud
+capacity, deadline penalty) are still to be decided with the supervisor; if
+they change the environment, all baselines and the DQN must be re-evaluated.
