@@ -143,7 +143,7 @@ next to the results.
 **First observation (validation, overload):** MAPPO sends most large
 Routine tasks to the cloud and keeps Critical and High tasks on the local
 node. This keeps every department's queue short, and the deadline violations
-were 0%. MAPPO hardly uses the Edge action (≈ 0–4% of decisions in overload);
+were 0%. MAPPO hardly uses the Edge action (0–2% of final-checkpoint decisions in overload, all 6 runs);
 it balances load through the cloud, not through the neighbour departments.
 This fits the Step 6/7 finding that the cloud has no usage cost and almost
 never fills. Whether a cloud cost should be added is still the open
