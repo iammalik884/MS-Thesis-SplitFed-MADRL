@@ -103,3 +103,48 @@ The DQN was given the same option in Step 7, so the comparison stays fair.
 - learning and validation curves;
 - per-seed results and full reports, including offloading communication;
 - critic V vs the discounted Monte Carlo team return.
+
+## Round 1 and Round 2 — results (validation seeds only)
+
+All runs come from the clean commit `608debe`. **Test seeds were not used.**
+Compact artefacts are in [results/debug/mappo1/](../results/debug/mappo1/) and
+[results/debug/mappo2/](../results/debug/mappo2/). Reproduce the table with
+`python summarize_dqn_experiments.py results/debug/mappo1` (or `mappo2`).
+
+| Setting | Decisions | Mean final score | Mean best score | Best → final drop |
+|---|---|---|---|---|
+| M0 (defaults, γ = 0.99) | 40,000 | 1.036 | 1.096 | 0.060 |
+| M1 (γ = 0.95) | 40,000 | 1.032 | 1.081 | 0.049 |
+| **LONG** (M0, longer run) | 120,000 | **1.207** | 1.224 | **0.017** |
+
+Score: 0 = random, 1 = ECT. Per run, final-checkpoint score (seed 0 / seed 1):
+
+| Setting | Default | Overload | Slow network |
+|---|---|---|---|
+| M0 | 1.01 / 1.04 | 0.97 / 1.12 | 0.96 / 1.11 |
+| M1 | 1.02 / 1.04 | 1.20 / 1.17 | 0.70 / 1.06 |
+| LONG | 1.03 / 1.03 | 1.26 / 1.24 | 1.30 / 1.38 |
+
+- All three settings meet the pre-registered stability rule: every final
+  score is ≥ 0, and every drop is ≤ 0.25.
+- M0 was ahead of M1 by 0.004, so Round 2 used M0.
+- The critic is close to the Monte Carlo returns, e.g. LONG final overload:
+  V −57.5 vs MC −56.2 (unscaled means). There is no sign of the DQN's
+  overestimation.
+
+**Frozen Step 9 configuration** (highest mean final score): **LONG** =
+`MAPPOConfig` defaults (γ = 0.99, reward × 0.01), 120,000 decisions.
+
+Note for the comparison: the frozen DQN uses 40,000 decisions. The DQN was
+given the same 120,000-decision option in Step 7, but scored worse with it
+(mean final 0.034), so its own rule kept 40,000. Both budgets are reported
+next to the results.
+
+**First observation (validation, overload):** MAPPO sends most large
+Routine tasks to the cloud and keeps Critical and High tasks on the local
+node. This keeps every department's queue short, and the deadline violations
+were 0%. MAPPO hardly uses the Edge action (≈ 0–4% of decisions in overload);
+it balances load through the cloud, not through the neighbour departments.
+This fits the Step 6/7 finding that the cloud has no usage cost and almost
+never fills. Whether a cloud cost should be added is still the open
+modelling question for the supervisor.

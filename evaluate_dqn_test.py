@@ -1,5 +1,5 @@
 """
-Step 7 close-out - ONE-TIME evaluation of the frozen DQN on the reserved test seeds.
+Step 7 / Step 9 close-out - ONE-TIME evaluation of a frozen DQN or MAPPO on the reserved test seeds.
 ================================================================================
 ROMAN URDU: Frozen setting ke 5 training seeds ke checkpoints (best =
 validation par chuna gaya, aur final) ko TEST seeds 2,000-2,029 par ek hi
@@ -12,7 +12,12 @@ frozen setting, evaluates them and all baselines on the test seeds, and
 writes summary.json, results_table.md, per_seed.csv, full reports (gzip) and
 learning_curves.png.
 
-Run:  py evaluate_dqn_test.py --runs results/runs/final/FINAL --out results/step7_final
+The method (DQN or MAPPO) is read from the runs' manifests. For MAPPO the
+summary also has "destination_load" (tasks and queue wait per node; roadmap
+Step 9 checkpoint on spare capacity).
+
+Run:  py evaluate_dqn_test.py --runs results/step7_final/training_runs --out results/step7_final
+      py evaluate_dqn_test.py --runs results/step9_final/training_runs --out results/step9_final
 """
 
 import argparse
@@ -28,8 +33,10 @@ import numpy as np
 import torch
 
 from agents.dqn import DQNAgent, DQNConfig
+from agents.mappo import MAPPOAgent, MAPPOConfig
 from agents.policy_eval import baseline_policies, evaluate
 from env.gym_env import HospitalSchedulingEnv
+from env.multi_agent_env import MultiAgentHospitalEnv
 from env.run_records import collect_provenance
 from train_dqn_pilot import TEST_SEEDS, VALIDATION_SEEDS
 
@@ -51,16 +58,32 @@ def mean_ci(values):
     return statistics.mean(values), T_975[len(values) - 1] * statistics.stdev(values) / math.sqrt(len(values))
 
 
-def load_agent(run_dir, which):
+def method_of(run_dir):
     manifest = json.load(open(os.path.join(run_dir, "manifest.json"), encoding="utf-8"))
-    env = HospitalSchedulingEnv(os.path.join(ROOT, manifest["config_path"]))
+    return "MAPPO" if "mappo_config" in manifest else "DQN"
+
+
+def load_policy(run_dir, which):
+    """(manifest, policy(env, obs)) of a saved checkpoint, greedy."""
+    manifest = json.load(open(os.path.join(run_dir, "manifest.json"), encoding="utf-8"))
+    config = os.path.join(ROOT, manifest["config_path"])
+    state = torch.load(os.path.join(run_dir, f"model_{which}.pt"))
+    if "mappo_config" in manifest:
+        from train_mappo import greedy_policy
+        env = MultiAgentHospitalEnv(config)
+        agent = MAPPOAgent(env.agents, env.observation_spaces[env.agents[0]].shape[0], env.state_space.shape[0],
+                           env.action_spaces[env.agents[0]].n, MAPPOConfig(**manifest["mappo_config"]),
+                           seed=manifest["train_seed"])
+        agent.load_state_dict(state)
+        return manifest, greedy_policy(agent)
+    env = HospitalSchedulingEnv(config)
     agent = DQNAgent(env.observation_space.shape[0], env.action_space.n, DQNConfig(**manifest["dqn_config"]),
                      seed=manifest["train_seed"], unbounded_mask=np.isinf(env.observation_space.high))
-    agent.q.load_state_dict(torch.load(os.path.join(run_dir, f"model_{which}.pt")))
-    return manifest, agent
+    agent.q.load_state_dict(state)
+    return manifest, lambda e, obs: agent.greedy_action(obs)
 
 
-def learning_curve_figure(runs_by_scenario, baselines_val, path):
+def learning_curve_figure(runs_by_scenario, baselines_val, path, method="DQN"):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -78,7 +101,7 @@ def learning_curve_figure(runs_by_scenario, baselines_val, path):
         steps = curves[0][0][:n]
         values = np.array([c[1][:n] for c in curves])
         ax.fill_between(steps, values.min(0), values.max(0), color=blue, alpha=0.15, linewidth=0)
-        ax.plot(steps, values.mean(0), color=blue, linewidth=2, label=f"DQN (mean, range over {len(curves)} training seeds)")
+        ax.plot(steps, values.mean(0), color=blue, linewidth=2, label=f"{method} (mean, range over {len(curves)} training seeds)")
         ect, fcfs = baselines_val[scenario]["ECT"], baselines_val[scenario]["FCFS"]
         ax.axhline(fcfs, color=aqua, linewidth=2, linestyle=":", label="FCFS")
         ax.axhline(ect, color=orange, linewidth=2, linestyle="--", label="ECT")
@@ -113,32 +136,37 @@ def main(argv=None):
     torch.set_num_threads(1)
     os.makedirs(os.path.join(args.out, "reports"), exist_ok=True)
 
-    runs_by_scenario, summary, per_seed_rows, baselines_val = {}, {}, [], {}
+    runs_by_scenario, summary, per_seed_rows, baselines_val, loads = {}, {}, [], {}, {}
+    method = None
     for scenario, config in SCENARIOS.items():
         run_dirs = sorted(d for d in glob.glob(os.path.join(args.runs, f"*_{scenario}_seed*"))
                           if os.path.exists(os.path.join(d, "summary.json")))
         runs_by_scenario[scenario] = run_dirs
+        methods = {method_of(d) for d in run_dirs}
+        if len(methods) != 1 or (method and methods != {method}):
+            raise SystemExit(f"--runs must contain runs of one method only, got {methods}")
+        method = methods.pop()
         val_summary = json.load(open(os.path.join(run_dirs[0], "summary.json"), encoding="utf-8"))
         baselines_val[scenario] = {k: v["mean_return"] for k, v in val_summary["baselines"].items()}
         results, reports = {}, {}
         for which in ("best", "final"):
             per_run = []
             for run_dir in run_dirs:
-                manifest, agent = load_agent(run_dir, which)
-                result = evaluate(config, lambda e, obs: agent.greedy_action(obs), eval_seeds, keep_reports=True)
-                label = f"DQN_{which}_trainseed{manifest['train_seed']}"
+                manifest, policy = load_policy(run_dir, which)
+                result = evaluate(config, policy, eval_seeds, keep_reports=True)
+                label = f"{method}_{which}_trainseed{manifest['train_seed']}"
                 reports[label] = result
                 per_run.append(result)
                 for row in result["per_seed"]:
-                    per_seed_rows.append({"scenario": scenario, "policy": f"DQN ({which})",
+                    per_seed_rows.append({"scenario": scenario, "policy": f"{method} ({which})",
                                           "train_seed": manifest["train_seed"],
                                           **{k: v for k, v in row.items() if k != "report"}})
-            results[f"DQN ({which})"] = {
+            results[f"{method} ({which})"] = {
                 key: mean_ci([r["means"][key] if key != "return" else r["mean_return"] for r in per_run])
                 for key in REPORTED}
-            results[f"DQN ({which})"]["action_shares"] = {
+            results[f"{method} ({which})"]["action_shares"] = {
                 a: statistics.mean(r["action_proportions"][a] for r in per_run) for a in ("Local", "Edge", "Cloud")}
-            results[f"DQN ({which})"]["per_training_seed_return"] = [r["mean_return"] for r in per_run]
+            results[f"{method} ({which})"]["per_training_seed_return"] = [r["mean_return"] for r in per_run]
         for name, policy in baseline_policies(random_seed=0).items():
             result = evaluate(config, policy, eval_seeds, keep_reports=True)
             reports[name] = result
@@ -150,6 +178,9 @@ def main(argv=None):
         with gzip.open(os.path.join(args.out, "reports", f"{scenario}.json.gz"), "wt", encoding="utf-8") as f:
             json.dump(reports, f)
         summary[scenario] = results
+        if method == "MAPPO":
+            from train_mappo import destination_load
+            loads[scenario] = {name: destination_load(result) for name, result in reports.items()}
 
     with open(os.path.join(args.out, "per_seed.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(per_seed_rows[0]))
@@ -160,7 +191,8 @@ def main(argv=None):
                    "seed_set": "validation (script check only)" if args.use_validation_seeds else "TEST (reserved)",
                    "runs": {s: [os.path.relpath(d, ROOT) for d in ds] for s, ds in runs_by_scenario.items()},
                    "ci": "mean +- 95% CI over training seeds (t, df = n-1); baselines are deterministic (CI n/a)",
-                   "provenance": collect_provenance(), "results": summary}, f, indent=2)
+                   "provenance": collect_provenance(), "results": summary,
+                   **({"destination_load": loads} if method == "MAPPO" else {})}, f, indent=2)
 
     lines = ["| Scenario | Policy | Return | Avg latency | Critical violation | Cloud share |", "|---|---|---|---|---|---|"]
     fmt = lambda m, h, pct=False: (f"{100 * m:.1f}%" if pct else f"{m:.1f}" if abs(m) >= 10 else f"{m:.2f}") + \
@@ -172,7 +204,7 @@ def main(argv=None):
     with open(os.path.join(args.out, "results_table.md"), "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
     print("\n".join(lines))
-    learning_curve_figure(runs_by_scenario, baselines_val, os.path.join(args.out, "learning_curves.png"))
+    learning_curve_figure(runs_by_scenario, baselines_val, os.path.join(args.out, "learning_curves.png"), method)
     print(f"Saved to {args.out}")
 
 
