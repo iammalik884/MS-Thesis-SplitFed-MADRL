@@ -7,12 +7,12 @@ University of Sargodha).
 The code follows the 18-step practical roadmap (`My Research Practical ROADMAP.docx`).
 Each step adds one new idea and is verified before the next step starts.
 
-**Current status: Steps 1–7 complete** (hospital simulator, FCFS baseline,
-Gymnasium environment, single-agent DQN baseline). The DQN was evaluated once
-on reserved test seeds; it beats FCFS under overload but does not beat the
-ECT heuristic in any scenario, and its training is not stable (see Step 7
-below). Steps 8–18 (MAPPO, SplitFed, privacy, robustness) have not been
-started.
+**Current status: Steps 1–8 complete** (hospital simulator, FCFS baseline,
+Gymnasium environment, single-agent DQN baseline, three-agent environment).
+The DQN was evaluated once on reserved test seeds; it beats FCFS under
+overload but does not beat the ECT heuristic in any scenario, and its training
+is not stable (see Step 7 below). Steps 9–18 (MAPPO training, SplitFed,
+privacy, robustness) have not been started.
 
 > **Data note:** all workload numbers (arrival rates, compute demands,
 > deadlines) are **synthetic placeholders**, not MIMIC-IV statistics.
@@ -25,11 +25,12 @@ Requires Python ≥ 3.10 (tested with 3.14.6 on Windows 11).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest -q                      # 96 tests, all should pass
+python -m pytest -q                      # 104 tests, all should pass
 python demo_simulation.py                # one readable run (seed 42)
 python run_baseline_fcfs.py --seeds 0-29 # FCFS baseline, 30 seeds
 python run_baseline_fcfs.py --config configs/scenarios/overload.yaml --seeds 0-29
 python check_simple_policies.py --config configs/scenarios/overload.yaml  # Step 6 sanity check
+python check_multi_agent_env.py --config configs/scenarios/overload.yaml   # Step 8 sanity check
 ```
 
 Each test file can also be run on its own, e.g. `python -m tests.test_step3_routing`.
@@ -91,7 +92,11 @@ and removed pre-v2 keys raise clear errors).
       evaluation of the frozen setting (Double DQN) on test seeds; see below.
       Still open with the supervisor: the modelling options in the design
       note (none applied).
-- [ ] Steps 8–18 — see the roadmap document.
+- [x] **Step 8 — Three-agent environment.** `MultiAgentHospitalEnv`
+      ([env/multi_agent_env.py](env/multi_agent_env.py)): Emergency, ICU and
+      General Ward are separate agents with local observations and their own
+      actions in one shared simulation; see below. No training yet.
+- [ ] Steps 9–18 — see the roadmap document.
 
 The design was revised after an audit (commits `470a079`, `acdb3d4`,
 `83e7f3f`). The pre-audit version is preserved under the git tag
@@ -246,6 +251,61 @@ Critical violations, offloading communication, action shares) are in
 `results/step7_final/summary.json` (short table: `results_table.md`); the analysis is in
 [Step7_DQN_Debugging.md](Step_Documentation/Step7_DQN_Debugging.md).
 
+## Step 8: three-agent environment
+
+`MultiAgentHospitalEnv(config)` in [env/multi_agent_env.py](env/multi_agent_env.py)
+wraps the Step 6 environment. The simulator, the reward definition, the cloud
+capacity and the evaluation protocol are unchanged.
+
+- **Agents:** `Emergency`, `ICU`, `General_Ward`. Each agent decides
+  Local / Edge / Cloud only for tasks that arrive in its own department.
+- **Turns:** the tasks of a step are decided one by one, in the same seeded
+  order FCFS uses; the task's own department acts (`env.agent_selection`).
+  All three agents act in the same simulation step when all three have tasks.
+  Each decision sees the load placed by earlier decisions, exactly as for
+  FCFS, ECT and the DQN, so later comparisons use the same decision process.
+  (Fully simultaneous decisions would give MAPPO a different, less informed
+  decision process than the baselines.)
+- **Local observation** (10 values): own load, the other two departments'
+  loads, cloud load (all backlog / capacity), the task's demand / own
+  capacity, priority one-hot, deadline offset fraction and time fraction.
+  Other departments' loads are a shared load signal; their tasks and
+  priorities are not visible. Agents whose turn it is not see no task.
+- **Global state** (`env.state()`): the 13-value Step 6 observation, for the
+  centralized critic of Step 9 (training only).
+- **Reward:** each task's Step 6 reward goes to the agent of its source
+  department. The sum over agents (team reward) equals the Step 6 reward
+  exactly; `step()` checks this every time.
+- **API:** `info = env.reset(seed)`, then while `not env.done`:
+  `obs = env.observe(env.agent_selection)`, `rewards, terminated, info = env.step(action)`.
+  At the end `info["episode_returns"]` holds each agent's return and
+  `info["report"]` the usual Step 5 protocol report.
+
+Both roadmap checkpoints are tested: all three agents act in the same step
+(25 such steps over seeds 0–29), and an Edge offload adds exactly the task's
+demand to the receiving department's queue and observed load. With FCFS
+decisions in every agent, all 6 configs × seeds 0–29 reproduce Step 5 exactly.
+
+**Sanity check, not a result** (`python check_multi_agent_env.py`, seeds 0–29,
+mean return per agent; each agent applies the same fixed rule independently):
+
+| Scenario | Rule | Emergency | ICU | General Ward | Team |
+|---|---|---|---|---|---|
+| Default | FCFS | −3.8 | −3.5 | −8.6 | −15.9 |
+| Default | ECT | −3.6 | −3.5 | −8.8 | −15.9 |
+| Overload | FCFS | −320.8 | −260.6 | −138.6 | −720.0 |
+| Overload | ECT | −74.1 | −69.4 | −66.7 | −210.1 |
+| Slow network | FCFS | −163.0 | −166.3 | −99.4 | −428.7 |
+| Slow network | ECT | −68.8 | −80.1 | −104.4 | −253.3 |
+
+The team returns equal the Step 6 sanity check. A better team result is not
+automatically better for every department: in the slow network, ECT improves
+the team return a lot, but General Ward's own return is slightly worse than
+with FCFS. Over seeds 0–29, ECT keeps 499 of General Ward's 679 tasks on its
+own node (FCFS: 64), and General Ward receives 4 tasks from the other
+departments (FCFS: 557). Step 9 trains the agents on the shared (team)
+objective, as the roadmap's cooperative setting requires.
+
 ## FCFS baseline results (seeds 0–29, mean)
 
 From [results/baselines/](results/baselines/), produced at commit `83e7f3f`
@@ -272,7 +332,7 @@ New runs go to `results/runs/` (git-ignored); a run folder is never overwritten.
 
 ## Verification
 
-96 automated tests (`python -m pytest -q`):
+104 automated tests (`python -m pytest -q`):
 
 | File | What it checks |
 |---|---|
@@ -287,6 +347,7 @@ New runs go to `results/runs/` (git-ignored); a run folder is never overwritten.
 | `test_ect_heuristic.py` | ECT estimates by hand, exact on idle nodes, tie order, no future information |
 | `test_dqn_pilot.py` | replay buffer, no bootstrapping at episode end, Double DQN target, ε schedule, reproducible training, shared evaluation = Step 5 FCFS, scaling knobs, Q vs Monte Carlo |
 | `test_step6_gym_env.py` | Gymnasium `check_env`, roadmap Step 6 checkpoints, exact FCFS reproduction on 6 configs × seeds 0–29, reward bookkeeping, action meanings, determinism, empty episode, invalid usage |
+| `test_step8_multi_agent_env.py` | roadmap Step 8 checkpoints (all three agents act in one step; Edge offload changes the receiving department's queue and observed load), exact FCFS reproduction on 6 configs × seeds 0–29, rewards per source agent = Step 6 reward, local vs global observation, determinism, invalid usage |
 
 ## Folder structure
 
@@ -306,12 +367,13 @@ MS_Thesis_Project/
 │   ├── metrics.py                # latency, throughput, deadline categories, breakdowns
 │   ├── evaluation.py             # common window + drain evaluation protocol
 │   ├── run_records.py            # run folders, manifests, provenance
-│   └── gym_env.py                # Step 6: Gymnasium environment (HospitalSchedulingEnv)
+│   ├── gym_env.py                # Step 6: Gymnasium environment (HospitalSchedulingEnv)
+│   └── multi_agent_env.py        # Step 8: three-agent environment (MultiAgentHospitalEnv)
 ├── agents/
 │   ├── heuristics.py             # Step 7: ECT heuristic baseline
 │   ├── policy_eval.py            # Step 7: one evaluation routine for all policies
 │   └── dqn.py                    # Step 7: DQN (replay buffer, target network, optional Double DQN)
-├── tests/                        # 96 tests (see Verification)
+├── tests/                        # 104 tests (see Verification)
 ├── results/
 │   ├── baselines/                # committed FCFS v2 results
 │   ├── pilot/                    # Step 7 DQN pilot runs (preliminary)
@@ -322,6 +384,7 @@ MS_Thesis_Project/
 ├── demo_simulation.py            # one readable run with seed 42
 ├── run_baseline_fcfs.py          # FCFS baseline runner (--seed / --seeds / --config)
 ├── check_simple_policies.py      # Step 6 sanity check with simple fixed policies (+ ECT)
+├── check_multi_agent_env.py      # Step 8 sanity check: per-agent returns of FCFS / ECT
 ├── train_dqn_pilot.py            # Step 7: DQN training with seed splits (--set for one override)
 ├── run_dqn_experiments.py        # Step 7: runs the pre-registered experiments (one override each)
 ├── summarize_dqn_experiments.py  # Step 7: pre-registered score per experiment
@@ -330,7 +393,7 @@ MS_Thesis_Project/
 ```
 
 **Note on `Step_Documentation/`:** the Step 3 and Step 5 write-ups were
-rewritten for the current (v2) design; Steps 6 and 7 have their own write-ups
+rewritten for the current (v2) design; Steps 6, 7 and 8 have their own write-ups
 (Step 7: `Step7_DQN_Baseline.docx`, with the design note and the debugging/close-out
 record as Markdown next to it). Steps 1, 2 and 4 start with a
 "V2 UPDATE" box listing what changed; their code listings are simplified

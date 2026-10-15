@@ -34,6 +34,7 @@ step that later touched it.
 | [run_records.py](env/run_records.py) | **Step 5 (V2 audit)** | Step 6/7 (+gymnasium, torch versions in provenance) | Unique run folders, manifest with config snapshot and git/package provenance |
 | [config_validation.py](env/config_validation.py) | **Step 5 (V2 audit)** | Step 6 (+rl_environment section) | Validates every config before a simulation is built |
 | [gym_env.py](env/gym_env.py) | **Step 6** | — | `HospitalSchedulingEnv` — Gymnasium reset()/step() around the simulator (Local / Edge / Cloud action) |
+| [multi_agent_env.py](env/multi_agent_env.py) | **Step 8** | — | `MultiAgentHospitalEnv` — three department agents (local observations, own actions, per-agent rewards) around the Step 6 env |
 
 *(Step 4 added no new file — only edited `task.py` and `hospital_env.py` above.)*
 
@@ -51,6 +52,7 @@ step that later touched it.
 |---|---|---|
 | [demo_simulation.py](demo_simulation.py) | Steps 1-4 demo | Runs the full pipeline once with seed=42 and prints a readable summary |
 | [check_simple_policies.py](check_simple_policies.py) | **Step 6** (ECT added in Step 7) | Sanity check: FCFS / always Local / Edge / Cloud / random / ECT played through the Gym env |
+| [check_multi_agent_env.py](check_multi_agent_env.py) | **Step 8** | Sanity check: per-agent and team returns when every department agent applies FCFS or ECT |
 | [run_dqn_experiments.py](run_dqn_experiments.py) | **Step 7 (debugging)** | Runs pre-registered experiments (one override each) in parallel |
 | [summarize_dqn_experiments.py](summarize_dqn_experiments.py) | **Step 7 (debugging)** | Applies the pre-registered normalised score (0 = random, 1 = ECT) |
 | [train_dqn_pilot.py](train_dqn_pilot.py) | **Step 7 (pilot; also used for debugging and close-out training)** | Trains a DQN (training/validation seed split, `--set` for one override), saves best/final checkpoints, curves, Q vs MC and the baseline comparison on validation seeds to `results/runs/` |
@@ -85,6 +87,7 @@ Stress scenarios live in `configs/scenarios/*.yaml`; each one `extends:` this fi
 | [test_step6_gym_env.py](tests/test_step6_gym_env.py) | Step 6 |
 | [test_ect_heuristic.py](tests/test_ect_heuristic.py) | Step 7 (design note) |
 | [test_dqn_pilot.py](tests/test_dqn_pilot.py) | Step 7 (pilot, debugging, Double DQN) |
+| [test_step8_multi_agent_env.py](tests/test_step8_multi_agent_env.py) | Step 8 |
 
 ---
 
