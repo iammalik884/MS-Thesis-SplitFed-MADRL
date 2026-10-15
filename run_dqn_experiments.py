@@ -1,8 +1,8 @@
 """
-Step 7 - Run the pre-registered DQN debugging experiments in parallel.
+Step 7 / Step 9 - Run pre-registered DQN or MAPPO experiments in parallel.
 ================================================================================
-ROMAN URDU: Har experiment train_dqn_pilot.py ko ZYADA SE ZYADA EK --set
-override ke saath chalata hai (Step7_DQN_Debugging.md ka plan). Har
+ROMAN URDU: Har experiment train_dqn_pilot.py (ya --trainer mappo: train_mappo.py) ko ZYADA SE ZYADA EK --set
+override ke saath chalata hai (Step7_DQN_Debugging.md / Step9_MAPPO.md ka plan). Har
 (experiment, scenario, training seed) ka alag run folder banta hai:
 results/runs/<group>/<experiment>/...
 
@@ -10,6 +10,7 @@ ENGLISH: e.g.
   py run_dqn_experiments.py --group phase1 --exp E0= --exp E1=reward_scale=0.1 --seeds 0 1
   py run_dqn_experiments.py --group phase2 --base reward_scale=0.01 --exp G095=gamma=0.95
   py run_dqn_experiments.py --group round2 --base reward_scale=0.01 --base gamma=0.95 --exp DDQN=double_dqn=1
+  py run_dqn_experiments.py --trainer mappo --group mappo1 --exp M0= --exp M1=gamma=0.95   (Step 9)
 """
 
 import argparse
@@ -20,6 +21,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
+TRAINERS = {"dqn": "train_dqn_pilot.py", "mappo": "train_mappo.py"}   # Step 7 / Step 9
 SCENARIOS = {"default": "configs/environment.yaml",
              "overload": "configs/scenarios/overload.yaml",
              "slow_network": "configs/scenarios/slow_network.yaml"}
@@ -28,6 +30,7 @@ SCENARIOS = {"default": "configs/environment.yaml",
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--group", required=True)
+    parser.add_argument("--trainer", choices=sorted(TRAINERS), default="dqn")
     parser.add_argument("--exp", action="append", required=True,
                         help="NAME=OVERRIDE (one KEY=VALUE, or empty for the reference)")
     parser.add_argument("--base", action="append", default=[],
@@ -52,7 +55,7 @@ def main(argv=None):
                 out_dir = os.path.join(ROOT, "results", "runs", args.group, name)
                 if args.only_missing and glob.glob(os.path.join(out_dir, f"{name}_{scenario}_seed{seed}_*", "summary.json")):
                     continue
-                cmd = [sys.executable, os.path.join(ROOT, "train_dqn_pilot.py"), "--config", SCENARIOS[scenario],
+                cmd = [sys.executable, os.path.join(ROOT, TRAINERS[args.trainer]), "--config", SCENARIOS[scenario],
                        "--train-seed", str(seed), "--name", f"{name}_{scenario}_seed{seed}",
                        "--out-dir", out_dir, "--total-steps", str(args.total_steps)]
                 for base in args.base:

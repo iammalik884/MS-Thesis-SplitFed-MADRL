@@ -4,7 +4,8 @@ Step 7 - Summarise DQN debugging runs with the pre-registered criterion.
 score = (R - R_random) / (R_ECT - R_random) on validation seeds (0 = random, 1 = ECT),
 computed per run with that run's own baseline evaluations. Selection uses the
 mean FINAL-checkpoint score over scenarios and training seeds
-(Step_Documentation/Step7_DQN_Debugging.md).
+(Step_Documentation/Step7_DQN_Debugging.md). Step 9: MAPPO run folders work too;
+their "Q" columns then show the critic V vs Monte Carlo check.
 
 Run:  py summarize_dqn_experiments.py results/runs/phase1
 """
@@ -24,22 +25,24 @@ def load(group_dir):
         manifest = json.load(open(os.path.join(os.path.dirname(path), "manifest.json"), encoding="utf-8"))
         exp = os.path.basename(os.path.dirname(os.path.dirname(path)))
         scenario = os.path.splitext(os.path.basename(manifest["config_path"]))[0]
+        method = "dqn" if "dqn_best" in summary else "mappo"          # Step 7 DQN or Step 9 MAPPO run
+        check = summary["q_vs_mc"] if method == "dqn" else summary["v_vs_mc"]   # Q (DQN) or critic V (MAPPO) vs MC
         r_rand = summary["baselines"]["random"]["mean_return"]
         r_ect = summary["baselines"]["ECT"]["mean_return"]
         score = lambda r: (r - r_rand) / (r_ect - r_rand)
         rows.append({
             "exp": exp, "scenario": scenario, "seed": manifest["train_seed"],
-            "overrides": manifest["dqn_overrides"], "total_steps": manifest["total_steps"], "commit": manifest["provenance"]["git_commit"][:7],
+            "overrides": manifest[f"{method}_overrides"], "total_steps": manifest["total_steps"], "commit": manifest["provenance"]["git_commit"][:7],
             "dirty": manifest["provenance"]["git_dirty"],
-            "best_return": summary["dqn_best"]["mean_return"], "final_return": summary["dqn_final"]["mean_return"],
-            "best_step": summary["dqn_best"]["step"],
-            "best_score": score(summary["dqn_best"]["mean_return"]),
-            "final_score": score(summary["dqn_final"]["mean_return"]),
+            "best_return": summary[f"{method}_best"]["mean_return"], "final_return": summary[f"{method}_final"]["mean_return"],
+            "best_step": summary[f"{method}_best"]["step"],
+            "best_score": score(summary[f"{method}_best"]["mean_return"]),
+            "final_score": score(summary[f"{method}_final"]["mean_return"]),
             "ect": r_ect, "random": r_rand,
-            "q_bias_final_unscaled": summary["q_vs_mc"]["dqn_final"]["unscaled"]["mean_bias"],
-            "q_rmse_final_unscaled": summary["q_vs_mc"]["dqn_final"]["unscaled"]["rmse"],
-            "q_corr_final": summary["q_vs_mc"]["dqn_final"]["correlation"],
-            "cloud_share_final": summary["dqn_final"]["action_proportions"]["Cloud"],
+            "q_bias_final_unscaled": check[f"{method}_final"]["unscaled"]["mean_bias"],
+            "q_rmse_final_unscaled": check[f"{method}_final"]["unscaled"]["rmse"],
+            "q_corr_final": check[f"{method}_final"]["correlation"],
+            "cloud_share_final": summary[f"{method}_final"]["action_proportions"]["Cloud"],
         })
     return rows
 

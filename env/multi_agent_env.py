@@ -110,21 +110,7 @@ class MultiAgentHospitalEnv:
         """Local observation of `agent` (task features only on its own turn)."""
         if agent not in self.agents:
             raise ValueError(f"observe: unknown agent {agent!r}; agents are {self.agents}")
-        sim, n = self.inner.sim, len(self.agents)
-        order = [agent] + [d for d in self.agents if d != agent]
-        obs = np.zeros(len(self.observation_names[agent]), dtype=np.float32)
-        obs[:n] = [sim.nodes[d].backlog_demand / sim.nodes[d].capacity for d in order]
-        obs[n] = sim.cloud_node.backlog_demand / self.inner.cloud_capacity
-        if agent == self.agent_selection and not self.done:
-            arrival = self.inner._pending[0]
-            obs[n + 1] = arrival.compute_demand / sim.nodes[agent].capacity
-            obs[n + 2 + PRIORITY_CLASSES.index(arrival.priority)] = 1.0
-            if self.inner.max_deadline_offset > 0:
-                obs[n + 5] = self.inner.deadline_offsets[arrival.priority] / self.inner.max_deadline_offset
-            obs[n + 6] = sim.current_time / self.inner.settings["window_steps"]
-        else:
-            obs[n + 6] = (1.0 if self.done else sim.current_time / self.inner.settings["window_steps"])
-        return obs
+        return local_observation(self.inner, agent, with_task=agent == self.agent_selection and not self.done)
 
     def state(self) -> np.ndarray:
         """Global state (the Step 6 observation) for a centralized critic."""
@@ -147,3 +133,27 @@ class MultiAgentHospitalEnv:
                     r = self.inner._task_reward(cutoff - task.arrival_time + 1, task.deadline <= cutoff)
                 rewards[task.source_department] += r
         return rewards
+
+
+def local_observation(inner: HospitalSchedulingEnv, agent: str, with_task: bool) -> np.ndarray:
+    """The 10-value local observation of `agent`, built from a Step 6 env.
+    Shared by MultiAgentHospitalEnv.observe() and by the evaluation of
+    trained actors through agents/policy_eval.evaluate() (Step 9)."""
+    sim, agents = inner.sim, inner.departments
+    n = len(agents)
+    order = [agent] + [d for d in agents if d != agent]
+    obs = np.zeros(n + 7, dtype=np.float32)
+    obs[:n] = [sim.nodes[d].backlog_demand / sim.nodes[d].capacity for d in order]
+    obs[n] = sim.cloud_node.backlog_demand / inner.cloud_capacity
+    if with_task:
+        arrival = inner._pending[0]
+        if arrival.department != agent:
+            raise ValueError(f"local_observation: the pending task belongs to {arrival.department}, not {agent}")
+        obs[n + 1] = arrival.compute_demand / sim.nodes[agent].capacity
+        obs[n + 2 + PRIORITY_CLASSES.index(arrival.priority)] = 1.0
+        if inner.max_deadline_offset > 0:
+            obs[n + 5] = inner.deadline_offsets[arrival.priority] / inner.max_deadline_offset
+        obs[n + 6] = sim.current_time / inner.settings["window_steps"]
+    else:
+        obs[n + 6] = 1.0 if inner._done else sim.current_time / inner.settings["window_steps"]
+    return obs
