@@ -1,0 +1,3443 @@
+{
+  "evaluation_seeds": [
+    2000,
+    2029
+  ],
+  "seed_set": "TEST (reserved)",
+  "runs": {
+    "default": [
+      "results\\step10_final\\training_runs\\FINAL_default_seed0_20261018T182037Z_672f628",
+      "results\\step10_final\\training_runs\\FINAL_default_seed1_20261018T182406Z_672f628",
+      "results\\step10_final\\training_runs\\FINAL_default_seed2_20261018T182744Z_672f628",
+      "results\\step10_final\\training_runs\\FINAL_default_seed3_20261018T183114Z_672f628",
+      "results\\step10_final\\training_runs\\FINAL_default_seed4_20261018T183444Z_672f628"
+    ],
+    "overload": [
+      "results\\step10_final\\training_runs\\FINAL_overload_seed0_20261018T183923Z_672f628",
+      "results\\step10_final\\training_runs\\FINAL_overload_seed1_20261018T184409Z_672f628",
+      "results\\step10_final\\training_runs\\FINAL_overload_seed2_20261018T184900Z_672f628",
+      "results\\step10_final\\training_runs\\FINAL_overload_seed3_20261018T185347Z_672f628",
+      "results\\step10_final\\training_runs\\FINAL_overload_seed4_20261018T185901Z_672f628"
+    ],
+    "slow_network": [
+      "results\\step10_final\\training_runs\\FINAL_slow_network_seed0_20261018T190325Z_672f628",
+      "results\\step10_final\\training_runs\\FINAL_slow_network_seed1_20261018T190737Z_672f628",
+      "results\\step10_final\\training_runs\\FINAL_slow_network_seed2_20261018T191137Z_672f628",
+      "results\\step10_final\\training_runs\\FINAL_slow_network_seed3_20261018T191542Z_672f628",
+      "results\\step10_final\\training_runs\\FINAL_slow_network_seed4_20261018T191945Z_672f628"
+    ]
+  },
+  "ci": "mean +- 95% CI over training seeds (t, df = n-1); baselines are deterministic (CI n/a)",
+  "provenance": {
+    "git_commit": "da022d9ecb57c459a737b8b28833b031bdd2540d",
+    "git_branch": "main",
+    "git_dirty": false,
+    "dirty_tracked_files": [],
+    "python_executable": "C:\\Users\\USr\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+    "python_version": "3.14.6",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "numpy": "2.5.3",
+      "PyYAML": "6.0.3",
+      "pytest": "9.1.1",
+      "gymnasium": "1.4.0",
+      "torch": "2.14.1+cpu"
+    },
+    "created_utc": "2026-10-18T19:22:09Z"
+  },
+  "results": {
+    "default": {
+      "MAPPO (best)": {
+        "return": [
+          -15.073333333333332,
+          0.38091189901730904
+        ],
+        "avg_latency": [
+          0.5587967838156691,
+          0.015637684261690703
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "throughput_in_window": [
+          1.2816666666666667,
+          0.0020694399970061874
+        ],
+        "neighbour_transfers": [
+          0.5133333333333333,
+          0.4051031207659872
+        ],
+        "cloud_transfers": [
+          3.2866666666666666,
+          0.7021472982695435
+        ],
+        "synthetic_payload_units_total": [
+          21.900701902942732,
+          3.1673038363593125
+        ],
+        "action_shares": {
+          "Local": 0.8558786346396966,
+          "Edge": 0.019469026548672566,
+          "Cloud": 0.12465233881163085
+        },
+        "per_training_seed_return": [
+          -15.1,
+          -15.2,
+          -14.966666666666667,
+          -14.633333333333333,
+          -15.466666666666667
+        ]
+      },
+      "MAPPO (final)": {
+        "return": [
+          -14.846666666666666,
+          0.257809369703215
+        ],
+        "avg_latency": [
+          0.5492599331397869,
+          0.01075064137977094
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "throughput_in_window": [
+          1.2813333333333334,
+          0.0022669579355275
+        ],
+        "neighbour_transfers": [
+          0.5066666666666667,
+          0.40910059972977436
+        ],
+        "cloud_transfers": [
+          2.74,
+          0.6859811216825741
+        ],
+        "synthetic_payload_units_total": [
+          18.714537781671062,
+          3.594311476361132
+        ],
+        "action_shares": {
+          "Local": 0.8768647281921618,
+          "Edge": 0.019216182048040455,
+          "Cloud": 0.10391908975979772
+        },
+        "per_training_seed_return": [
+          -15.1,
+          -14.7,
+          -14.766666666666667,
+          -14.633333333333333,
+          -15.033333333333333
+        ]
+      },
+      "FCFS": {
+        "return": [
+          -15.7,
+          null
+        ],
+        "avg_latency": [
+          0.5822250152040324,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "throughput_in_window": [
+          1.2833333333333332,
+          null
+        ],
+        "neighbour_transfers": [
+          2.466666666666667,
+          null
+        ],
+        "cloud_transfers": [
+          3.4,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          30.578469109012204,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.7774968394437421,
+          "Edge": 0.09355246523388117,
+          "Cloud": 0.12895069532237674
+        }
+      },
+      "always Local": {
+        "return": [
+          -19.866666666666667,
+          null
+        ],
+        "avg_latency": [
+          0.6937311951913023,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.006666666666666667,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0018268268268268268,
+          null
+        ],
+        "throughput_in_window": [
+          1.2683333333333333,
+          null
+        ],
+        "neighbour_transfers": [
+          0,
+          null
+        ],
+        "cloud_transfers": [
+          0,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          0.0,
+          null
+        ],
+        "action_shares": {
+          "Local": 1.0,
+          "Edge": 0.0,
+          "Cloud": 0.0
+        }
+      },
+      "always Edge": {
+        "return": [
+          -38.233333333333334,
+          null
+        ],
+        "avg_latency": [
+          1.4321107988256876,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "throughput_in_window": [
+          1.2166666666666668,
+          null
+        ],
+        "neighbour_transfers": [
+          26.366666666666667,
+          null
+        ],
+        "cloud_transfers": [
+          0,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          88.61464966393167,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.0,
+          "Edge": 1.0,
+          "Cloud": 0.0
+        }
+      },
+      "always Cloud": {
+        "return": [
+          -52.733333333333334,
+          null
+        ],
+        "avg_latency": [
+          2.0,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "throughput_in_window": [
+          1.1883333333333332,
+          null
+        ],
+        "neighbour_transfers": [
+          0,
+          null
+        ],
+        "cloud_transfers": [
+          26.366666666666667,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          88.61464966393167,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.0,
+          "Edge": 0.0,
+          "Cloud": 1.0
+        }
+      },
+      "random": {
+        "return": [
+          -34.733333333333334,
+          null
+        ],
+        "avg_latency": [
+          1.3164169042934923,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "throughput_in_window": [
+          1.245,
+          null
+        ],
+        "neighbour_transfers": [
+          8.4,
+          null
+        ],
+        "cloud_transfers": [
+          9.533333333333333,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          60.331773149866045,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.3198482932996207,
+          "Edge": 0.3185840707964602,
+          "Cloud": 0.3615676359039191
+        }
+      },
+      "ECT": {
+        "return": [
+          -15.466666666666667,
+          null
+        ],
+        "avg_latency": [
+          0.566921153128572,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "throughput_in_window": [
+          1.2783333333333333,
+          null
+        ],
+        "neighbour_transfers": [
+          1.7666666666666666,
+          null
+        ],
+        "cloud_transfers": [
+          0.13333333333333333,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          8.333623411253162,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.9279393173198482,
+          "Edge": 0.06700379266750948,
+          "Cloud": 0.0050568900126422255
+        }
+      }
+    },
+    "overload": {
+      "MAPPO (best)": {
+        "return": [
+          -142.85333333333335,
+          2.6965684604143405
+        ],
+        "avg_latency": [
+          1.1298923526500988,
+          0.021505608673138284
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "throughput_in_window": [
+          6.000333333333334,
+          0.010891626079860378
+        ],
+        "neighbour_transfers": [
+          0,
+          0.0
+        ],
+        "cloud_transfers": [
+          61.3,
+          2.2080061676400975
+        ],
+        "synthetic_payload_units_total": [
+          284.1124839360411,
+          6.277011328622454
+        ],
+        "action_shares": {
+          "Local": 0.5145195353748679,
+          "Edge": 0.0,
+          "Cloud": 0.485480464625132
+        },
+        "per_training_seed_return": [
+          -144.76666666666668,
+          -143.36666666666667,
+          -142.5,
+          -144.33333333333334,
+          -139.3
+        ]
+      },
+      "MAPPO (final)": {
+        "return": [
+          -144.42666666666668,
+          3.375585876986338
+        ],
+        "avg_latency": [
+          1.142981018484511,
+          0.026734896552393108
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "throughput_in_window": [
+          5.996333333333333,
+          0.010180298719058381
+        ],
+        "neighbour_transfers": [
+          0.006666666666666666,
+          0.01850963403465199
+        ],
+        "cloud_transfers": [
+          63.13333333333333,
+          2.240162822617391
+        ],
+        "synthetic_payload_units_total": [
+          288.81204665498814,
+          6.20856267013336
+        ],
+        "action_shares": {
+          "Local": 0.49994720168954593,
+          "Edge": 5.279831045406547e-05,
+          "Cloud": 0.5
+        },
+        "per_training_seed_return": [
+          -144.33333333333334,
+          -146.5,
+          -146.16666666666666,
+          -145.33333333333334,
+          -139.8
+        ]
+      },
+      "FCFS": {
+        "return": [
+          -772.7,
+          null
+        ],
+        "avg_latency": [
+          3.6695988471909256,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.6481326023029289,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.23306608434514184,
+          null
+        ],
+        "throughput_in_window": [
+          4.831666666666667,
+          null
+        ],
+        "neighbour_transfers": [
+          102.63333333333334,
+          null
+        ],
+        "cloud_transfers": [
+          17.5,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          405.5689091801177,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.048574445617740235,
+          "Edge": 0.8128299894403379,
+          "Cloud": 0.13859556494192185
+        }
+      },
+      "always Local": {
+        "return": [
+          -1932.2,
+          null
+        ],
+        "avg_latency": [
+          9.72071344693023,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.7022406657344775,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.5291639615481173,
+          null
+        ],
+        "throughput_in_window": [
+          3.5533333333333332,
+          null
+        ],
+        "neighbour_transfers": [
+          0,
+          null
+        ],
+        "cloud_transfers": [
+          0,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          0.0,
+          null
+        ],
+        "action_shares": {
+          "Local": 1.0,
+          "Edge": 0.0,
+          "Cloud": 0.0
+        }
+      },
+      "always Edge": {
+        "return": [
+          -2007.6,
+          null
+        ],
+        "avg_latency": [
+          9.51020312820746,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.8985881040506619,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.6164654205002683,
+          null
+        ],
+        "throughput_in_window": [
+          3.3266666666666667,
+          null
+        ],
+        "neighbour_transfers": [
+          126.26666666666667,
+          null
+        ],
+        "cloud_transfers": [
+          0,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          422.1398281921178,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.0,
+          "Edge": 1.0,
+          "Cloud": 0.0
+        }
+      },
+      "always Cloud": {
+        "return": [
+          -253.46666666666667,
+          null
+        ],
+        "avg_latency": [
+          2.0019582230227466,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.0019624819624819625,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0004851628382908154,
+          null
+        ],
+        "throughput_in_window": [
+          5.7683333333333335,
+          null
+        ],
+        "neighbour_transfers": [
+          0,
+          null
+        ],
+        "cloud_transfers": [
+          126.26666666666667,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          422.1398281921178,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.0,
+          "Edge": 0.0,
+          "Cloud": 1.0
+        }
+      },
+      "random": {
+        "return": [
+          -555.2,
+          null
+        ],
+        "avg_latency": [
+          3.071302991212772,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.3205782279335608,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.1260311916270752,
+          null
+        ],
+        "throughput_in_window": [
+          5.216666666666667,
+          null
+        ],
+        "neighbour_transfers": [
+          42.13333333333333,
+          null
+        ],
+        "cloud_transfers": [
+          43.1,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          281.8774760542975,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.32497360084477295,
+          "Edge": 0.33368532206969376,
+          "Cloud": 0.34134107708553324
+        }
+      },
+      "ECT": {
+        "return": [
+          -215.2,
+          null
+        ],
+        "avg_latency": [
+          1.668653666652393,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.011761016761016761,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0027594517424349685,
+          null
+        ],
+        "throughput_in_window": [
+          5.845,
+          null
+        ],
+        "neighbour_transfers": [
+          7.9,
+          null
+        ],
+        "cloud_transfers": [
+          36.06666666666667,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          201.0103875288552,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.6517951425554382,
+          "Edge": 0.06256599788806758,
+          "Cloud": 0.2856388595564942
+        }
+      }
+    },
+    "slow_network": {
+      "MAPPO (best)": {
+        "return": [
+          -151.12666666666667,
+          11.321837948160606
+        ],
+        "avg_latency": [
+          2.04017693988932,
+          0.16393386261258155
+        ],
+        "critical_deadline_violation_rate": [
+          0.0017713365539452494,
+          0.0014556280760848355
+        ],
+        "deadline_violation_rate": [
+          0.000983219243551056,
+          0.0009322529590661719
+        ],
+        "throughput_in_window": [
+          3.332666666666667,
+          0.03004610232251319
+        ],
+        "neighbour_transfers": [
+          0.06,
+          0.10305728074716101
+        ],
+        "cloud_transfers": [
+          20.246666666666666,
+          2.716347917559825
+        ],
+        "synthetic_payload_units_total": [
+          112.71930225795344,
+          11.926292067500546
+        ],
+        "action_shares": {
+          "Local": 0.7245931283905968,
+          "Edge": 0.0008137432188065099,
+          "Cloud": 0.27459312839059674
+        },
+        "per_training_seed_return": [
+          -147.2,
+          -160.0,
+          -144.7,
+          -161.76666666666668,
+          -141.96666666666667
+        ]
+      },
+      "MAPPO (final)": {
+        "return": [
+          -157.79333333333332,
+          14.68070127131783
+        ],
+        "avg_latency": [
+          2.1261540784522577,
+          0.2094260141032389
+        ],
+        "critical_deadline_violation_rate": [
+          0.00214170692431562,
+          0.000804766697158782
+        ],
+        "deadline_violation_rate": [
+          0.0014205498627206717,
+          0.001160412148047321
+        ],
+        "throughput_in_window": [
+          3.3173333333333335,
+          0.03925395480782949
+        ],
+        "neighbour_transfers": [
+          0.04666666666666667,
+          0.08068162423896906
+        ],
+        "cloud_transfers": [
+          21.82,
+          3.565759814981716
+        ],
+        "synthetic_payload_units_total": [
+          120.50967304168661,
+          16.330289539648856
+        ],
+        "action_shares": {
+          "Local": 0.7034358047016275,
+          "Edge": 0.0006329113924050633,
+          "Cloud": 0.29593128390596746
+        },
+        "per_training_seed_return": [
+          -160.43333333333334,
+          -166.06666666666666,
+          -149.73333333333332,
+          -170.76666666666668,
+          -141.96666666666667
+        ]
+      },
+      "FCFS": {
+        "return": [
+          -409.56666666666666,
+          null
+        ],
+        "avg_latency": [
+          3.641051534496926,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.8401069327403625,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.18438035294167918,
+          null
+        ],
+        "throughput_in_window": [
+          2.9266666666666667,
+          null
+        ],
+        "neighbour_transfers": [
+          53.6,
+          null
+        ],
+        "cloud_transfers": [
+          11.033333333333333,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          227.12128515683,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.12341772151898735,
+          "Edge": 0.7269439421338155,
+          "Cloud": 0.14963833634719712
+        }
+      },
+      "always Local": {
+        "return": [
+          -402.8666666666667,
+          null
+        ],
+        "avg_latency": [
+          3.6028759436963824,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.2634891682354329,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.17468165955026385,
+          null
+        ],
+        "throughput_in_window": [
+          2.9516666666666667,
+          null
+        ],
+        "neighbour_transfers": [
+          0,
+          null
+        ],
+        "cloud_transfers": [
+          0,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          0.0,
+          null
+        ],
+        "action_shares": {
+          "Local": 1.0,
+          "Edge": 0.0,
+          "Cloud": 0.0
+        }
+      },
+      "always Edge": {
+        "return": [
+          -667.0,
+          null
+        ],
+        "avg_latency": [
+          5.321148261960644,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          1.0,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.3587207181832935,
+          null
+        ],
+        "throughput_in_window": [
+          2.6083333333333334,
+          null
+        ],
+        "neighbour_transfers": [
+          73.73333333333333,
+          null
+        ],
+        "cloud_transfers": [
+          0,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          253.09267266630388,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.0,
+          "Edge": 1.0,
+          "Cloud": 0.0
+        }
+      },
+      "always Cloud": {
+        "return": [
+          -868.7333333333333,
+          null
+        ],
+        "avg_latency": [
+          6.0,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          1.0,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.5762792721318958,
+          null
+        ],
+        "throughput_in_window": [
+          2.5583333333333336,
+          null
+        ],
+        "neighbour_transfers": [
+          0,
+          null
+        ],
+        "cloud_transfers": [
+          73.73333333333333,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          253.09267266630388,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.0,
+          "Edge": 0.0,
+          "Cloud": 1.0
+        }
+      },
+      "random": {
+        "return": [
+          -492.6,
+          null
+        ],
+        "avg_latency": [
+          3.8297170720911526,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.7232768084928537,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.2842705959766617,
+          null
+        ],
+        "throughput_in_window": [
+          2.945,
+          null
+        ],
+        "neighbour_transfers": [
+          24.9,
+          null
+        ],
+        "cloud_transfers": [
+          25.266666666666666,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          173.22897985912746,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.31962025316455694,
+          "Edge": 0.33770343580470163,
+          "Cloud": 0.3426763110307414
+        }
+      },
+      "ECT": {
+        "return": [
+          -246.0,
+          null
+        ],
+        "avg_latency": [
+          2.5173793271844533,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.3076736357224983,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.07527604731391524,
+          null
+        ],
+        "throughput_in_window": [
+          3.1266666666666665,
+          null
+        ],
+        "neighbour_transfers": [
+          5.766666666666667,
+          null
+        ],
+        "cloud_transfers": [
+          1.5666666666666667,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          32.87884635103067,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.9005424954792043,
+          "Edge": 0.07820976491862568,
+          "Cloud": 0.021247739602169982
+        }
+      }
+    }
+  },
+  "destination_load": {
+    "default": {
+      "MAPPO_best_trainseed0": {
+        "Cloud": {
+          "mean_tasks": 3.6333333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.333333333333334,
+          "mean_avg_queue_wait": 0.03628368363662481
+        },
+        "General_Ward": {
+          "mean_tasks": 5.166666666666667,
+          "mean_avg_queue_wait": 0.028412698412698414
+        },
+        "ICU": {
+          "mean_tasks": 7.233333333333333,
+          "mean_avg_queue_wait": 0.022632275132275132
+        }
+      },
+      "MAPPO_best_trainseed1": {
+        "Cloud": {
+          "mean_tasks": 3.6666666666666665,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.466666666666667,
+          "mean_avg_queue_wait": 0.04770226505520623
+        },
+        "General_Ward": {
+          "mean_tasks": 5.366666666666666,
+          "mean_avg_queue_wait": 0.02253968253968254
+        },
+        "ICU": {
+          "mean_tasks": 6.866666666666666,
+          "mean_avg_queue_wait": 0.00787037037037037
+        }
+      },
+      "MAPPO_best_trainseed2": {
+        "Cloud": {
+          "mean_tasks": 3.2,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.133333333333333,
+          "mean_avg_queue_wait": 0.029344405594405595
+        },
+        "General_Ward": {
+          "mean_tasks": 5.3,
+          "mean_avg_queue_wait": 0.010317460317460317
+        },
+        "ICU": {
+          "mean_tasks": 7.733333333333333,
+          "mean_avg_queue_wait": 0.0
+        }
+      },
+      "MAPPO_best_trainseed3": {
+        "Cloud": {
+          "mean_tasks": 2.3333333333333335,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.966666666666667,
+          "mean_avg_queue_wait": 0.048886774989716164
+        },
+        "General_Ward": {
+          "mean_tasks": 5.3,
+          "mean_avg_queue_wait": 0.009722222222222222
+        },
+        "ICU": {
+          "mean_tasks": 7.766666666666667,
+          "mean_avg_queue_wait": 0.0
+        }
+      },
+      "MAPPO_best_trainseed4": {
+        "Cloud": {
+          "mean_tasks": 3.6,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.733333333333333,
+          "mean_avg_queue_wait": 0.052383417236358414
+        },
+        "General_Ward": {
+          "mean_tasks": 4.2,
+          "mean_avg_queue_wait": 0.02142857142857143
+        },
+        "ICU": {
+          "mean_tasks": 7.833333333333333,
+          "mean_avg_queue_wait": 0.007407407407407407
+        }
+      },
+      "MAPPO_final_trainseed0": {
+        "Cloud": {
+          "mean_tasks": 3.6333333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.333333333333334,
+          "mean_avg_queue_wait": 0.03628368363662481
+        },
+        "General_Ward": {
+          "mean_tasks": 5.166666666666667,
+          "mean_avg_queue_wait": 0.028412698412698414
+        },
+        "ICU": {
+          "mean_tasks": 7.233333333333333,
+          "mean_avg_queue_wait": 0.022632275132275132
+        }
+      },
+      "MAPPO_final_trainseed1": {
+        "Cloud": {
+          "mean_tasks": 2.7333333333333334,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.4,
+          "mean_avg_queue_wait": 0.04770226505520623
+        },
+        "General_Ward": {
+          "mean_tasks": 5.233333333333333,
+          "mean_avg_queue_wait": 0.005555555555555555
+        },
+        "ICU": {
+          "mean_tasks": 8,
+          "mean_avg_queue_wait": 0.029943019943019945
+        }
+      },
+      "MAPPO_final_trainseed2": {
+        "Cloud": {
+          "mean_tasks": 2.2333333333333334,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.566666666666666,
+          "mean_avg_queue_wait": 0.03239576599870717
+        },
+        "General_Ward": {
+          "mean_tasks": 5.466666666666667,
+          "mean_avg_queue_wait": 0.005555555555555555
+        },
+        "ICU": {
+          "mean_tasks": 8.1,
+          "mean_avg_queue_wait": 0.016481481481481482
+        }
+      },
+      "MAPPO_final_trainseed3": {
+        "Cloud": {
+          "mean_tasks": 2.3333333333333335,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.966666666666667,
+          "mean_avg_queue_wait": 0.048886774989716164
+        },
+        "General_Ward": {
+          "mean_tasks": 5.3,
+          "mean_avg_queue_wait": 0.009722222222222222
+        },
+        "ICU": {
+          "mean_tasks": 7.766666666666667,
+          "mean_avg_queue_wait": 0.0
+        }
+      },
+      "MAPPO_final_trainseed4": {
+        "Cloud": {
+          "mean_tasks": 2.7666666666666666,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.8,
+          "mean_avg_queue_wait": 0.04925626660920778
+        },
+        "General_Ward": {
+          "mean_tasks": 4.7,
+          "mean_avg_queue_wait": 0.012222222222222223
+        },
+        "ICU": {
+          "mean_tasks": 8.1,
+          "mean_avg_queue_wait": 0.019814814814814816
+        }
+      },
+      "FCFS": {
+        "Cloud": {
+          "mean_tasks": 3.4,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 9.166666666666666,
+          "mean_avg_queue_wait": 0.0
+        },
+        "General_Ward": {
+          "mean_tasks": 5.766666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "ICU": {
+          "mean_tasks": 8.033333333333333,
+          "mean_avg_queue_wait": 0.006666666666666667
+        }
+      },
+      "always Local": {
+        "Emergency": {
+          "mean_tasks": 10.333333333333334,
+          "mean_avg_queue_wait": 0.04855474590768708
+        },
+        "General_Ward": {
+          "mean_tasks": 7.666666666666667,
+          "mean_avg_queue_wait": 0.41236050986050987
+        },
+        "ICU": {
+          "mean_tasks": 8.366666666666667,
+          "mean_avg_queue_wait": 0.06077829577829578
+        }
+      },
+      "always Edge": {
+        "Emergency": {
+          "mean_tasks": 9,
+          "mean_avg_queue_wait": 0.0047619047619047615
+        },
+        "General_Ward": {
+          "mean_tasks": 8.466666666666667,
+          "mean_avg_queue_wait": 0.0432005957005957
+        },
+        "ICU": {
+          "mean_tasks": 8.9,
+          "mean_avg_queue_wait": 0.008703703703703703
+        }
+      },
+      "always Cloud": {
+        "Cloud": {
+          "mean_tasks": 26.366666666666667,
+          "mean_avg_queue_wait": 0.0
+        }
+      },
+      "random": {
+        "Cloud": {
+          "mean_tasks": 9.533333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 6.8,
+          "mean_avg_queue_wait": 0.015079365079365078
+        },
+        "General_Ward": {
+          "mean_tasks": 4.233333333333333,
+          "mean_avg_queue_wait": 0.08527777777777779
+        },
+        "ICU": {
+          "mean_tasks": 5.8,
+          "mean_avg_queue_wait": 0.02142857142857143
+        }
+      },
+      "ECT": {
+        "Cloud": {
+          "mean_tasks": 0.13333333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 11.4,
+          "mean_avg_queue_wait": 0.06441867772750126
+        },
+        "General_Ward": {
+          "mean_tasks": 6.233333333333333,
+          "mean_avg_queue_wait": 0.03226190476190476
+        },
+        "ICU": {
+          "mean_tasks": 8.6,
+          "mean_avg_queue_wait": 0.03396825396825397
+        }
+      }
+    },
+    "overload": {
+      "MAPPO_best_trainseed0": {
+        "Cloud": {
+          "mean_tasks": 62.63333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 28.133333333333333,
+          "mean_avg_queue_wait": 0.04652492278944885
+        },
+        "General_Ward": {
+          "mean_tasks": 11,
+          "mean_avg_queue_wait": 0.028686406186406187
+        },
+        "ICU": {
+          "mean_tasks": 24.5,
+          "mean_avg_queue_wait": 0.09949288801643874
+        }
+      },
+      "MAPPO_best_trainseed1": {
+        "Cloud": {
+          "mean_tasks": 61.03333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 28,
+          "mean_avg_queue_wait": 0.04391846461827541
+        },
+        "General_Ward": {
+          "mean_tasks": 12.733333333333333,
+          "mean_avg_queue_wait": 0.10574377419965655
+        },
+        "ICU": {
+          "mean_tasks": 24.5,
+          "mean_avg_queue_wait": 0.08473690515344688
+        }
+      },
+      "MAPPO_best_trainseed2": {
+        "Cloud": {
+          "mean_tasks": 60.63333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 27.266666666666666,
+          "mean_avg_queue_wait": 0.03330536567142055
+        },
+        "General_Ward": {
+          "mean_tasks": 12.1,
+          "mean_avg_queue_wait": 0.06858369843663961
+        },
+        "ICU": {
+          "mean_tasks": 26.266666666666666,
+          "mean_avg_queue_wait": 0.09420409764641681
+        }
+      },
+      "MAPPO_best_trainseed3": {
+        "Cloud": {
+          "mean_tasks": 63.36666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 28.3,
+          "mean_avg_queue_wait": 0.05560958569264367
+        },
+        "General_Ward": {
+          "mean_tasks": 10.566666666666666,
+          "mean_avg_queue_wait": 0.03301504051504051
+        },
+        "ICU": {
+          "mean_tasks": 24.033333333333335,
+          "mean_avg_queue_wait": 0.061082805518837505
+        }
+      },
+      "MAPPO_best_trainseed4": {
+        "Cloud": {
+          "mean_tasks": 58.833333333333336,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 27.966666666666665,
+          "mean_avg_queue_wait": 0.046485467276351486
+        },
+        "General_Ward": {
+          "mean_tasks": 13.4,
+          "mean_avg_queue_wait": 0.038497455703338054
+        },
+        "ICU": {
+          "mean_tasks": 26.066666666666666,
+          "mean_avg_queue_wait": 0.08526381768755743
+        }
+      },
+      "MAPPO_final_trainseed0": {
+        "Cloud": {
+          "mean_tasks": 62.53333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 28.533333333333335,
+          "mean_avg_queue_wait": 0.0727439342280616
+        },
+        "General_Ward": {
+          "mean_tasks": 10.733333333333333,
+          "mean_avg_queue_wait": 0.024266381766381767
+        },
+        "ICU": {
+          "mean_tasks": 24.466666666666665,
+          "mean_avg_queue_wait": 0.07814237077518595
+        }
+      },
+      "MAPPO_final_trainseed1": {
+        "Cloud": {
+          "mean_tasks": 63.63333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 28.033333333333335,
+          "mean_avg_queue_wait": 0.05144940366037064
+        },
+        "General_Ward": {
+          "mean_tasks": 13.3,
+          "mean_avg_queue_wait": 0.1420848900841161
+        },
+        "ICU": {
+          "mean_tasks": 21.3,
+          "mean_avg_queue_wait": 0.04609842196112219
+        }
+      },
+      "MAPPO_final_trainseed2": {
+        "Cloud": {
+          "mean_tasks": 64.8,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 28.6,
+          "mean_avg_queue_wait": 0.06574586496843822
+        },
+        "General_Ward": {
+          "mean_tasks": 12.633333333333333,
+          "mean_avg_queue_wait": 0.057034738137679314
+        },
+        "ICU": {
+          "mean_tasks": 20.233333333333334,
+          "mean_avg_queue_wait": 0.0187986388907105
+        }
+      },
+      "MAPPO_final_trainseed3": {
+        "Cloud": {
+          "mean_tasks": 64.4,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 28.066666666666666,
+          "mean_avg_queue_wait": 0.04544486066974289
+        },
+        "General_Ward": {
+          "mean_tasks": 10.1,
+          "mean_avg_queue_wait": 0.021677026677026676
+        },
+        "ICU": {
+          "mean_tasks": 23.7,
+          "mean_avg_queue_wait": 0.06512760619804678
+        }
+      },
+      "MAPPO_final_trainseed4": {
+        "Cloud": {
+          "mean_tasks": 60.3,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 27.8,
+          "mean_avg_queue_wait": 0.03802075947362649
+        },
+        "General_Ward": {
+          "mean_tasks": 14.466666666666667,
+          "mean_avg_queue_wait": 0.053895632517923536
+        },
+        "ICU": {
+          "mean_tasks": 23.7,
+          "mean_avg_queue_wait": 0.054351094085371685
+        }
+      },
+      "FCFS": {
+        "Cloud": {
+          "mean_tasks": 17.5,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 40.833333333333336,
+          "mean_avg_queue_wait": 1.472923531653264
+        },
+        "General_Ward": {
+          "mean_tasks": 33,
+          "mean_avg_queue_wait": 3.543570686563184
+        },
+        "ICU": {
+          "mean_tasks": 34.93333333333333,
+          "mean_avg_queue_wait": 2.230965954089187
+        }
+      },
+      "always Local": {
+        "Emergency": {
+          "mean_tasks": 45.2,
+          "mean_avg_queue_wait": 4.60787645592328
+        },
+        "General_Ward": {
+          "mean_tasks": 40.63333333333333,
+          "mean_avg_queue_wait": 17.095667158345744
+        },
+        "ICU": {
+          "mean_tasks": 40.43333333333333,
+          "mean_avg_queue_wait": 4.807269362695313
+        }
+      },
+      "always Edge": {
+        "Emergency": {
+          "mean_tasks": 45.4,
+          "mean_avg_queue_wait": 5.556989784171476
+        },
+        "General_Ward": {
+          "mean_tasks": 41.2,
+          "mean_avg_queue_wait": 10.181368578843161
+        },
+        "ICU": {
+          "mean_tasks": 39.666666666666664,
+          "mean_avg_queue_wait": 7.463776129513285
+        }
+      },
+      "always Cloud": {
+        "Cloud": {
+          "mean_tasks": 126.26666666666667,
+          "mean_avg_queue_wait": 0.0009791115113733468
+        }
+      },
+      "random": {
+        "Cloud": {
+          "mean_tasks": 43.1,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 32.36666666666667,
+          "mean_avg_queue_wait": 1.27889133716286
+        },
+        "General_Ward": {
+          "mean_tasks": 22.133333333333333,
+          "mean_avg_queue_wait": 4.171969255410522
+        },
+        "ICU": {
+          "mean_tasks": 28.666666666666668,
+          "mean_avg_queue_wait": 2.0318006284679906
+        }
+      },
+      "ECT": {
+        "Cloud": {
+          "mean_tasks": 36.06666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 36.8,
+          "mean_avg_queue_wait": 0.9131178311764983
+        },
+        "General_Ward": {
+          "mean_tasks": 20.8,
+          "mean_avg_queue_wait": 0.6412915495810233
+        },
+        "ICU": {
+          "mean_tasks": 32.6,
+          "mean_avg_queue_wait": 0.8398483947655628
+        }
+      }
+    },
+    "slow_network": {
+      "MAPPO_best_trainseed0": {
+        "Cloud": {
+          "mean_tasks": 19.233333333333334,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 24.033333333333335,
+          "mean_avg_queue_wait": 0.17856882000354973
+        },
+        "General_Ward": {
+          "mean_tasks": 11.4,
+          "mean_avg_queue_wait": 0.16193265340324164
+        },
+        "ICU": {
+          "mean_tasks": 19.066666666666666,
+          "mean_avg_queue_wait": 0.13720269144773997
+        }
+      },
+      "MAPPO_best_trainseed1": {
+        "Cloud": {
+          "mean_tasks": 22.733333333333334,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 21.6,
+          "mean_avg_queue_wait": 0.11649563140531684
+        },
+        "General_Ward": {
+          "mean_tasks": 11.6,
+          "mean_avg_queue_wait": 0.14627280127280126
+        },
+        "ICU": {
+          "mean_tasks": 17.8,
+          "mean_avg_queue_wait": 0.0975419782847319
+        }
+      },
+      "MAPPO_best_trainseed2": {
+        "Cloud": {
+          "mean_tasks": 19.033333333333335,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 23.633333333333333,
+          "mean_avg_queue_wait": 0.1592323920336348
+        },
+        "General_Ward": {
+          "mean_tasks": 11.766666666666667,
+          "mean_avg_queue_wait": 0.13789127539127538
+        },
+        "ICU": {
+          "mean_tasks": 19.3,
+          "mean_avg_queue_wait": 0.14829220370258403
+        }
+      },
+      "MAPPO_best_trainseed3": {
+        "Cloud": {
+          "mean_tasks": 22.4,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 24.5,
+          "mean_avg_queue_wait": 0.23573688755362993
+        },
+        "General_Ward": {
+          "mean_tasks": 8.3,
+          "mean_avg_queue_wait": 0.11523310023310022
+        },
+        "ICU": {
+          "mean_tasks": 18.533333333333335,
+          "mean_avg_queue_wait": 0.09418749506983679
+        }
+      },
+      "MAPPO_best_trainseed4": {
+        "Cloud": {
+          "mean_tasks": 17.833333333333332,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 24.1,
+          "mean_avg_queue_wait": 0.1964652022554101
+        },
+        "General_Ward": {
+          "mean_tasks": 12.633333333333333,
+          "mean_avg_queue_wait": 0.1607309928633458
+        },
+        "ICU": {
+          "mean_tasks": 19.166666666666668,
+          "mean_avg_queue_wait": 0.13518220211011972
+        }
+      },
+      "MAPPO_final_trainseed0": {
+        "Cloud": {
+          "mean_tasks": 22.3,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 23.7,
+          "mean_avg_queue_wait": 0.16730787755423968
+        },
+        "General_Ward": {
+          "mean_tasks": 9.066666666666666,
+          "mean_avg_queue_wait": 0.08852887852887853
+        },
+        "ICU": {
+          "mean_tasks": 18.666666666666668,
+          "mean_avg_queue_wait": 0.11061255718800475
+        }
+      },
+      "MAPPO_final_trainseed1": {
+        "Cloud": {
+          "mean_tasks": 23.9,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 18.766666666666666,
+          "mean_avg_queue_wait": 0.04573376552736718
+        },
+        "General_Ward": {
+          "mean_tasks": 13.466666666666667,
+          "mean_avg_queue_wait": 0.2155643158584335
+        },
+        "ICU": {
+          "mean_tasks": 17.6,
+          "mean_avg_queue_wait": 0.0889219268385935
+        }
+      },
+      "MAPPO_final_trainseed2": {
+        "Cloud": {
+          "mean_tasks": 20.133333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 23.1,
+          "mean_avg_queue_wait": 0.1505701859893286
+        },
+        "General_Ward": {
+          "mean_tasks": 12.2,
+          "mean_avg_queue_wait": 0.13874847374847374
+        },
+        "ICU": {
+          "mean_tasks": 18.3,
+          "mean_avg_queue_wait": 0.11943795597405324
+        }
+      },
+      "MAPPO_final_trainseed3": {
+        "Cloud": {
+          "mean_tasks": 24.933333333333334,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 21.633333333333333,
+          "mean_avg_queue_wait": 0.1020616370084026
+        },
+        "General_Ward": {
+          "mean_tasks": 7.933333333333334,
+          "mean_avg_queue_wait": 0.07688228438228438
+        },
+        "ICU": {
+          "mean_tasks": 19.233333333333334,
+          "mean_avg_queue_wait": 0.14707775703828335
+        }
+      },
+      "MAPPO_final_trainseed4": {
+        "Cloud": {
+          "mean_tasks": 17.833333333333332,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 24.1,
+          "mean_avg_queue_wait": 0.1964652022554101
+        },
+        "General_Ward": {
+          "mean_tasks": 12.633333333333333,
+          "mean_avg_queue_wait": 0.1607309928633458
+        },
+        "ICU": {
+          "mean_tasks": 19.166666666666668,
+          "mean_avg_queue_wait": 0.13518220211011972
+        }
+      },
+      "FCFS": {
+        "Cloud": {
+          "mean_tasks": 11.033333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 22.166666666666668,
+          "mean_avg_queue_wait": 0.05995667945454817
+        },
+        "General_Ward": {
+          "mean_tasks": 20.033333333333335,
+          "mean_avg_queue_wait": 0.45828677659492706
+        },
+        "ICU": {
+          "mean_tasks": 20.5,
+          "mean_avg_queue_wait": 0.13260265150139292
+        }
+      },
+      "always Local": {
+        "Emergency": {
+          "mean_tasks": 27.366666666666667,
+          "mean_avg_queue_wait": 0.9663805664817537
+        },
+        "General_Ward": {
+          "mean_tasks": 22.633333333333333,
+          "mean_avg_queue_wait": 6.502206415636806
+        },
+        "ICU": {
+          "mean_tasks": 23.733333333333334,
+          "mean_avg_queue_wait": 0.9756892201054606
+        }
+      },
+      "always Edge": {
+        "Emergency": {
+          "mean_tasks": 26.566666666666666,
+          "mean_avg_queue_wait": 0.6761497603327443
+        },
+        "General_Ward": {
+          "mean_tasks": 23.433333333333334,
+          "mean_avg_queue_wait": 2.708749075064036
+        },
+        "ICU": {
+          "mean_tasks": 23.733333333333334,
+          "mean_avg_queue_wait": 1.3343873579391836
+        }
+      },
+      "always Cloud": {
+        "Cloud": {
+          "mean_tasks": 73.73333333333333,
+          "mean_avg_queue_wait": 0.0
+        }
+      },
+      "random": {
+        "Cloud": {
+          "mean_tasks": 25.266666666666666,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 17.8,
+          "mean_avg_queue_wait": 0.17243636893028916
+        },
+        "General_Ward": {
+          "mean_tasks": 14.166666666666666,
+          "mean_avg_queue_wait": 1.0152755224078753
+        },
+        "ICU": {
+          "mean_tasks": 16.5,
+          "mean_avg_queue_wait": 0.4546743358121067
+        }
+      },
+      "ECT": {
+        "Cloud": {
+          "mean_tasks": 1.5666666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 29.633333333333333,
+          "mean_avg_queue_wait": 1.2052155834584115
+        },
+        "General_Ward": {
+          "mean_tasks": 16.666666666666668,
+          "mean_avg_queue_wait": 2.1787687135132954
+        },
+        "ICU": {
+          "mean_tasks": 25.866666666666667,
+          "mean_avg_queue_wait": 1.2012874321061597
+        }
+      }
+    }
+  },
+  "priority_breakdown": {
+    "default": {
+      "MAPPO_best_trainseed0": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 0.11413043478260869
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 0.2375886524822695
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 1.123076923076923
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_best_trainseed1": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 0.10869565217391304
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 0.22695035460992907
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 1.1446153846153846
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_best_trainseed2": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 0.11413043478260869
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 0.24113475177304963
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 1.1076923076923078
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_best_trainseed3": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 0.1358695652173913
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 0.24468085106382978
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 1.0615384615384615
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_best_trainseed4": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 0.11413043478260869
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 0.23049645390070922
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 1.1630769230769231
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_final_trainseed0": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 0.11413043478260869
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 0.2375886524822695
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 1.123076923076923
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_final_trainseed1": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 0.13043478260869565
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 0.2624113475177305
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 1.0553846153846154
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_final_trainseed2": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 0.13043478260869565
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 0.25886524822695034
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 1.0646153846153845
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_final_trainseed3": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 0.1358695652173913
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 0.24468085106382978
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 1.0615384615384615
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_final_trainseed4": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 0.1358695652173913
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 0.24822695035460993
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 1.0953846153846154
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "FCFS": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 0.125
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 0.25886524822695034
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 1.1538461538461537
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "always Local": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 0.21739130434782608
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 0.3617021276595745
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 1.3353846153846154
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.010869565217391304
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "always Edge": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 1.076086956521739
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 1.2411347517730495
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 1.843076923076923
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "always Cloud": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 2.0
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 2.0
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 2.0
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "random": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 1.0923913043478262
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 1.1808510638297873
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 1.563076923076923
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "ECT": {
+        "latency": {
+          "Critical": {
+            "completed": 184,
+            "unfinished": 0,
+            "avg_latency": 0.18478260869565216
+          },
+          "High": {
+            "completed": 282,
+            "unfinished": 0,
+            "avg_latency": 0.30851063829787234
+          },
+          "Routine": {
+            "completed": 325,
+            "unfinished": 0,
+            "avg_latency": 1.0553846153846154
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 184,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 282,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 325,
+            "violation_rate": 0.0
+          }
+        }
+      }
+    },
+    "overload": {
+      "MAPPO_best_trainseed0": {
+        "latency": {
+          "Critical": {
+            "completed": 882,
+            "unfinished": 0,
+            "avg_latency": 0.3378684807256236
+          },
+          "High": {
+            "completed": 1349,
+            "unfinished": 0,
+            "avg_latency": 0.6901408450704225
+          },
+          "Routine": {
+            "completed": 1557,
+            "unfinished": 0,
+            "avg_latency": 2.0
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_best_trainseed1": {
+        "latency": {
+          "Critical": {
+            "completed": 882,
+            "unfinished": 0,
+            "avg_latency": 0.3356009070294785
+          },
+          "High": {
+            "completed": 1349,
+            "unfinished": 0,
+            "avg_latency": 0.6782802075611564
+          },
+          "Routine": {
+            "completed": 1557,
+            "unfinished": 0,
+            "avg_latency": 1.9845857418111754
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_best_trainseed2": {
+        "latency": {
+          "Critical": {
+            "completed": 882,
+            "unfinished": 0,
+            "avg_latency": 0.3526077097505669
+          },
+          "High": {
+            "completed": 1349,
+            "unfinished": 0,
+            "avg_latency": 0.6300963676797627
+          },
+          "Routine": {
+            "completed": 1557,
+            "unfinished": 0,
+            "avg_latency": 2.0
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_best_trainseed3": {
+        "latency": {
+          "Critical": {
+            "completed": 882,
+            "unfinished": 0,
+            "avg_latency": 0.30952380952380953
+          },
+          "High": {
+            "completed": 1349,
+            "unfinished": 0,
+            "avg_latency": 0.6990363232023721
+          },
+          "Routine": {
+            "completed": 1557,
+            "unfinished": 0,
+            "avg_latency": 2.0
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_best_trainseed4": {
+        "latency": {
+          "Critical": {
+            "completed": 882,
+            "unfinished": 0,
+            "avg_latency": 0.35034013605442177
+          },
+          "High": {
+            "completed": 1349,
+            "unfinished": 0,
+            "avg_latency": 0.6515937731653076
+          },
+          "Routine": {
+            "completed": 1557,
+            "unfinished": 0,
+            "avg_latency": 1.9210019267822736
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_final_trainseed0": {
+        "latency": {
+          "Critical": {
+            "completed": 882,
+            "unfinished": 0,
+            "avg_latency": 0.3412698412698413
+          },
+          "High": {
+            "completed": 1349,
+            "unfinished": 0,
+            "avg_latency": 0.6782802075611564
+          },
+          "Routine": {
+            "completed": 1557,
+            "unfinished": 0,
+            "avg_latency": 2.0
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_final_trainseed1": {
+        "latency": {
+          "Critical": {
+            "completed": 882,
+            "unfinished": 0,
+            "avg_latency": 0.2857142857142857
+          },
+          "High": {
+            "completed": 1349,
+            "unfinished": 0,
+            "avg_latency": 0.7946627131208303
+          },
+          "Routine": {
+            "completed": 1557,
+            "unfinished": 0,
+            "avg_latency": 1.972382787411689
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_final_trainseed2": {
+        "latency": {
+          "Critical": {
+            "completed": 882,
+            "unfinished": 0,
+            "avg_latency": 0.25963718820861675
+          },
+          "High": {
+            "completed": 1349,
+            "unfinished": 0,
+            "avg_latency": 0.7813194959229058
+          },
+          "Routine": {
+            "completed": 1557,
+            "unfinished": 0,
+            "avg_latency": 1.9922928709055876
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_final_trainseed3": {
+        "latency": {
+          "Critical": {
+            "completed": 882,
+            "unfinished": 0,
+            "avg_latency": 0.29931972789115646
+          },
+          "High": {
+            "completed": 1349,
+            "unfinished": 0,
+            "avg_latency": 0.7309117865085248
+          },
+          "Routine": {
+            "completed": 1557,
+            "unfinished": 0,
+            "avg_latency": 1.9974309569685291
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_final_trainseed4": {
+        "latency": {
+          "Critical": {
+            "completed": 882,
+            "unfinished": 0,
+            "avg_latency": 0.30839002267573695
+          },
+          "High": {
+            "completed": 1349,
+            "unfinished": 0,
+            "avg_latency": 0.7049666419570052
+          },
+          "Routine": {
+            "completed": 1557,
+            "unfinished": 0,
+            "avg_latency": 1.9081567116249196
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "FCFS": {
+        "latency": {
+          "Critical": {
+            "completed": 882,
+            "unfinished": 0,
+            "avg_latency": 3.9546485260770976
+          },
+          "High": {
+            "completed": 1349,
+            "unfinished": 0,
+            "avg_latency": 3.922164566345441
+          },
+          "Routine": {
+            "completed": 1557,
+            "unfinished": 0,
+            "avg_latency": 3.4309569685292227
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.655328798185941
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.23054114158636027
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.010918432883750802
+          }
+        }
+      },
+      "always Local": {
+        "latency": {
+          "Critical": {
+            "completed": 880,
+            "unfinished": 2,
+            "avg_latency": 6.552272727272728
+          },
+          "High": {
+            "completed": 1348,
+            "unfinished": 1,
+            "avg_latency": 8.557121661721068
+          },
+          "Routine": {
+            "completed": 1553,
+            "unfinished": 4,
+            "avg_latency": 12.828074694140373
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.7131519274376418
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.5300222386953298
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.44572896596017986
+          }
+        }
+      },
+      "always Edge": {
+        "latency": {
+          "Critical": {
+            "completed": 882,
+            "unfinished": 0,
+            "avg_latency": 9.749433106575964
+          },
+          "High": {
+            "completed": 1349,
+            "unfinished": 0,
+            "avg_latency": 9.499629355077836
+          },
+          "Routine": {
+            "completed": 1557,
+            "unfinished": 0,
+            "avg_latency": 9.739242132305716
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.9002267573696145
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.6953298739807264
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.40655105973025046
+          }
+        }
+      },
+      "always Cloud": {
+        "latency": {
+          "Critical": {
+            "completed": 882,
+            "unfinished": 0,
+            "avg_latency": 2.002267573696145
+          },
+          "High": {
+            "completed": 1349,
+            "unfinished": 0,
+            "avg_latency": 2.001482579688658
+          },
+          "Routine": {
+            "completed": 1557,
+            "unfinished": 0,
+            "avg_latency": 2.0025690430314707
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.0022675736961451248
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "random": {
+        "latency": {
+          "Critical": {
+            "completed": 882,
+            "unfinished": 0,
+            "avg_latency": 2.6383219954648527
+          },
+          "High": {
+            "completed": 1349,
+            "unfinished": 0,
+            "avg_latency": 2.853224610822832
+          },
+          "Routine": {
+            "completed": 1557,
+            "unfinished": 0,
+            "avg_latency": 3.590237636480411
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.3242630385487528
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.11193476649369903
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.033397559409120106
+          }
+        }
+      },
+      "ECT": {
+        "latency": {
+          "Critical": {
+            "completed": 882,
+            "unfinished": 0,
+            "avg_latency": 1.471655328798186
+          },
+          "High": {
+            "completed": 1349,
+            "unfinished": 0,
+            "avg_latency": 1.5989621942179393
+          },
+          "Routine": {
+            "completed": 1557,
+            "unfinished": 0,
+            "avg_latency": 1.8567758509955041
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 882,
+            "violation_rate": 0.012471655328798186
+          },
+          "High": {
+            "decided": 1349,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 1557,
+            "violation_rate": 0.0
+          }
+        }
+      }
+    },
+    "slow_network": {
+      "MAPPO_best_trainseed0": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 0.3779697624190065
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 0.6127450980392157
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 3.977491961414791
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 0.0021598272138228943
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 0.0024509803921568627
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_best_trainseed1": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 0.27429805615550756
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 0.49019607843137253
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 4.569131832797428
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 0.0021598272138228943
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_best_trainseed2": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 0.34989200863930886
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 0.5906862745098039
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 3.9517684887459805
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 0.0
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 0.0012254901960784314
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_best_trainseed3": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 0.34989200863930886
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 0.5698529411764706
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 4.518756698821008
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 0.0021598272138228943
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_best_trainseed4": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 0.408207343412527
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 0.6397058823529411
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 3.7491961414790995
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 0.004319654427645789
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 0.003676470588235294
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_final_trainseed0": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 0.3434125269978402
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 0.5526960784313726
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 4.440514469453376
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 0.0021598272138228943
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 0.006127450980392157
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_final_trainseed1": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 0.24190064794816415
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 0.44362745098039214
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 4.821007502679528
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 0.0021598272138228943
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 0.0
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_final_trainseed2": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 0.35205183585313177
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 0.5674019607843137
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 4.122186495176849
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 0.0021598272138228943
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 0.0012254901960784314
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_final_trainseed3": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 0.3045356371490281
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 0.48161764705882354
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 4.897106109324759
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 0.0021598272138228943
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 0.0012254901960784314
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "MAPPO_final_trainseed4": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 0.408207343412527
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 0.6397058823529411
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 3.7491961414790995
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 0.004319654427645789
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 0.003676470588235294
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "FCFS": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 3.012958963282937
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 3.2254901960784315
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 4.383708467309753
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 0.8531317494600432
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 0.02696078431372549
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "always Local": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 1.8833693304535637
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 2.9105392156862746
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 5.218649517684887
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 0.27645788336933047
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 0.15073529411764705
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.1564844587352626
+          }
+        }
+      },
+      "always Edge": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 5.118790496760259
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 5.311274509803922
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 5.590568060021436
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 1.0
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 0.39338235294117646
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.02679528403001072
+          }
+        }
+      },
+      "always Cloud": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 6.0
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 6.0
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 6.0
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 1.0
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 1.0
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.0
+          }
+        }
+      },
+      "random": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 3.5615550755939527
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 3.593137254901961
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 4.176848874598071
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 0.7257019438444925
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 0.3590686274509804
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.0010718113612004287
+          }
+        }
+      },
+      "ECT": {
+        "latency": {
+          "Critical": {
+            "completed": 463,
+            "unfinished": 0,
+            "avg_latency": 1.7991360691144709
+          },
+          "High": {
+            "completed": 816,
+            "unfinished": 0,
+            "avg_latency": 2.230392156862745
+          },
+          "Routine": {
+            "completed": 933,
+            "unfinished": 0,
+            "avg_latency": 3.212218649517685
+          }
+        },
+        "violation": {
+          "Critical": {
+            "decided": 463,
+            "violation_rate": 0.31533477321814257
+          },
+          "High": {
+            "decided": 816,
+            "violation_rate": 0.03308823529411765
+          },
+          "Routine": {
+            "decided": 933,
+            "violation_rate": 0.0
+          }
+        }
+      }
+    }
+  },
+  "priority_weights": {
+    "Critical": 5.0,
+    "High": 2.0,
+    "Routine": 1.0
+  }
+}
