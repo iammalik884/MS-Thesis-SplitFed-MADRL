@@ -7,12 +7,18 @@ University of Sargodha).
 The code follows the 18-step practical roadmap (`My Research Practical ROADMAP.docx`).
 Each step adds one new idea and is verified before the next step starts.
 
-**Current status: Steps 1–8 complete** (hospital simulator, FCFS baseline,
-Gymnasium environment, single-agent DQN baseline, three-agent environment).
-The DQN was evaluated once on reserved test seeds; it beats FCFS under
-overload but does not beat the ECT heuristic in any scenario, and its training
-is not stable (see Step 7 below). Steps 9–18 (MAPPO training, SplitFed,
-privacy, robustness) have not been started.
+**Current status: Steps 1–9 complete**:
+
+- hospital simulator and FCFS baseline;
+- Gymnasium environment;
+- single-agent DQN baseline;
+- three-agent environment;
+- MAPPO with centralized training and decentralized execution (CTDE).
+
+On the reserved test seeds, cooperative MAPPO is the best policy in all three
+scenarios (default, overload, slow network). The DQN does not beat the ECT
+heuristic in any scenario (see Steps 7 and 9 below). Steps 10–18
+(priority-aware reward, SplitFed, privacy, robustness) have not been started.
 
 > **Data note:** all workload numbers (arrival rates, compute demands,
 > deadlines) are **synthetic placeholders**, not MIMIC-IV statistics.
@@ -25,7 +31,7 @@ Requires Python ≥ 3.10 (tested with 3.14.6 on Windows 11).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest -q                      # 104 tests, all should pass
+python -m pytest -q                      # 109 tests, all should pass
 python demo_simulation.py                # one readable run (seed 42)
 python run_baseline_fcfs.py --seeds 0-29 # FCFS baseline, 30 seeds
 python run_baseline_fcfs.py --config configs/scenarios/overload.yaml --seeds 0-29
@@ -96,7 +102,11 @@ and removed pre-v2 keys raise clear errors).
       ([env/multi_agent_env.py](env/multi_agent_env.py)): Emergency, ICU and
       General Ward are separate agents with local observations and their own
       actions in one shared simulation; see below. No training yet.
-- [ ] Steps 9–18 — see the roadmap document.
+- [x] **Step 9 — MAPPO with CTDE.** One actor per department on local
+      observations, a centralized critic on the global state (training only),
+      team reward, PPO updates; pre-registered experiments on validation seeds
+      and one evaluation of the frozen setting on test seeds; see below.
+- [ ] Steps 10–18 — see the roadmap document.
 
 The design was revised after an audit (commits `470a079`, `acdb3d4`,
 `83e7f3f`). The pre-audit version is preserved under the git tag
@@ -306,6 +316,53 @@ own node (FCFS: 64), and General Ward receives 4 tasks from the other
 departments (FCFS: 557). Step 9 trains the agents on the shared (team)
 objective, as the roadmap's cooperative setting requires.
 
+## Step 9: MAPPO with CTDE
+
+[Step9_MAPPO.md](Step_Documentation/Step9_MAPPO.md) has the method, the plan
+(committed before the runs), and all results.
+
+- **Code:** [agents/mappo.py](agents/mappo.py) and [train_mappo.py](train_mappo.py).
+- **Actors:** each department has its own actor on its Step 8 local
+  observation.
+- **Critic:** one centralized critic on the 13-value global state, used only
+  in training.
+- **Objective:** the team reward (× 0.01 for training, as for the DQN).
+- **Learning:** GAE over the joint decision sequence, then PPO clipped
+  updates.
+
+**Experiments** (validation seeds, 2 training seeds; score 0 = random,
+1 = ECT, mean final checkpoint):
+
+| Setting | Mean final score |
+|---|---|
+| M0 (γ 0.99), 40k decisions | 1.036 |
+| M1 (γ 0.95), 40k decisions | 1.032 |
+| **LONG (M0), 120k decisions** | **1.207** |
+
+All three are stable. LONG is frozen.
+
+**Close-out:** 5 training seeds per scenario, then one evaluation on test
+seeds 2,000–2,029 ([results/step9_final/](results/step9_final/)). MAPPO and
+DQN are the mean ± 95% CI over 5 training seeds.
+
+| Test seeds, return | Default | Overload | Slow network |
+|---|---|---|---|
+| **MAPPO (best checkpoint)** | **−14.8 ± 0.4** | **−141.6 ± 4.8** | **−153.6 ± 19.8** |
+| DQN (best checkpoint) | −20.1 ± 0.7 | −278.6 ± 71.5 | −411.9 ± 49.3 |
+| ECT | −15.5 | −215.2 | −246.0 |
+| FCFS | −15.7 | −772.7 | −409.6 |
+| always Cloud | −52.7 | −253.5 | −868.7 |
+
+- **Critical violations:** MAPPO has 0.0%, 0.0% and 5.9% Critical deadline
+  violations; ECT has 0.0%, 1.2% and 30.8%.
+- **Load balancing:** MAPPO overloads no node, but it balances the load
+  through the cloud. Under overload its Edge share is 0%. The cloud has no
+  usage cost in this model, which is still an open question for the
+  supervisor.
+- **Caveat:** MAPPO trained for 120,000 decisions and the DQN for 40,000.
+  Both were given the same options, and each budget was chosen by its own
+  pre-registered rule.
+
 ## FCFS baseline results (seeds 0–29, mean)
 
 From [results/baselines/](results/baselines/), produced at commit `83e7f3f`
@@ -332,7 +389,7 @@ New runs go to `results/runs/` (git-ignored); a run folder is never overwritten.
 
 ## Verification
 
-104 automated tests (`python -m pytest -q`):
+109 automated tests (`python -m pytest -q`):
 
 | File | What it checks |
 |---|---|
@@ -348,6 +405,7 @@ New runs go to `results/runs/` (git-ignored); a run folder is never overwritten.
 | `test_dqn_pilot.py` | replay buffer, no bootstrapping at episode end, Double DQN target, ε schedule, reproducible training, shared evaluation = Step 5 FCFS, scaling knobs, Q vs Monte Carlo |
 | `test_step6_gym_env.py` | Gymnasium `check_env`, roadmap Step 6 checkpoints, exact FCFS reproduction on 6 configs × seeds 0–29, reward bookkeeping, action meanings, determinism, empty episode, invalid usage |
 | `test_step8_multi_agent_env.py` | roadmap Step 8 checkpoints (all three agents act in one step; Edge offload changes the receiving department's queue and observed load), exact FCFS reproduction on 6 configs × seeds 0–29, rewards per source agent = Step 6 reward, local vs global observation, determinism, invalid usage |
+| `test_mappo.py` | GAE by hand (no bootstrap at episode end), PPO update direction, greedy action, config checks, reproducible training on training seeds only, evaluation uses the same local observations as the Step 8 env |
 
 ## Folder structure
 
@@ -372,13 +430,15 @@ MS_Thesis_Project/
 ├── agents/
 │   ├── heuristics.py             # Step 7: ECT heuristic baseline
 │   ├── policy_eval.py            # Step 7: one evaluation routine for all policies
-│   └── dqn.py                    # Step 7: DQN (replay buffer, target network, optional Double DQN)
-├── tests/                        # 104 tests (see Verification)
+│   ├── dqn.py                    # Step 7: DQN (replay buffer, target network, optional Double DQN)
+│   └── mappo.py                  # Step 9: MAPPO (per-department actors, centralized critic, PPO)
+├── tests/                        # 109 tests (see Verification)
 ├── results/
 │   ├── baselines/                # committed FCFS v2 results
 │   ├── pilot/                    # Step 7 DQN pilot runs (preliminary)
-│   ├── debug/                    # Step 7 DQN debugging runs, rounds 1-2 (compact artefacts)
+│   ├── debug/                    # Step 7 DQN and Step 9 MAPPO experiment runs (compact artefacts)
 │   ├── step7_final/              # Step 7 close-out: frozen DQN, test-seed results
+│   ├── step9_final/              # Step 9 close-out: frozen MAPPO, test-seed results
 │   └── legacy/                   # pre-audit result, not comparable
 ├── Step_Documentation/           # per-step Word write-ups (Roman Urdu), see note below
 ├── demo_simulation.py            # one readable run with seed 42
@@ -386,14 +446,15 @@ MS_Thesis_Project/
 ├── check_simple_policies.py      # Step 6 sanity check with simple fixed policies (+ ECT)
 ├── check_multi_agent_env.py      # Step 8 sanity check: per-agent returns of FCFS / ECT
 ├── train_dqn_pilot.py            # Step 7: DQN training with seed splits (--set for one override)
-├── run_dqn_experiments.py        # Step 7: runs the pre-registered experiments (one override each)
+├── run_dqn_experiments.py        # Steps 7/9: runs the pre-registered experiments (one override each; --trainer dqn|mappo)
 ├── summarize_dqn_experiments.py  # Step 7: pre-registered score per experiment
-├── evaluate_dqn_test.py          # Step 7: one-time test-seed evaluation of the frozen DQN
+├── evaluate_dqn_test.py          # Steps 7/9: one-time test-seed evaluation of the frozen DQN or MAPPO
+├── train_mappo.py                # Step 9: MAPPO training (validation seeds only)
 └── requirements.txt
 ```
 
 **Note on `Step_Documentation/`:** the Step 3 and Step 5 write-ups were
-rewritten for the current (v2) design; Steps 6, 7 and 8 have their own write-ups
+rewritten for the current (v2) design; Steps 6–9 have their own write-ups
 (Step 7: `Step7_DQN_Baseline.docx`, with the design note and the debugging/close-out
 record as Markdown next to it). Steps 1, 2 and 4 start with a
 "V2 UPDATE" box listing what changed; their code listings are simplified
@@ -407,6 +468,8 @@ versions of the code in `env/`.
 - The DQN baseline does not beat the ECT heuristic, and its training is not
   stable across training seeds (checkpoint selection on validation seeds is
   needed). FCFS routing ignores priority and deadlines by design.
+- MAPPO's load balancing relies on the cost-free cloud (Edge is almost
+  unused). The reward is not priority-weighted yet (roadmap Step 10).
 - In the stressed scenarios the cloud almost never fills up and is free to use
   (see the Step 6 sanity check). Whether to add a cloud usage cost or change
   the capacity is still to be decided with the supervisor; any such change

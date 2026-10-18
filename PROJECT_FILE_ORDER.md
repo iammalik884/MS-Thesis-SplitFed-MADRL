@@ -34,17 +34,18 @@ step that later touched it.
 | [run_records.py](env/run_records.py) | **Step 5 (V2 audit)** | Step 6/7 (+gymnasium, torch versions in provenance) | Unique run folders, manifest with config snapshot and git/package provenance |
 | [config_validation.py](env/config_validation.py) | **Step 5 (V2 audit)** | Step 6 (+rl_environment section) | Validates every config before a simulation is built |
 | [gym_env.py](env/gym_env.py) | **Step 6** | — | `HospitalSchedulingEnv` — Gymnasium reset()/step() around the simulator (Local / Edge / Cloud action) |
-| [multi_agent_env.py](env/multi_agent_env.py) | **Step 8** | — | `MultiAgentHospitalEnv` — three department agents (local observations, own actions, per-agent rewards) around the Step 6 env |
+| [multi_agent_env.py](env/multi_agent_env.py) | **Step 8** | Step 9 (local observation as a shared function `local_observation`) | `MultiAgentHospitalEnv` — three department agents (local observations, own actions, per-agent rewards) around the Step 6 env |
 
 *(Step 4 added no new file — only edited `task.py` and `hospital_env.py` above.)*
 
-## `agents/` folder — policies (Step 7)
+## `agents/` folder — policies (Steps 7 and 9)
 
 | File | Created | Also edited in | What it does |
 |---|---|---|---|
 | [heuristics.py](agents/heuristics.py) | **Step 7 (design note)** | — | ECT heuristic: smallest estimated completion time, observation-level information only |
 | [policy_eval.py](agents/policy_eval.py) | **Step 7** | Step 7 debugging (+`q_vs_monte_carlo`, full reports, offloading metrics) | `evaluate()` — one evaluation routine (undiscounted return, protocol metrics, action proportions) for DQN and every baseline |
 | [dqn.py](agents/dqn.py) | **Step 7 (pilot)** | Step 7 debugging (+`reward_scale`, `obs_scale`; Round 2: +`double_dqn`) | DQN: Q-network, replay buffer, target network, epsilon-greedy; optional Double DQN target |
+| [mappo.py](agents/mappo.py) | **Step 9** | — | MAPPO: one actor per department, centralized critic, GAE, PPO clipped updates |
 
 ## Root folder — runnable scripts
 
@@ -56,7 +57,8 @@ step that later touched it.
 | [run_dqn_experiments.py](run_dqn_experiments.py) | **Step 7 (debugging)** | Runs pre-registered experiments (one override each) in parallel |
 | [summarize_dqn_experiments.py](summarize_dqn_experiments.py) | **Step 7 (debugging)** | Applies the pre-registered normalised score (0 = random, 1 = ECT) |
 | [train_dqn_pilot.py](train_dqn_pilot.py) | **Step 7 (pilot; also used for debugging and close-out training)** | Trains a DQN (training/validation seed split, `--set` for one override), saves best/final checkpoints, curves, Q vs MC and the baseline comparison on validation seeds to `results/runs/` |
-| [evaluate_dqn_test.py](evaluate_dqn_test.py) | **Step 7 (close-out)** | One-time evaluation of the frozen DQN (5 training seeds) and all baselines on the reserved test seeds; mean ± 95% CI, per-seed results, full reports, learning-curve figure |
+| [train_mappo.py](train_mappo.py) | **Step 9** | Trains MAPPO in the three-agent env (validation seeds only), saves best/final checkpoints, curves, critic V vs MC, destination load and the baseline comparison |
+| [evaluate_dqn_test.py](evaluate_dqn_test.py) | **Step 7 (close-out)**, Step 9 (MAPPO) | One-time evaluation of the frozen DQN or MAPPO (5 training seeds) and all baselines on the reserved test seeds; mean ± 95% CI, per-seed results, full reports, learning-curve figure |
 | [run_baseline_fcfs.py](run_baseline_fcfs.py) | **Step 5** | Runs the FCFS baseline (`--seed`, `--seeds 0-29`, `--config`), saves a run folder under `results/runs/` |
 
 ## `configs/environment.yaml` — one file, grew every step
@@ -88,6 +90,7 @@ Stress scenarios live in `configs/scenarios/*.yaml`; each one `extends:` this fi
 | [test_ect_heuristic.py](tests/test_ect_heuristic.py) | Step 7 (design note) |
 | [test_dqn_pilot.py](tests/test_dqn_pilot.py) | Step 7 (pilot, debugging, Double DQN) |
 | [test_step8_multi_agent_env.py](tests/test_step8_multi_agent_env.py) | Step 8 |
+| [test_mappo.py](tests/test_mappo.py) | Step 9 |
 
 ---
 

@@ -1,7 +1,7 @@
 # Step 9 — MAPPO with CTDE
 
-Status: the plan below was written and committed **before** any MAPPO
-experiment was run. The simulator, the reward definition, the cloud capacity
+Status: **Step 9 is complete** (see "Close-out — results" at the end). The
+plan below was written and committed **before** any MAPPO experiment was run. The simulator, the reward definition, the cloud capacity
 and the Step 6/8 environments are unchanged. Privacy layers are not part of
 this step (roadmap: "first prove that cooperation works").
 
@@ -148,3 +148,84 @@ it balances load through the cloud, not through the neighbour departments.
 This fits the Step 6/7 finding that the cloud has no usage cost and almost
 never fills. Whether a cloud cost should be added is still the open
 modelling question for the supervisor.
+
+## Close-out — results (test seeds, evaluated once)
+
+**Training.** The frozen setting (LONG) was trained with training seeds 0–4
+on each of the 3 scenarios (15 runs) at the clean commit `58c8914`. Seven
+runs finished in the first attempt. The other eight stopped when the PC
+session ended (Windows process-termination codes, not a Python error) and
+were re-run with `--only-missing` from the same commit and a clean tree.
+Seeds 0 and 1 are byte-identical to the Round 2 LONG runs.
+
+On the validation seeds the 15 runs have mean final score 1.211, mean best
+score 1.226 and drop 0.015. Every final score is ≥ 1.0; the lowest, default seed 2, equals ECT's validation return exactly. Compact artefacts:
+[results/step9_final/training_runs/](../results/step9_final/training_runs/).
+
+**Test evaluation.** `python evaluate_dqn_test.py --runs results/step9_final/training_runs --out results/step9_final`
+was run once, at commit `3447356`, on test seeds 2,000–2,029. Results are in
+[results/step9_final/](../results/step9_final/). The baseline results there
+are identical to the Step 7 test evaluation. MAPPO and DQN values are the
+mean ± 95% CI over 5 training seeds; the DQN values are from
+[results/step7_final/](../results/step7_final/).
+
+Undiscounted return on the test seeds (higher is better):
+
+| Policy | Default | Overload | Slow network |
+|---|---|---|---|
+| **MAPPO (best checkpoint)**, 120k decisions | **−14.8 ± 0.4** | **−141.6 ± 4.8** | **−153.6 ± 19.8** |
+| MAPPO (final checkpoint) | −14.8 ± 0.4 | −143.6 ± 4.9 | −156.5 ± 17.7 |
+| DQN (best checkpoint), 40k decisions | −20.1 ± 0.7 | −278.6 ± 71.5 | −411.9 ± 49.3 |
+| ECT | −15.5 | −215.2 | −246.0 |
+| FCFS | −15.7 | −772.7 | −409.6 |
+| always Local | −19.9 | −1,932.2 | −402.9 |
+| always Cloud | −52.7 | −253.5 | −868.7 |
+| random | −34.7 | −555.2 | −492.6 |
+
+Critical-task deadline violation rate (test seeds):
+
+| Policy | Default | Overload | Slow network |
+|---|---|---|---|
+| MAPPO (best) | 0.0% | 0.0% | 5.9% ± 5.3 pp |
+| DQN (best) | 0.1% ± 0.2 pp | 5.7% ± 6.3 pp | 55.0% ± 15.0 pp |
+| ECT | 0.0% | 1.2% | 30.8% |
+| FCFS | 0.0% | 64.8% | 84.0% |
+
+**Roadmap checkpoint 1 — does the joint reward improve?** Yes. The team
+return on the validation seeds rises during training in all three scenarios
+and passes ECT (`learning_curves.png`). On the test seeds MAPPO has the best
+return in every scenario. In the default scenario the margin over ECT is
+small (−14.8 ± 0.4 vs −15.5); under overload and in the slow network it is
+large. The final checkpoints are almost as good as the validation-selected
+ones, so training is stable.
+
+**Roadmap checkpoint 2 — spare capacity instead of overloading one node?**
+Partly. MAPPO overloads no node: under overload, each department's mean queue
+wait is 0.09–0.11 steps, against 0.64–0.91 for ECT and up to 3.54 for FCFS
+(General Ward). But it does this through the **cloud**, not through the
+neighbour departments:
+
+- under overload its Edge share is 0.0% (43% Cloud);
+- in the default scenario Edge is 3.3%, and in the slow network 1.7%.
+
+As a consequence, its offloading communication under overload is higher than
+ECT's (synthetic payload 250.7 vs 201.0 units per episode). In this
+environment the cloud has no usage cost and almost never fills (Step 6/7
+finding). Whether MAPPO would use the neighbours if cloud use had a cost is
+the open modelling question for the supervisor.
+
+**Conclusion of Step 9.** Cooperative MAPPO with CTDE was trained and frozen
+by the pre-registered rules, and evaluated once on the test seeds.
+
+- It beats every baseline and the DQN in all three scenarios.
+- Its Critical deadline violation rate is 0.0% in the default and overload
+  scenarios and 5.9% in the slow network (ECT: 30.8%).
+- It is stable across training seeds.
+
+Two caveats are reported next to the result:
+
+- MAPPO trained for 120,000 decisions, the DQN for 40,000. Both had the same
+  options, and each budget was chosen by its own rule.
+- The load balancing relies on the free cloud.
+
+Priority weighting is roadmap Step 10, and privacy (SplitFed) follows later.

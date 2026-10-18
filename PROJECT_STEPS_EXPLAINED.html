@@ -187,7 +187,7 @@
     <!-- ============================= RESEARCH OVERVIEW ============================= -->
     <section id="roadmap">
       <h2 class="section-head">1. Where This Fits in the Whole Research</h2>
-      <p class="section-sub">Before looking at individual steps, here is the entire research plan grouped into three phases. Steps 0–8 are complete; Step 9 (MAPPO training) is next.</p>
+      <p class="section-sub">Before looking at individual steps, here is the entire research plan grouped into three phases. Steps 0–9 are complete; Step 10 (priority-aware reward) is next.</p>
 
       <div class="roadmap">
         <div class="phase done">
@@ -216,12 +216,13 @@
         <div class="phase">
           <div class="phase-head">
             Phase C — Teach an AI to Schedule
-            <span class="phase-status">In progress (Steps 7–8 done)</span>
+            <span class="phase-status">In progress (Steps 7–9 done)</span>
           </div>
           <div class="phase-steps">
             <span class="chip done">Step 7 · Single-agent DQN baseline</span>
             <span class="chip done">Step 8 · Three-agent environment</span>
-            <span class="chip">Step 9+ · MAPPO training</span>
+            <span class="chip done">Step 9 · MAPPO with CTDE</span>
+            <span class="chip">Step 10 · Priority-aware reward</span>
             <span class="chip">SplitFed privacy-preserving training</span>
             <span class="chip">Final evaluation vs. baselines</span>
           </div>
@@ -502,7 +503,7 @@ def least_loaded_neighbour(self, source: str, backlogs: Mapping[str, float]) -&g
       </div>
     </section>
 
-    <p class="closing-note">Steps 4 (priority deadlines), 5 (FCFS baseline, evaluation protocol and results) and 6 (Gymnasium environment for the Local / Edge / Cloud decision) are described in <code>README.md</code> and <code>Step_Documentation/</code>. Step 7 (single-agent DQN baseline: design note, ECT heuristic, debugging, and a one-time test-seed evaluation) is in <code>Step_Documentation/Step7_DQN_Debugging.md</code> and <code>results/step7_final/</code>: the DQN does not beat the ECT heuristic in any scenario. Step 8 turns the three departments into separate agents with local observations in one shared simulation (<code>env/multi_agent_env.py</code>). Next up: Step 9 — MAPPO training with a centralized critic.</p>
+    <p class="closing-note">Steps 4 (priority deadlines), 5 (FCFS baseline, evaluation protocol and results) and 6 (Gymnasium environment for the Local / Edge / Cloud decision) are described in <code>README.md</code> and <code>Step_Documentation/</code>. Step 7 (single-agent DQN baseline: design note, ECT heuristic, debugging, and a one-time test-seed evaluation) is in <code>Step_Documentation/Step7_DQN_Debugging.md</code> and <code>results/step7_final/</code>: the DQN does not beat the ECT heuristic in any scenario. Step 8 turns the three departments into separate agents with local observations in one shared simulation (<code>env/multi_agent_env.py</code>). Step 9 trains the three agents with MAPPO (one actor per department, a centralized critic during training only); on the reserved test seeds it is the best policy in all three scenarios (<code>Step_Documentation/Step9_MAPPO.md</code>, <code>results/step9_final/</code>). Next up: Step 10 — a priority-aware reward.</p>
 
   </div>
 </div>
