@@ -92,3 +92,50 @@ Critical deadline violations even if some Routine tasks wait longer?*
 It is answered with the Critical violation rate and the per-priority average
 latency of the chosen setting against Step 9 (W1), in the overload and
 slow-network scenarios.
+
+## Round 1 — results (validation seeds only)
+
+All 18 runs come from the clean commit `20537fd`. **Test seeds were not
+used.** Compact artefacts are in [results/debug/prio1/](../results/debug/prio1/).
+The six W1 runs are byte-identical to the Step 9 LONG runs (models, curves,
+per-seed results), so W1 is exactly Step 9.
+
+Final checkpoint, deadline violation rate per priority, pooled per run and
+averaged over 3 scenarios × 2 training seeds:
+
+| Setting | Critical | High | Routine | Mean final score (unweighted) |
+|---|---|---|---|---|
+| W1 (1/1/1) | 3.380% | 0.203% | 0.000% | 1.207 |
+| **W5 (5/2/1)** | **0.141%** | 0.061% | 0.000% | 1.204 |
+| W25 (25/4/1) | 0.246% | 1.419% | 0.000% | 1.089 |
+
+Slow network, per run (seed 0 / seed 1). The violation rates and average
+latencies are in steps, final checkpoint:
+
+| Setting | Critical violation | Critical latency | Routine latency |
+|---|---|---|---|
+| W1 | 13.29% / 6.33% | 1.14 / 0.88 | 2.81 / 2.87 |
+| W5 | 0.21% / 0.63% | 0.35 / 0.29 | 4.38 / 4.87 |
+| W25 | 1.27% / 0.21% | 0.49 / 0.24 | 3.87 / 5.92 |
+
+**Selection (rule fixed before the runs).**
+
+- W5 and W25 both lower the Critical rate by more than 0.5 percentage points
+  against W1 (by 3.24 and 3.13 points).
+- They differ from each other by 0.105 points, which is less than 0.5, so the
+  smaller weights win.
+- **Frozen Step 10 setting: W5 (Critical 5, High 2, Routine 1)**, Step 9 MAPPO
+  otherwise unchanged (120,000 decisions).
+
+**Observations.**
+
+- **W5 trades Routine latency for Critical deadlines, as the roadmap asks.**
+  In the slow network, Critical violations fall from 13.29% / 6.33% to
+  0.21% / 0.63%. Routine latency rises from about 2.8 to 4.4–4.9 steps, but
+  Routine still has no violations. The unweighted score stays almost the same
+  (1.204 vs 1.207).
+- **W25 goes too far.** High-priority violations rise (1.419% vs 0.203%), the
+  unweighted score drops (1.089), and the default-scenario score falls below
+  ECT (0.83–0.89).
+- In one W25 run (slow network, seed 0) the critic is far off the Monte Carlo
+  return (mean bias −362.5 unweighted steps). W25 is not used further.
