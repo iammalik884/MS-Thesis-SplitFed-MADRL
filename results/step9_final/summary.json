@@ -1,0 +1,1846 @@
+{
+  "evaluation_seeds": [
+    2000,
+    2029
+  ],
+  "seed_set": "TEST (reserved)",
+  "runs": {
+    "default": [
+      "results\\step9_final\\training_runs\\FINAL_default_seed0_20261015T115113Z_58c8914",
+      "results\\step9_final\\training_runs\\FINAL_default_seed1_20261015T115227Z_58c8914",
+      "results\\step9_final\\training_runs\\FINAL_default_seed2_20261015T115345Z_58c8914",
+      "results\\step9_final\\training_runs\\FINAL_default_seed3_20261015T115628Z_58c8914",
+      "results\\step9_final\\training_runs\\FINAL_default_seed4_20261015T120052Z_58c8914"
+    ],
+    "overload": [
+      "results\\step9_final\\training_runs\\FINAL_overload_seed0_20261015T120647Z_58c8914",
+      "results\\step9_final\\training_runs\\FINAL_overload_seed1_20261015T121244Z_58c8914",
+      "results\\step9_final\\training_runs\\FINAL_overload_seed2_20261018T074436Z_58c8914",
+      "results\\step9_final\\training_runs\\FINAL_overload_seed3_20261018T074928Z_58c8914",
+      "results\\step9_final\\training_runs\\FINAL_overload_seed4_20261018T075553Z_58c8914"
+    ],
+    "slow_network": [
+      "results\\step9_final\\training_runs\\FINAL_slow_network_seed0_20261018T080049Z_58c8914",
+      "results\\step9_final\\training_runs\\FINAL_slow_network_seed1_20261018T080637Z_58c8914",
+      "results\\step9_final\\training_runs\\FINAL_slow_network_seed2_20261018T081218Z_58c8914",
+      "results\\step9_final\\training_runs\\FINAL_slow_network_seed3_20261018T081915Z_58c8914",
+      "results\\step9_final\\training_runs\\FINAL_slow_network_seed4_20261018T082447Z_58c8914"
+    ]
+  },
+  "ci": "mean +- 95% CI over training seeds (t, df = n-1); baselines are deterministic (CI n/a)",
+  "provenance": {
+    "git_commit": "344735661d3ceed24df1750922a60a82164fec9d",
+    "git_branch": "main",
+    "git_dirty": false,
+    "dirty_tracked_files": [],
+    "python_executable": "C:\\Users\\USr\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+    "python_version": "3.14.6",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "numpy": "2.5.3",
+      "PyYAML": "6.0.3",
+      "pytest": "9.1.1",
+      "gymnasium": "1.4.0",
+      "torch": "2.14.1+cpu"
+    },
+    "created_utc": "2026-10-18T08:27:25Z"
+  },
+  "results": {
+    "default": {
+      "MAPPO (best)": {
+        "return": [
+          -14.766666666666667,
+          0.43111953622224747
+        ],
+        "avg_latency": [
+          0.5451387494496279,
+          0.015133292411850281
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "throughput_in_window": [
+          1.2830000000000001,
+          0.0009254817017326209
+        ],
+        "neighbour_transfers": [
+          0.8666666666666667,
+          0.36436251033481687
+        ],
+        "cloud_transfers": [
+          1.82,
+          0.7337616756277465
+        ],
+        "synthetic_payload_units_total": [
+          14.389049290380925,
+          4.410911671754275
+        ],
+        "action_shares": {
+          "Local": 0.8981036662452592,
+          "Edge": 0.03286978508217446,
+          "Cloud": 0.06902654867256637
+        },
+        "per_training_seed_return": [
+          -14.633333333333333,
+          -14.866666666666667,
+          -15.3,
+          -14.366666666666667,
+          -14.666666666666666
+        ]
+      },
+      "MAPPO (final)": {
+        "return": [
+          -14.753333333333334,
+          0.3889226050909285
+        ],
+        "avg_latency": [
+          0.5449489686240127,
+          0.014250456891139391
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "throughput_in_window": [
+          1.2826666666666668,
+          0.0011334789677637878
+        ],
+        "neighbour_transfers": [
+          0.8266666666666667,
+          0.4080524283949542
+        ],
+        "cloud_transfers": [
+          1.8266666666666667,
+          0.7260166529776336
+        ],
+        "synthetic_payload_units_total": [
+          14.3949588529723,
+          5.054339514293787
+        ],
+        "action_shares": {
+          "Local": 0.8993678887484197,
+          "Edge": 0.031352718078381796,
+          "Cloud": 0.06927939317319848
+        },
+        "per_training_seed_return": [
+          -14.666666666666666,
+          -14.5,
+          -15.3,
+          -14.633333333333333,
+          -14.666666666666666
+        ]
+      },
+      "FCFS": {
+        "return": [
+          -15.7,
+          null
+        ],
+        "avg_latency": [
+          0.5822250152040324,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "throughput_in_window": [
+          1.2833333333333332,
+          null
+        ],
+        "neighbour_transfers": [
+          2.466666666666667,
+          null
+        ],
+        "cloud_transfers": [
+          3.4,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          30.578469109012204,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.7774968394437421,
+          "Edge": 0.09355246523388117,
+          "Cloud": 0.12895069532237674
+        }
+      },
+      "always Local": {
+        "return": [
+          -19.866666666666667,
+          null
+        ],
+        "avg_latency": [
+          0.6937311951913023,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.006666666666666667,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0018268268268268268,
+          null
+        ],
+        "throughput_in_window": [
+          1.2683333333333333,
+          null
+        ],
+        "neighbour_transfers": [
+          0,
+          null
+        ],
+        "cloud_transfers": [
+          0,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          0.0,
+          null
+        ],
+        "action_shares": {
+          "Local": 1.0,
+          "Edge": 0.0,
+          "Cloud": 0.0
+        }
+      },
+      "always Edge": {
+        "return": [
+          -38.233333333333334,
+          null
+        ],
+        "avg_latency": [
+          1.4321107988256876,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "throughput_in_window": [
+          1.2166666666666668,
+          null
+        ],
+        "neighbour_transfers": [
+          26.366666666666667,
+          null
+        ],
+        "cloud_transfers": [
+          0,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          88.61464966393167,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.0,
+          "Edge": 1.0,
+          "Cloud": 0.0
+        }
+      },
+      "always Cloud": {
+        "return": [
+          -52.733333333333334,
+          null
+        ],
+        "avg_latency": [
+          2.0,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "throughput_in_window": [
+          1.1883333333333332,
+          null
+        ],
+        "neighbour_transfers": [
+          0,
+          null
+        ],
+        "cloud_transfers": [
+          26.366666666666667,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          88.61464966393167,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.0,
+          "Edge": 0.0,
+          "Cloud": 1.0
+        }
+      },
+      "random": {
+        "return": [
+          -34.733333333333334,
+          null
+        ],
+        "avg_latency": [
+          1.3164169042934923,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "throughput_in_window": [
+          1.245,
+          null
+        ],
+        "neighbour_transfers": [
+          8.4,
+          null
+        ],
+        "cloud_transfers": [
+          9.533333333333333,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          60.331773149866045,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.3198482932996207,
+          "Edge": 0.3185840707964602,
+          "Cloud": 0.3615676359039191
+        }
+      },
+      "ECT": {
+        "return": [
+          -15.466666666666667,
+          null
+        ],
+        "avg_latency": [
+          0.566921153128572,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          null
+        ],
+        "throughput_in_window": [
+          1.2783333333333333,
+          null
+        ],
+        "neighbour_transfers": [
+          1.7666666666666666,
+          null
+        ],
+        "cloud_transfers": [
+          0.13333333333333333,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          8.333623411253162,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.9279393173198482,
+          "Edge": 0.06700379266750948,
+          "Cloud": 0.0050568900126422255
+        }
+      }
+    },
+    "overload": {
+      "MAPPO (best)": {
+        "return": [
+          -141.58,
+          4.809709794509491
+        ],
+        "avg_latency": [
+          1.1179340301709593,
+          0.038526195462636734
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "throughput_in_window": [
+          6.009,
+          0.01697697740916755
+        ],
+        "neighbour_transfers": [
+          0,
+          0.0
+        ],
+        "cloud_transfers": [
+          53.96,
+          2.625237780083581
+        ],
+        "synthetic_payload_units_total": [
+          250.6996483931582,
+          10.391098825546488
+        ],
+        "action_shares": {
+          "Local": 0.5726504751847941,
+          "Edge": 0.0,
+          "Cloud": 0.4273495248152059
+        },
+        "per_training_seed_return": [
+          -142.83333333333334,
+          -140.36666666666667,
+          -140.56666666666666,
+          -147.33333333333334,
+          -136.8
+        ]
+      },
+      "MAPPO (final)": {
+        "return": [
+          -143.63333333333333,
+          4.895089606293888
+        ],
+        "avg_latency": [
+          1.1334941064023862,
+          0.038389628489741194
+        ],
+        "critical_deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "deadline_violation_rate": [
+          0.0,
+          0.0
+        ],
+        "throughput_in_window": [
+          6.005333333333334,
+          0.017584152332919406
+        ],
+        "neighbour_transfers": [
+          0,
+          0.0
+        ],
+        "cloud_transfers": [
+          52.38,
+          1.9337031596353937
+        ],
+        "synthetic_payload_units_total": [
+          238.9423261361124,
+          10.151872670473487
+        ],
+        "action_shares": {
+          "Local": 0.5851636747624076,
+          "Edge": 0.0,
+          "Cloud": 0.4148363252375924
+        },
+        "per_training_seed_return": [
+          -146.26666666666668,
+          -143.93333333333334,
+          -144.93333333333334,
+          -146.23333333333332,
+          -136.8
+        ]
+      },
+      "FCFS": {
+        "return": [
+          -772.7,
+          null
+        ],
+        "avg_latency": [
+          3.6695988471909256,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.6481326023029289,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.23306608434514184,
+          null
+        ],
+        "throughput_in_window": [
+          4.831666666666667,
+          null
+        ],
+        "neighbour_transfers": [
+          102.63333333333334,
+          null
+        ],
+        "cloud_transfers": [
+          17.5,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          405.5689091801177,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.048574445617740235,
+          "Edge": 0.8128299894403379,
+          "Cloud": 0.13859556494192185
+        }
+      },
+      "always Local": {
+        "return": [
+          -1932.2,
+          null
+        ],
+        "avg_latency": [
+          9.72071344693023,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.7022406657344775,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.5291639615481173,
+          null
+        ],
+        "throughput_in_window": [
+          3.5533333333333332,
+          null
+        ],
+        "neighbour_transfers": [
+          0,
+          null
+        ],
+        "cloud_transfers": [
+          0,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          0.0,
+          null
+        ],
+        "action_shares": {
+          "Local": 1.0,
+          "Edge": 0.0,
+          "Cloud": 0.0
+        }
+      },
+      "always Edge": {
+        "return": [
+          -2007.6,
+          null
+        ],
+        "avg_latency": [
+          9.51020312820746,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.8985881040506619,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.6164654205002683,
+          null
+        ],
+        "throughput_in_window": [
+          3.3266666666666667,
+          null
+        ],
+        "neighbour_transfers": [
+          126.26666666666667,
+          null
+        ],
+        "cloud_transfers": [
+          0,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          422.1398281921178,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.0,
+          "Edge": 1.0,
+          "Cloud": 0.0
+        }
+      },
+      "always Cloud": {
+        "return": [
+          -253.46666666666667,
+          null
+        ],
+        "avg_latency": [
+          2.0019582230227466,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.0019624819624819625,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0004851628382908154,
+          null
+        ],
+        "throughput_in_window": [
+          5.7683333333333335,
+          null
+        ],
+        "neighbour_transfers": [
+          0,
+          null
+        ],
+        "cloud_transfers": [
+          126.26666666666667,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          422.1398281921178,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.0,
+          "Edge": 0.0,
+          "Cloud": 1.0
+        }
+      },
+      "random": {
+        "return": [
+          -555.2,
+          null
+        ],
+        "avg_latency": [
+          3.071302991212772,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.3205782279335608,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.1260311916270752,
+          null
+        ],
+        "throughput_in_window": [
+          5.216666666666667,
+          null
+        ],
+        "neighbour_transfers": [
+          42.13333333333333,
+          null
+        ],
+        "cloud_transfers": [
+          43.1,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          281.8774760542975,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.32497360084477295,
+          "Edge": 0.33368532206969376,
+          "Cloud": 0.34134107708553324
+        }
+      },
+      "ECT": {
+        "return": [
+          -215.2,
+          null
+        ],
+        "avg_latency": [
+          1.668653666652393,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.011761016761016761,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.0027594517424349685,
+          null
+        ],
+        "throughput_in_window": [
+          5.845,
+          null
+        ],
+        "neighbour_transfers": [
+          7.9,
+          null
+        ],
+        "cloud_transfers": [
+          36.06666666666667,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          201.0103875288552,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.6517951425554382,
+          "Edge": 0.06256599788806758,
+          "Cloud": 0.2856388595564942
+        }
+      }
+    },
+    "slow_network": {
+      "MAPPO (best)": {
+        "return": [
+          -153.58,
+          19.75617531867555
+        ],
+        "avg_latency": [
+          1.8990168009487178,
+          0.1098900861421821
+        ],
+        "critical_deadline_violation_rate": [
+          0.05948911144916664,
+          0.05331310773350514
+        ],
+        "deadline_violation_rate": [
+          0.014637359276368153,
+          0.013459596181700168
+        ],
+        "throughput_in_window": [
+          3.312,
+          0.03445477765151357
+        ],
+        "neighbour_transfers": [
+          1.26,
+          1.4947030896545606
+        ],
+        "cloud_transfers": [
+          10.4,
+          1.9780209364273311
+        ],
+        "synthetic_payload_units_total": [
+          59.47944527259883,
+          11.53556715532506
+        ],
+        "action_shares": {
+          "Local": 0.8418625678119349,
+          "Edge": 0.01708860759493671,
+          "Cloud": 0.1410488245931284
+        },
+        "per_training_seed_return": [
+          -175.2,
+          -140.03333333333333,
+          -147.56666666666666,
+          -139.83333333333334,
+          -165.26666666666668
+        ]
+      },
+      "MAPPO (final)": {
+        "return": [
+          -156.46,
+          17.707234409643796
+        ],
+        "avg_latency": [
+          1.9193678664515732,
+          0.07618817237495233
+        ],
+        "critical_deadline_violation_rate": [
+          0.06307678235077616,
+          0.0533449562304233
+        ],
+        "deadline_violation_rate": [
+          0.01692351273881997,
+          0.01408542319934248
+        ],
+        "throughput_in_window": [
+          3.302,
+          0.02117513459358924
+        ],
+        "neighbour_transfers": [
+          1.78,
+          0.7476380071571023
+        ],
+        "cloud_transfers": [
+          9.813333333333334,
+          1.8233633706825514
+        ],
+        "synthetic_payload_units_total": [
+          58.50843482776204,
+          11.007813965144722
+        ],
+        "action_shares": {
+          "Local": 0.8427667269439422,
+          "Edge": 0.024141048824593128,
+          "Cloud": 0.13309222423146475
+        },
+        "per_training_seed_return": [
+          -176.0,
+          -145.23333333333332,
+          -149.8,
+          -144.23333333333332,
+          -167.03333333333333
+        ]
+      },
+      "FCFS": {
+        "return": [
+          -409.56666666666666,
+          null
+        ],
+        "avg_latency": [
+          3.641051534496926,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.8401069327403625,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.18438035294167918,
+          null
+        ],
+        "throughput_in_window": [
+          2.9266666666666667,
+          null
+        ],
+        "neighbour_transfers": [
+          53.6,
+          null
+        ],
+        "cloud_transfers": [
+          11.033333333333333,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          227.12128515683,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.12341772151898735,
+          "Edge": 0.7269439421338155,
+          "Cloud": 0.14963833634719712
+        }
+      },
+      "always Local": {
+        "return": [
+          -402.8666666666667,
+          null
+        ],
+        "avg_latency": [
+          3.6028759436963824,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.2634891682354329,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.17468165955026385,
+          null
+        ],
+        "throughput_in_window": [
+          2.9516666666666667,
+          null
+        ],
+        "neighbour_transfers": [
+          0,
+          null
+        ],
+        "cloud_transfers": [
+          0,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          0.0,
+          null
+        ],
+        "action_shares": {
+          "Local": 1.0,
+          "Edge": 0.0,
+          "Cloud": 0.0
+        }
+      },
+      "always Edge": {
+        "return": [
+          -667.0,
+          null
+        ],
+        "avg_latency": [
+          5.321148261960644,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          1.0,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.3587207181832935,
+          null
+        ],
+        "throughput_in_window": [
+          2.6083333333333334,
+          null
+        ],
+        "neighbour_transfers": [
+          73.73333333333333,
+          null
+        ],
+        "cloud_transfers": [
+          0,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          253.09267266630388,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.0,
+          "Edge": 1.0,
+          "Cloud": 0.0
+        }
+      },
+      "always Cloud": {
+        "return": [
+          -868.7333333333333,
+          null
+        ],
+        "avg_latency": [
+          6.0,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          1.0,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.5762792721318958,
+          null
+        ],
+        "throughput_in_window": [
+          2.5583333333333336,
+          null
+        ],
+        "neighbour_transfers": [
+          0,
+          null
+        ],
+        "cloud_transfers": [
+          73.73333333333333,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          253.09267266630388,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.0,
+          "Edge": 0.0,
+          "Cloud": 1.0
+        }
+      },
+      "random": {
+        "return": [
+          -492.6,
+          null
+        ],
+        "avg_latency": [
+          3.8297170720911526,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.7232768084928537,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.2842705959766617,
+          null
+        ],
+        "throughput_in_window": [
+          2.945,
+          null
+        ],
+        "neighbour_transfers": [
+          24.9,
+          null
+        ],
+        "cloud_transfers": [
+          25.266666666666666,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          173.22897985912746,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.31962025316455694,
+          "Edge": 0.33770343580470163,
+          "Cloud": 0.3426763110307414
+        }
+      },
+      "ECT": {
+        "return": [
+          -246.0,
+          null
+        ],
+        "avg_latency": [
+          2.5173793271844533,
+          null
+        ],
+        "critical_deadline_violation_rate": [
+          0.3076736357224983,
+          null
+        ],
+        "deadline_violation_rate": [
+          0.07527604731391524,
+          null
+        ],
+        "throughput_in_window": [
+          3.1266666666666665,
+          null
+        ],
+        "neighbour_transfers": [
+          5.766666666666667,
+          null
+        ],
+        "cloud_transfers": [
+          1.5666666666666667,
+          null
+        ],
+        "synthetic_payload_units_total": [
+          32.87884635103067,
+          null
+        ],
+        "action_shares": {
+          "Local": 0.9005424954792043,
+          "Edge": 0.07820976491862568,
+          "Cloud": 0.021247739602169982
+        }
+      }
+    }
+  },
+  "destination_load": {
+    "default": {
+      "MAPPO_best_trainseed0": {
+        "Cloud": {
+          "mean_tasks": 2.3666666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.566666666666666,
+          "mean_avg_queue_wait": 0.02901359261653379
+        },
+        "General_Ward": {
+          "mean_tasks": 5.4,
+          "mean_avg_queue_wait": 0.03841269841269841
+        },
+        "ICU": {
+          "mean_tasks": 8.033333333333333,
+          "mean_avg_queue_wait": 0.01037037037037037
+        }
+      },
+      "MAPPO_best_trainseed1": {
+        "Cloud": {
+          "mean_tasks": 1.6666666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.8,
+          "mean_avg_queue_wait": 0.04669216404510522
+        },
+        "General_Ward": {
+          "mean_tasks": 5.633333333333334,
+          "mean_avg_queue_wait": 0.005555555555555555
+        },
+        "ICU": {
+          "mean_tasks": 8.266666666666667,
+          "mean_avg_queue_wait": 0.04364875864875865
+        }
+      },
+      "MAPPO_best_trainseed2": {
+        "Cloud": {
+          "mean_tasks": 0.8666666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 11.266666666666667,
+          "mean_avg_queue_wait": 0.0478231164260576
+        },
+        "General_Ward": {
+          "mean_tasks": 6.033333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "ICU": {
+          "mean_tasks": 8.2,
+          "mean_avg_queue_wait": 0.020808080808080807
+        }
+      },
+      "MAPPO_best_trainseed3": {
+        "Cloud": {
+          "mean_tasks": 2.033333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.966666666666667,
+          "mean_avg_queue_wait": 0.0418692092221504
+        },
+        "General_Ward": {
+          "mean_tasks": 5.333333333333333,
+          "mean_avg_queue_wait": 0.0047619047619047615
+        },
+        "ICU": {
+          "mean_tasks": 8.033333333333333,
+          "mean_avg_queue_wait": 0.024444444444444446
+        }
+      },
+      "MAPPO_best_trainseed4": {
+        "Cloud": {
+          "mean_tasks": 2.1666666666666665,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.866666666666667,
+          "mean_avg_queue_wait": 0.04925626660920778
+        },
+        "General_Ward": {
+          "mean_tasks": 5.166666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "ICU": {
+          "mean_tasks": 8.166666666666666,
+          "mean_avg_queue_wait": 0.02314814814814815
+        }
+      },
+      "MAPPO_final_trainseed0": {
+        "Cloud": {
+          "mean_tasks": 2.533333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.366666666666667,
+          "mean_avg_queue_wait": 0.01688141923436041
+        },
+        "General_Ward": {
+          "mean_tasks": 5.233333333333333,
+          "mean_avg_queue_wait": 0.037619047619047614
+        },
+        "ICU": {
+          "mean_tasks": 8.233333333333333,
+          "mean_avg_queue_wait": 0.020370370370370372
+        }
+      },
+      "MAPPO_final_trainseed1": {
+        "Cloud": {
+          "mean_tasks": 1.8666666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.8,
+          "mean_avg_queue_wait": 0.04673101408395526
+        },
+        "General_Ward": {
+          "mean_tasks": 5.366666666666666,
+          "mean_avg_queue_wait": 0.0
+        },
+        "ICU": {
+          "mean_tasks": 8.333333333333334,
+          "mean_avg_queue_wait": 0.03682336182336182
+        }
+      },
+      "MAPPO_final_trainseed2": {
+        "Cloud": {
+          "mean_tasks": 1,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.766666666666667,
+          "mean_avg_queue_wait": 0.04673101408395526
+        },
+        "General_Ward": {
+          "mean_tasks": 6.1,
+          "mean_avg_queue_wait": 0.015873015873015872
+        },
+        "ICU": {
+          "mean_tasks": 8.5,
+          "mean_avg_queue_wait": 0.06110694860694861
+        }
+      },
+      "MAPPO_final_trainseed3": {
+        "Cloud": {
+          "mean_tasks": 1.5666666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 11.366666666666667,
+          "mean_avg_queue_wait": 0.04507191338073691
+        },
+        "General_Ward": {
+          "mean_tasks": 5.566666666666666,
+          "mean_avg_queue_wait": 0.0
+        },
+        "ICU": {
+          "mean_tasks": 7.866666666666666,
+          "mean_avg_queue_wait": 0.006734006734006734
+        }
+      },
+      "MAPPO_final_trainseed4": {
+        "Cloud": {
+          "mean_tasks": 2.1666666666666665,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 10.866666666666667,
+          "mean_avg_queue_wait": 0.04925626660920778
+        },
+        "General_Ward": {
+          "mean_tasks": 5.166666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "ICU": {
+          "mean_tasks": 8.166666666666666,
+          "mean_avg_queue_wait": 0.02314814814814815
+        }
+      },
+      "FCFS": {
+        "Cloud": {
+          "mean_tasks": 3.4,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 9.166666666666666,
+          "mean_avg_queue_wait": 0.0
+        },
+        "General_Ward": {
+          "mean_tasks": 5.766666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "ICU": {
+          "mean_tasks": 8.033333333333333,
+          "mean_avg_queue_wait": 0.006666666666666667
+        }
+      },
+      "always Local": {
+        "Emergency": {
+          "mean_tasks": 10.333333333333334,
+          "mean_avg_queue_wait": 0.04855474590768708
+        },
+        "General_Ward": {
+          "mean_tasks": 7.666666666666667,
+          "mean_avg_queue_wait": 0.41236050986050987
+        },
+        "ICU": {
+          "mean_tasks": 8.366666666666667,
+          "mean_avg_queue_wait": 0.06077829577829578
+        }
+      },
+      "always Edge": {
+        "Emergency": {
+          "mean_tasks": 9,
+          "mean_avg_queue_wait": 0.0047619047619047615
+        },
+        "General_Ward": {
+          "mean_tasks": 8.466666666666667,
+          "mean_avg_queue_wait": 0.0432005957005957
+        },
+        "ICU": {
+          "mean_tasks": 8.9,
+          "mean_avg_queue_wait": 0.008703703703703703
+        }
+      },
+      "always Cloud": {
+        "Cloud": {
+          "mean_tasks": 26.366666666666667,
+          "mean_avg_queue_wait": 0.0
+        }
+      },
+      "random": {
+        "Cloud": {
+          "mean_tasks": 9.533333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 6.8,
+          "mean_avg_queue_wait": 0.015079365079365078
+        },
+        "General_Ward": {
+          "mean_tasks": 4.233333333333333,
+          "mean_avg_queue_wait": 0.08527777777777779
+        },
+        "ICU": {
+          "mean_tasks": 5.8,
+          "mean_avg_queue_wait": 0.02142857142857143
+        }
+      },
+      "ECT": {
+        "Cloud": {
+          "mean_tasks": 0.13333333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 11.4,
+          "mean_avg_queue_wait": 0.06441867772750126
+        },
+        "General_Ward": {
+          "mean_tasks": 6.233333333333333,
+          "mean_avg_queue_wait": 0.03226190476190476
+        },
+        "ICU": {
+          "mean_tasks": 8.6,
+          "mean_avg_queue_wait": 0.03396825396825397
+        }
+      }
+    },
+    "overload": {
+      "MAPPO_best_trainseed0": {
+        "Cloud": {
+          "mean_tasks": 57.03333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 29.833333333333332,
+          "mean_avg_queue_wait": 0.10941858752284836
+        },
+        "General_Ward": {
+          "mean_tasks": 13.166666666666666,
+          "mean_avg_queue_wait": 0.02332047582047582
+        },
+        "ICU": {
+          "mean_tasks": 26.233333333333334,
+          "mean_avg_queue_wait": 0.0818657168725166
+        }
+      },
+      "MAPPO_best_trainseed1": {
+        "Cloud": {
+          "mean_tasks": 54.43333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 31.5,
+          "mean_avg_queue_wait": 0.11363255685024154
+        },
+        "General_Ward": {
+          "mean_tasks": 14.3,
+          "mean_avg_queue_wait": 0.1311925474193276
+        },
+        "ICU": {
+          "mean_tasks": 26.033333333333335,
+          "mean_avg_queue_wait": 0.08305770202321927
+        }
+      },
+      "MAPPO_best_trainseed2": {
+        "Cloud": {
+          "mean_tasks": 53.333333333333336,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 29.933333333333334,
+          "mean_avg_queue_wait": 0.06409005144274518
+        },
+        "General_Ward": {
+          "mean_tasks": 17.133333333333333,
+          "mean_avg_queue_wait": 0.11240563257978119
+        },
+        "ICU": {
+          "mean_tasks": 25.866666666666667,
+          "mean_avg_queue_wait": 0.07612421976564905
+        }
+      },
+      "MAPPO_best_trainseed3": {
+        "Cloud": {
+          "mean_tasks": 53.833333333333336,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 29.1,
+          "mean_avg_queue_wait": 0.0497629812399273
+        },
+        "General_Ward": {
+          "mean_tasks": 16.766666666666666,
+          "mean_avg_queue_wait": 0.2003776157336529
+        },
+        "ICU": {
+          "mean_tasks": 26.566666666666666,
+          "mean_avg_queue_wait": 0.11889738768692033
+        }
+      },
+      "MAPPO_best_trainseed4": {
+        "Cloud": {
+          "mean_tasks": 51.166666666666664,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 31.333333333333332,
+          "mean_avg_queue_wait": 0.0886837521104599
+        },
+        "General_Ward": {
+          "mean_tasks": 15.766666666666667,
+          "mean_avg_queue_wait": 0.0703928530476518
+        },
+        "ICU": {
+          "mean_tasks": 28,
+          "mean_avg_queue_wait": 0.1568243718398622
+        }
+      },
+      "MAPPO_final_trainseed0": {
+        "Cloud": {
+          "mean_tasks": 53.46666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 29.533333333333335,
+          "mean_avg_queue_wait": 0.03274396617555683
+        },
+        "General_Ward": {
+          "mean_tasks": 15.333333333333334,
+          "mean_avg_queue_wait": 0.03887138188608777
+        },
+        "ICU": {
+          "mean_tasks": 27.933333333333334,
+          "mean_avg_queue_wait": 0.20706796346933928
+        }
+      },
+      "MAPPO_final_trainseed1": {
+        "Cloud": {
+          "mean_tasks": 54.4,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 31,
+          "mean_avg_queue_wait": 0.11666544261230939
+        },
+        "General_Ward": {
+          "mean_tasks": 14.4,
+          "mean_avg_queue_wait": 0.10812540400775694
+        },
+        "ICU": {
+          "mean_tasks": 26.466666666666665,
+          "mean_avg_queue_wait": 0.07068198980474899
+        }
+      },
+      "MAPPO_final_trainseed2": {
+        "Cloud": {
+          "mean_tasks": 50.666666666666664,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 31.966666666666665,
+          "mean_avg_queue_wait": 0.12902304027120828
+        },
+        "General_Ward": {
+          "mean_tasks": 18.266666666666666,
+          "mean_avg_queue_wait": 0.24117595682611162
+        },
+        "ICU": {
+          "mean_tasks": 25.366666666666667,
+          "mean_avg_queue_wait": 0.049654768177756686
+        }
+      },
+      "MAPPO_final_trainseed3": {
+        "Cloud": {
+          "mean_tasks": 52.2,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 31.5,
+          "mean_avg_queue_wait": 0.13827869859074407
+        },
+        "General_Ward": {
+          "mean_tasks": 15.466666666666667,
+          "mean_avg_queue_wait": 0.05821561665601913
+        },
+        "ICU": {
+          "mean_tasks": 27.1,
+          "mean_avg_queue_wait": 0.13615536731087827
+        }
+      },
+      "MAPPO_final_trainseed4": {
+        "Cloud": {
+          "mean_tasks": 51.166666666666664,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 31.333333333333332,
+          "mean_avg_queue_wait": 0.0886837521104599
+        },
+        "General_Ward": {
+          "mean_tasks": 15.766666666666667,
+          "mean_avg_queue_wait": 0.0703928530476518
+        },
+        "ICU": {
+          "mean_tasks": 28,
+          "mean_avg_queue_wait": 0.1568243718398622
+        }
+      },
+      "FCFS": {
+        "Cloud": {
+          "mean_tasks": 17.5,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 40.833333333333336,
+          "mean_avg_queue_wait": 1.472923531653264
+        },
+        "General_Ward": {
+          "mean_tasks": 33,
+          "mean_avg_queue_wait": 3.543570686563184
+        },
+        "ICU": {
+          "mean_tasks": 34.93333333333333,
+          "mean_avg_queue_wait": 2.230965954089187
+        }
+      },
+      "always Local": {
+        "Emergency": {
+          "mean_tasks": 45.2,
+          "mean_avg_queue_wait": 4.60787645592328
+        },
+        "General_Ward": {
+          "mean_tasks": 40.63333333333333,
+          "mean_avg_queue_wait": 17.095667158345744
+        },
+        "ICU": {
+          "mean_tasks": 40.43333333333333,
+          "mean_avg_queue_wait": 4.807269362695313
+        }
+      },
+      "always Edge": {
+        "Emergency": {
+          "mean_tasks": 45.4,
+          "mean_avg_queue_wait": 5.556989784171476
+        },
+        "General_Ward": {
+          "mean_tasks": 41.2,
+          "mean_avg_queue_wait": 10.181368578843161
+        },
+        "ICU": {
+          "mean_tasks": 39.666666666666664,
+          "mean_avg_queue_wait": 7.463776129513285
+        }
+      },
+      "always Cloud": {
+        "Cloud": {
+          "mean_tasks": 126.26666666666667,
+          "mean_avg_queue_wait": 0.0009791115113733468
+        }
+      },
+      "random": {
+        "Cloud": {
+          "mean_tasks": 43.1,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 32.36666666666667,
+          "mean_avg_queue_wait": 1.27889133716286
+        },
+        "General_Ward": {
+          "mean_tasks": 22.133333333333333,
+          "mean_avg_queue_wait": 4.171969255410522
+        },
+        "ICU": {
+          "mean_tasks": 28.666666666666668,
+          "mean_avg_queue_wait": 2.0318006284679906
+        }
+      },
+      "ECT": {
+        "Cloud": {
+          "mean_tasks": 36.06666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 36.8,
+          "mean_avg_queue_wait": 0.9131178311764983
+        },
+        "General_Ward": {
+          "mean_tasks": 20.8,
+          "mean_avg_queue_wait": 0.6412915495810233
+        },
+        "ICU": {
+          "mean_tasks": 32.6,
+          "mean_avg_queue_wait": 0.8398483947655628
+        }
+      }
+    },
+    "slow_network": {
+      "MAPPO_best_trainseed0": {
+        "Cloud": {
+          "mean_tasks": 8.033333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 27.8,
+          "mean_avg_queue_wait": 0.9481483673156109
+        },
+        "General_Ward": {
+          "mean_tasks": 15.066666666666666,
+          "mean_avg_queue_wait": 0.8411893405585356
+        },
+        "ICU": {
+          "mean_tasks": 22.833333333333332,
+          "mean_avg_queue_wait": 0.5407362469583423
+        }
+      },
+      "MAPPO_best_trainseed1": {
+        "Cloud": {
+          "mean_tasks": 11.5,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 25.566666666666666,
+          "mean_avg_queue_wait": 0.38175413927970436
+        },
+        "General_Ward": {
+          "mean_tasks": 14.4,
+          "mean_avg_queue_wait": 0.47020375264570313
+        },
+        "ICU": {
+          "mean_tasks": 22.266666666666666,
+          "mean_avg_queue_wait": 0.3532904823150612
+        }
+      },
+      "MAPPO_best_trainseed2": {
+        "Cloud": {
+          "mean_tasks": 10.766666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 26.833333333333332,
+          "mean_avg_queue_wait": 0.5605775032553459
+        },
+        "General_Ward": {
+          "mean_tasks": 13.5,
+          "mean_avg_queue_wait": 0.28196863049804227
+        },
+        "ICU": {
+          "mean_tasks": 22.633333333333333,
+          "mean_avg_queue_wait": 0.3734376172112969
+        }
+      },
+      "MAPPO_best_trainseed3": {
+        "Cloud": {
+          "mean_tasks": 12.033333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 25.733333333333334,
+          "mean_avg_queue_wait": 0.472142241521519
+        },
+        "General_Ward": {
+          "mean_tasks": 14.5,
+          "mean_avg_queue_wait": 0.39457469688893837
+        },
+        "ICU": {
+          "mean_tasks": 21.466666666666665,
+          "mean_avg_queue_wait": 0.2983014113540383
+        }
+      },
+      "MAPPO_best_trainseed4": {
+        "Cloud": {
+          "mean_tasks": 9.666666666666666,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 27.833333333333332,
+          "mean_avg_queue_wait": 1.0110760642533605
+        },
+        "General_Ward": {
+          "mean_tasks": 15.533333333333333,
+          "mean_avg_queue_wait": 0.6426844816976396
+        },
+        "ICU": {
+          "mean_tasks": 20.7,
+          "mean_avg_queue_wait": 0.19497389498224066
+        }
+      },
+      "MAPPO_final_trainseed0": {
+        "Cloud": {
+          "mean_tasks": 7.5,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 27.933333333333334,
+          "mean_avg_queue_wait": 0.9620699723051672
+        },
+        "General_Ward": {
+          "mean_tasks": 15.333333333333334,
+          "mean_avg_queue_wait": 0.8409765615647968
+        },
+        "ICU": {
+          "mean_tasks": 22.966666666666665,
+          "mean_avg_queue_wait": 0.5443723785785909
+        }
+      },
+      "MAPPO_final_trainseed1": {
+        "Cloud": {
+          "mean_tasks": 10.366666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 26.6,
+          "mean_avg_queue_wait": 0.42377278896517867
+        },
+        "General_Ward": {
+          "mean_tasks": 13.766666666666667,
+          "mean_avg_queue_wait": 0.6393894920868605
+        },
+        "ICU": {
+          "mean_tasks": 23,
+          "mean_avg_queue_wait": 0.348477893941118
+        }
+      },
+      "MAPPO_final_trainseed2": {
+        "Cloud": {
+          "mean_tasks": 10.9,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 26.9,
+          "mean_avg_queue_wait": 0.5871331210544616
+        },
+        "General_Ward": {
+          "mean_tasks": 13.666666666666666,
+          "mean_avg_queue_wait": 0.3167331766673872
+        },
+        "ICU": {
+          "mean_tasks": 22.266666666666666,
+          "mean_avg_queue_wait": 0.3889686845633574
+        }
+      },
+      "MAPPO_final_trainseed3": {
+        "Cloud": {
+          "mean_tasks": 11.033333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 25.4,
+          "mean_avg_queue_wait": 0.35232340803460893
+        },
+        "General_Ward": {
+          "mean_tasks": 15.466666666666667,
+          "mean_avg_queue_wait": 0.7757501955102575
+        },
+        "ICU": {
+          "mean_tasks": 21.833333333333332,
+          "mean_avg_queue_wait": 0.34286772401709203
+        }
+      },
+      "MAPPO_final_trainseed4": {
+        "Cloud": {
+          "mean_tasks": 9.266666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 27.833333333333332,
+          "mean_avg_queue_wait": 1.0041408399648128
+        },
+        "General_Ward": {
+          "mean_tasks": 15.633333333333333,
+          "mean_avg_queue_wait": 0.6749586295484128
+        },
+        "ICU": {
+          "mean_tasks": 21,
+          "mean_avg_queue_wait": 0.2198479849005716
+        }
+      },
+      "FCFS": {
+        "Cloud": {
+          "mean_tasks": 11.033333333333333,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 22.166666666666668,
+          "mean_avg_queue_wait": 0.05995667945454817
+        },
+        "General_Ward": {
+          "mean_tasks": 20.033333333333335,
+          "mean_avg_queue_wait": 0.45828677659492706
+        },
+        "ICU": {
+          "mean_tasks": 20.5,
+          "mean_avg_queue_wait": 0.13260265150139292
+        }
+      },
+      "always Local": {
+        "Emergency": {
+          "mean_tasks": 27.366666666666667,
+          "mean_avg_queue_wait": 0.9663805664817537
+        },
+        "General_Ward": {
+          "mean_tasks": 22.633333333333333,
+          "mean_avg_queue_wait": 6.502206415636806
+        },
+        "ICU": {
+          "mean_tasks": 23.733333333333334,
+          "mean_avg_queue_wait": 0.9756892201054606
+        }
+      },
+      "always Edge": {
+        "Emergency": {
+          "mean_tasks": 26.566666666666666,
+          "mean_avg_queue_wait": 0.6761497603327443
+        },
+        "General_Ward": {
+          "mean_tasks": 23.433333333333334,
+          "mean_avg_queue_wait": 2.708749075064036
+        },
+        "ICU": {
+          "mean_tasks": 23.733333333333334,
+          "mean_avg_queue_wait": 1.3343873579391836
+        }
+      },
+      "always Cloud": {
+        "Cloud": {
+          "mean_tasks": 73.73333333333333,
+          "mean_avg_queue_wait": 0.0
+        }
+      },
+      "random": {
+        "Cloud": {
+          "mean_tasks": 25.266666666666666,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 17.8,
+          "mean_avg_queue_wait": 0.17243636893028916
+        },
+        "General_Ward": {
+          "mean_tasks": 14.166666666666666,
+          "mean_avg_queue_wait": 1.0152755224078753
+        },
+        "ICU": {
+          "mean_tasks": 16.5,
+          "mean_avg_queue_wait": 0.4546743358121067
+        }
+      },
+      "ECT": {
+        "Cloud": {
+          "mean_tasks": 1.5666666666666667,
+          "mean_avg_queue_wait": 0.0
+        },
+        "Emergency": {
+          "mean_tasks": 29.633333333333333,
+          "mean_avg_queue_wait": 1.2052155834584115
+        },
+        "General_Ward": {
+          "mean_tasks": 16.666666666666668,
+          "mean_avg_queue_wait": 2.1787687135132954
+        },
+        "ICU": {
+          "mean_tasks": 25.866666666666667,
+          "mean_avg_queue_wait": 1.2012874321061597
+        }
+      }
+    }
+  }
+}
