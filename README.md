@@ -7,18 +7,21 @@ University of Sargodha).
 The code follows the 18-step practical roadmap (`My Research Practical ROADMAP.docx`).
 Each step adds one new idea and is verified before the next step starts.
 
-**Current status: Steps 1–9 complete**:
+**Current status: Steps 1–10 complete**:
 
 - hospital simulator and FCFS baseline;
 - Gymnasium environment;
 - single-agent DQN baseline;
 - three-agent environment;
-- MAPPO with centralized training and decentralized execution (CTDE).
+- MAPPO with centralized training and decentralized execution (CTDE);
+- priority-aware reward.
 
 On the reserved test seeds, cooperative MAPPO is the best policy in all three
 scenarios (default, overload, slow network). The DQN does not beat the ECT
-heuristic in any scenario (see Steps 7 and 9 below). Steps 10–18
-(priority-aware reward, SplitFed, privacy, robustness) have not been started.
+heuristic in any scenario (see Steps 7 and 9 below). The priority-aware
+reward (Step 10) almost removes Critical deadline violations in the slow
+network, while Routine tasks wait longer. Steps 11–18 (SplitFed, privacy,
+robustness) have not been started.
 
 > **Data note:** all workload numbers (arrival rates, compute demands,
 > deadlines) are **synthetic placeholders**, not MIMIC-IV statistics.
@@ -31,7 +34,7 @@ Requires Python ≥ 3.10 (tested with 3.14.6 on Windows 11).
 
 ```bash
 pip install -r requirements.txt
-python -m pytest -q                      # 109 tests, all should pass
+python -m pytest -q                      # 115 tests, all should pass
 python demo_simulation.py                # one readable run (seed 42)
 python run_baseline_fcfs.py --seeds 0-29 # FCFS baseline, 30 seeds
 python run_baseline_fcfs.py --config configs/scenarios/overload.yaml --seeds 0-29
@@ -106,7 +109,11 @@ and removed pre-v2 keys raise clear errors).
       observations, a centralized critic on the global state (training only),
       team reward, PPO updates; pre-registered experiments on validation seeds
       and one evaluation of the frozen setting on test seeds; see below.
-- [ ] Steps 10–18 — see the roadmap document.
+- [x] **Step 10 — Priority-aware reward.** Optional per-priority reward
+      weights (`rl_environment.priority_weights`) derived from the deadline
+      offsets; pre-registered comparison on validation seeds, one test
+      evaluation of the chosen weights (5/2/1); see below.
+- [ ] Steps 11–18 — see the roadmap document.
 
 The design was revised after an audit (commits `470a079`, `acdb3d4`,
 `83e7f3f`). The pre-audit version is preserved under the git tag
@@ -363,6 +370,42 @@ DQN are the mean ± 95% CI over 5 training seeds.
   Both were given the same options, and each budget was chosen by its own
   pre-registered rule.
 
+## Step 10: priority-aware reward
+
+[Step10_Priority_Reward.md](Step_Documentation/Step10_Priority_Reward.md) has
+the plan (committed before the runs) and all results.
+
+- **Reward:** each task's reward is multiplied by its priority weight:
+  `w_p × (−latency − 10 × miss)`.
+- **Default:** without `rl_environment.priority_weights` every weight is 1.0,
+  and the reward is exactly the Steps 6–9 reward.
+- **Candidates:** the weights are derived from the deadline offsets (2 / 5 / 10):
+  - W5 = 5/2/1 (urgency);
+  - W25 = 25/4/1 (urgency squared);
+  - W1 = 1/1/1 (= Step 9).
+- **Selection:** on validation seeds, by the Critical violation rate. W5 was
+  chosen: mean Critical violation 0.141%, against 3.380% for W1 and 0.246%
+  for W25. W25 raised High-priority violations and lowered the score.
+- **Close-out:** W5 was trained with 5 training seeds and evaluated once on
+  test seeds 2,000–2,029 ([results/step10_final/](results/step10_final/)).
+  The Step 9 MAPPO was re-evaluated on the same seeds for its per-priority
+  numbers.
+
+| Slow network, test seeds | Step 9 MAPPO (W1) | **Step 10 MAPPO (W5)** | ECT |
+|---|---|---|---|
+| Critical deadline violations (pooled) | 6.78% ± 5.96 | **0.22% ± 0.19** | 31.53% |
+| Critical latency (steps) | 0.87 ± 0.21 | **0.35 ± 0.06** | 1.80 |
+| Routine latency (steps) | 3.05 ± 0.06 | 4.15 ± 0.46 | 3.21 |
+| Routine deadline violations | 0.00% | 0.00% | 0.00% |
+| Unweighted return | −153.6 ± 19.8 | −151.1 ± 11.3 | −246.0 |
+
+- **Roadmap checkpoint:** yes. Critical violations almost disappear, and
+  Routine tasks wait longer, without any Routine violation.
+- **Return:** the unweighted return of W5 and Step 9 is about the same in all
+  three scenarios (the CIs overlap).
+- **Cost:** W5 uses the cost-free cloud more (Cloud share 27.5% vs 14.1% in
+  the slow network), so its offloading communication is higher.
+
 ## FCFS baseline results (seeds 0–29, mean)
 
 From [results/baselines/](results/baselines/), produced at commit `83e7f3f`
@@ -389,7 +432,7 @@ New runs go to `results/runs/` (git-ignored); a run folder is never overwritten.
 
 ## Verification
 
-109 automated tests (`python -m pytest -q`):
+115 automated tests (`python -m pytest -q`):
 
 | File | What it checks |
 |---|---|
@@ -406,6 +449,7 @@ New runs go to `results/runs/` (git-ignored); a run folder is never overwritten.
 | `test_step6_gym_env.py` | Gymnasium `check_env`, roadmap Step 6 checkpoints, exact FCFS reproduction on 6 configs × seeds 0–29, reward bookkeeping, action meanings, determinism, empty episode, invalid usage |
 | `test_step8_multi_agent_env.py` | roadmap Step 8 checkpoints (all three agents act in one step; Edge offload changes the receiving department's queue and observed load), exact FCFS reproduction on 6 configs × seeds 0–29, rewards per source agent = Step 6 reward, local vs global observation, determinism, invalid usage |
 | `test_mappo.py` | GAE by hand (no bootstrap at episode end), PPO update direction, greedy action, config checks, reproducible training on training seeds only, evaluation uses the same local observations as the Step 8 env |
+| `test_step10_priority_reward.py` | weighted return by hand (incl. unfinished tasks), default weights = 1, weights change only the reward (identical reports), weighted per-agent rewards, invalid weights, per-priority latency and violation rates |
 
 ## Folder structure
 
@@ -432,13 +476,14 @@ MS_Thesis_Project/
 │   ├── policy_eval.py            # Step 7: one evaluation routine for all policies
 │   ├── dqn.py                    # Step 7: DQN (replay buffer, target network, optional Double DQN)
 │   └── mappo.py                  # Step 9: MAPPO (per-department actors, centralized critic, PPO)
-├── tests/                        # 109 tests (see Verification)
+├── tests/                        # 115 tests (see Verification)
 ├── results/
 │   ├── baselines/                # committed FCFS v2 results
 │   ├── pilot/                    # Step 7 DQN pilot runs (preliminary)
-│   ├── debug/                    # Step 7 DQN and Step 9 MAPPO experiment runs (compact artefacts)
+│   ├── debug/                    # Step 7 DQN, Step 9 MAPPO and Step 10 reward-weight runs (compact artefacts)
 │   ├── step7_final/              # Step 7 close-out: frozen DQN, test-seed results
 │   ├── step9_final/              # Step 9 close-out: frozen MAPPO, test-seed results
+│   ├── step10_final/             # Step 10 close-out: priority-aware MAPPO (W5), test-seed results
 │   └── legacy/                   # pre-audit result, not comparable
 ├── Step_Documentation/           # per-step Word write-ups (Roman Urdu), see note below
 ├── demo_simulation.py            # one readable run with seed 42
@@ -454,7 +499,7 @@ MS_Thesis_Project/
 ```
 
 **Note on `Step_Documentation/`:** the Step 3 and Step 5 write-ups were
-rewritten for the current (v2) design; Steps 6–9 have their own write-ups
+rewritten for the current (v2) design; Steps 6–10 have their own write-ups
 (Step 7: `Step7_DQN_Baseline.docx`, with the design note and the debugging/close-out
 record as Markdown next to it). Steps 1, 2 and 4 start with a
 "V2 UPDATE" box listing what changed; their code listings are simplified
@@ -469,7 +514,9 @@ versions of the code in `env/`.
   stable across training seeds (checkpoint selection on validation seeds is
   needed). FCFS routing ignores priority and deadlines by design.
 - MAPPO's load balancing relies on the cost-free cloud (Edge is almost
-  unused). The reward is not priority-weighted yet (roadmap Step 10).
+  unused); the priority-aware MAPPO (Step 10) uses the cloud even more. The
+  priority weights (5/2/1) come from the deadline placeholders, not from
+  clinical data.
 - In the stressed scenarios the cloud almost never fills up and is free to use
   (see the Step 6 sanity check). Whether to add a cloud usage cost or change
   the capacity is still to be decided with the supervisor; any such change

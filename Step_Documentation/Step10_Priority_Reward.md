@@ -140,3 +140,87 @@ latencies are in steps, final checkpoint:
 - In one W25 run (slow network, seed 0) the critic is far off the Monte Carlo
   return (mean bias −362.5, in units of the weighted reward it is trained on).
   W25 is not used further.
+
+## Close-out — results (test seeds, evaluated once)
+
+**Training.** W5 was trained with training seeds 0–4 on the 3 scenarios
+(15 runs) at the clean commit `672f628`. Seeds 0 and 1 are byte-identical to
+the Round 1 W5 runs. On the validation seeds the mean final score is 1.212
+(drop 0.010).
+
+**Test evaluation.** This command was run once, at commit `da022d9`, on test
+seeds 2,000–2,029:
+
+```
+python evaluate_dqn_test.py --runs results/step10_final/training_runs --out results/step10_final
+```
+
+As planned, the frozen Step 9 MAPPO was re-evaluated with the same command
+(`--runs results/step9_final/training_runs --out results/step10_final/step9_reference`)
+to get its per-priority numbers. Its `per_seed.csv`, table, figure and
+results are identical to [results/step9_final/](../results/step9_final/).
+
+All values below are means ± 95% CI over the 5 training seeds, best
+checkpoint, test seeds. "Violation" is pooled over the 30 test seeds of a
+run: late + overdue tasks / decided tasks of that priority. This is
+slightly different from the headline `critical_deadline_violation_rate`
+(the mean of per-seed rates, e.g. 5.9% for Step 9 in the slow network).
+Latency is the mean over completed tasks, in steps. No task was left
+unfinished.
+
+**Slow network** (where Critical deadlines are at risk):
+
+| Priority | Step 9 MAPPO (W1): violation | latency | **Step 10 MAPPO (W5): violation** | **latency** | ECT: violation / latency |
+|---|---|---|---|---|---|
+| Critical | 6.78% ± 5.96 | 0.87 ± 0.21 | **0.22% ± 0.19** | **0.35 ± 0.06** | 31.53% / 1.80 |
+| High | 0.49% ± 0.71 | 1.23 ± 0.27 | 0.15% ± 0.20 | 0.58 ± 0.07 | 3.31% / 2.23 |
+| Routine | 0.00% | 3.05 ± 0.06 | 0.00% | 4.15 ± 0.46 | 0.00% / 3.21 |
+
+**Overload:** Critical violations are 0.00% for both. Critical latency falls
+from 0.57 ± 0.07 to 0.34 ± 0.02, and Routine latency rises from 1.78 ± 0.07
+to 1.98 ± 0.04.
+
+**Default:** no violations for either. Critical latency 0.15 → 0.12, and
+Routine latency 1.05 → 1.12.
+
+**Unweighted return** (comparable with Steps 7–9):
+
+| Policy | Default | Overload | Slow network |
+|---|---|---|---|
+| **Step 10 MAPPO (W5)** | −15.1 ± 0.4 | −142.9 ± 2.7 | **−151.1 ± 11.3** |
+| Step 9 MAPPO (W1) | **−14.8 ± 0.4** | **−141.6 ± 4.8** | −153.6 ± 19.8 |
+| ECT | −15.5 | −215.2 | −246.0 |
+| FCFS | −15.7 | −772.7 | −409.6 |
+
+**Roadmap checkpoint — when resources are limited, does the policy reduce
+Critical deadline violations even if some Routine tasks wait longer? Yes.**
+
+- In the slow network, W5 cuts the Critical violation rate from 6.78% to
+  0.22% and the Critical latency from 0.87 to 0.35 steps.
+- In exchange, Routine tasks wait longer: 3.05 → 4.15 steps, with still no
+  Routine violation.
+- Under overload, W5 has the same pattern on latency (Critical faster,
+  Routine slower), and both settings have no violations.
+- The unweighted return of W5 and Step 9 is about the same: their 95%
+  confidence intervals overlap in all three scenarios.
+- W5 has a better mean return than ECT and FCFS in every scenario. In the
+  default scenario the margin over ECT is very small: −15.1 ± 0.4 vs −15.5,
+  and one of the 5 training seeds equals ECT exactly (−15.47).
+
+**Costs, reported honestly.**
+
+- W5 uses the cloud more: Cloud share in the slow network 27.5% vs 14.1%,
+  and under overload 48.5% vs 42.7%.
+- Its offloading communication is higher: synthetic payload 112.7 vs 59.5
+  units in the slow network, and 284.1 vs 250.7 under overload.
+- Edge is still almost unused (0.0–1.9%).
+- The priority-aware policy therefore relies even more on the cost-free
+  cloud. The open modelling question about a cloud usage cost (supervisor)
+  matters even more here.
+
+**Conclusion of Step 10.** A priority-weighted team reward with weights from
+the deadline offsets (W5 = 5/2/1) was chosen by the pre-registered rule. On
+the test seeds it almost removes Critical deadline violations where they
+occurred, accepts longer Routine waits, and keeps the overall return. This
+is the healthcare-specific contribution the roadmap asks for. Privacy
+(SplitFed) is the next part of the roadmap.
