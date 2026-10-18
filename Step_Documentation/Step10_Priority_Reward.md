@@ -138,4 +138,5 @@ latencies are in steps, final checkpoint:
   unweighted score drops (1.089), and the default-scenario score falls below
   ECT (0.83–0.89).
 - In one W25 run (slow network, seed 0) the critic is far off the Monte Carlo
-  return (mean bias −362.5 unweighted steps). W25 is not used further.
+  return (mean bias −362.5, in units of the weighted reward it is trained on).
+  W25 is not used further.
