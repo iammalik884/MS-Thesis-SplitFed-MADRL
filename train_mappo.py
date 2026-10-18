@@ -12,6 +12,11 @@ departments rather than overload one node?" -> har policy ke liye har node
 par aane wale tasks aur un ka average queue wait (summary.json:
 "destination_load") aur Edge ka share.
 
+Step 10: --set priority_weights=5/2/1 (Critical/High/Routine) trains on the
+priority-weighted reward (env/gym_env.py). The checkpoint is chosen on that
+weighted validation return; the saved results are ALSO given with the
+original (unweighted) reward, so they compare directly with Steps 7-9.
+
 Run:  py train_mappo.py --config configs/scenarios/overload.yaml --train-seed 0 [--set gamma=0.95]
 Output: results/runs/<name>_<UTC time>_<commit>/ (git-ignored)
 """
@@ -30,6 +35,7 @@ from agents.mappo import MAPPOAgent, MAPPOConfig
 from agents.policy_eval import baseline_policies, evaluate
 from env.hospital_env import load_config
 from env.multi_agent_env import MultiAgentHospitalEnv, local_observation
+from env.task import PRIORITY_CLASSES
 from env.run_records import collect_provenance, unique_run_dir, write_json
 from train_dqn_pilot import TEST_SEEDS, TRAIN_SEED_RANGE, VALIDATION_SEEDS, _write_csv, step_of
 
@@ -142,6 +148,18 @@ def destination_load(result):
     return out
 
 
+def violation_by_priority(result):
+    """Deadline violation rate per priority, pooled over seeds (needs
+    evaluate(..., keep_reports=True)): (late + overdue) / decided."""
+    out = {}
+    for p in PRIORITY_CLASSES:
+        groups = [row["report"]["final"]["deadlines"]["per_priority"].get(p) for row in result["per_seed"]]
+        decided = sum(g["decided"] for g in groups if g)
+        missed = sum(g["completed_late"] + g["overdue_unfinished"] for g in groups if g)
+        out[p] = {"decided": decided, "violation_rate": missed / decided if decided else None}
+    return out
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Step 9: train MAPPO in the three-agent environment (validation seeds only)")
     parser.add_argument("--config", default=os.path.join(ROOT, "configs", "environment.yaml"))
@@ -151,31 +169,44 @@ def main(argv=None):
     parser.add_argument("--out-dir", default=os.path.join(ROOT, "results", "runs"))
     parser.add_argument("--name", default=None)
     parser.add_argument("--set", action="append", default=[], metavar="KEY=VALUE",
-                        help="override one MAPPOConfig field, e.g. --set gamma=0.95")
+                        help="override one MAPPOConfig field, e.g. --set gamma=0.95; Step 10: "
+                             "--set priority_weights=5/2/1 (Critical/High/Routine reward weights)")
     args = parser.parse_args(argv)
 
     torch.set_num_threads(1)  # deterministic, and the networks are small
     fields = {f.name: f.type for f in dataclasses.fields(MAPPOConfig)}
-    overrides = {}
+    overrides, weights = {}, None
     for item in args.set:
         key, _, value = item.partition("=")
+        if key == "priority_weights":
+            parts = value.split("/")
+            if len(parts) != len(PRIORITY_CLASSES):
+                raise SystemExit(f"--set priority_weights: need {len(PRIORITY_CLASSES)} values C/H/R, got {value!r}")
+            weights = dict(zip(PRIORITY_CLASSES, (float(x) for x in parts)))
+            continue
         if key not in fields:
             raise SystemExit(f"--set: unknown MAPPOConfig field {key!r}; known: {sorted(fields)}")
         overrides[key] = (int if fields[key] in (int, "int") else float)(value)
     cfg = MAPPOConfig(**overrides)
+    train_config = load_config(args.config)            # the reward the agents are trained on
+    if weights is not None:
+        train_config["rl_environment"]["priority_weights"] = weights
+        MultiAgentHospitalEnv(train_config)            # validates the weights before training
     scenario = os.path.splitext(os.path.basename(args.config))[0]
     name = args.name or f"mappo_{scenario}_trainseed{args.train_seed}"
     print(f"MAPPO [{scenario}] train seed {args.train_seed}, {args.total_steps} decisions")
     start = time.time()
     agent, learning_curve, validation_curve, best = train(
-        args.config, args.train_seed, args.total_steps, args.eval_every, cfg)
+        train_config, args.train_seed, args.total_steps, args.eval_every, cfg)
 
     final_state = {k: {n: t.clone() for n, t in v.items()} for k, v in agent.state_dict().items()}
-    results, v_check = {}, {}
+    results, v_check, weighted = {}, {}, {}
     for label, state in (("mappo_best", best["state_dict"]), ("mappo_final", final_state)):
         agent.load_state_dict(state)
         results[label] = evaluate(args.config, greedy_policy(agent), VALIDATION_SEEDS, keep_reports=True)
-        v_check[label] = value_vs_monte_carlo(args.config, agent, VALIDATION_SEEDS)
+        v_check[label] = value_vs_monte_carlo(train_config, agent, VALIDATION_SEEDS)
+        if weights is not None:
+            weighted[label] = evaluate(train_config, greedy_policy(agent), VALIDATION_SEEDS)["mean_return"]
     agent.load_state_dict(final_state)
     for bname, policy in baseline_policies(random_seed=args.train_seed).items():
         results[bname] = evaluate(args.config, policy, VALIDATION_SEEDS, keep_reports=True)
@@ -190,7 +221,9 @@ def main(argv=None):
         "method": "MAPPO with CTDE (Step 9 training script; evaluation here on validation seeds only)",
         "config_path": os.path.relpath(os.path.abspath(args.config), ROOT),
         "config_snapshot": load_config(args.config),
-        "mappo_config": cfg.to_dict(), "mappo_overrides": overrides,
+        "mappo_config": cfg.to_dict(),
+        "mappo_overrides": {**overrides, **({"priority_weights": weights} if weights else {})},
+        "priority_weights": weights,
         "train_seed": args.train_seed, "total_steps": args.total_steps, "eval_every": args.eval_every,
         "training_workload_seed_range": TRAIN_SEED_RANGE,
         "validation_seeds": [VALIDATION_SEEDS.start, VALIDATION_SEEDS.stop - 1],
@@ -210,11 +243,16 @@ def main(argv=None):
     _write_csv(os.path.join(out, "per_seed.csv"), per_seed)
     strip = lambda r: {k: v for k, v in r.items() if k != "per_seed"}
     write_json(os.path.join(out, "summary.json"), {
-        "note": "Validation seeds only; undiscounted returns in original units",
+        "note": "Validation seeds only; undiscounted returns in original units (unweighted reward)",
         "mappo_best": {"step": best["step"], **strip(results["mappo_best"])},
         "mappo_final": {"step": step_of(learning_curve), **strip(results["mappo_final"])},
         "v_vs_mc": v_check,
         "destination_load": {k: destination_load(v) for k, v in results.items()},
+        "violation_by_priority": {k: violation_by_priority(v) for k, v in results.items()},
+        **({"weighted_return": {"priority_weights": weights, **weighted,
+                                **{k: evaluate(train_config, p, VALIDATION_SEEDS)["mean_return"]
+                                   for k, p in baseline_policies(random_seed=args.train_seed).items()}}}
+           if weights else {}),
         "baselines": {k: strip(v) for k, v in results.items() if not k.startswith("mappo_")},
     })
     print(f"Saved to {out}")

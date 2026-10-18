@@ -128,9 +128,9 @@ class MultiAgentHospitalEnv:
             if task.task_id in self.inner._rewarded and task.task_id not in self._seen:
                 self._seen.add(task.task_id)
                 if task.completion_time is not None:
-                    r = self.inner._task_reward(task.latency, task.completion_time > task.deadline)
+                    r = self.inner._task_reward(task.latency, task.completion_time > task.deadline, task.priority)
                 else:                                   # unfinished after the drain (episode end only)
-                    r = self.inner._task_reward(cutoff - task.arrival_time + 1, task.deadline <= cutoff)
+                    r = self.inner._task_reward(cutoff - task.arrival_time + 1, task.deadline <= cutoff, task.priority)
                 rewards[task.source_department] += r
         return rewards
 

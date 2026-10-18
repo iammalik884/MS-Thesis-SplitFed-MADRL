@@ -10,7 +10,7 @@ report nahi hota (design note, Section 4).
 
 ENGLISH: evaluate(config, policy, seeds) plays one episode per seed with
 policy(env, obs) -> action and returns per-seed rows plus means and action
-proportions.
+proportions; Step 10 added the latency per priority (latency_by_priority).
 """
 
 import statistics
@@ -51,6 +51,7 @@ def evaluate(config, policy: Callable, seeds: Iterable[int], keep_reports: bool 
     env = HospitalSchedulingEnv(config)
     rows, overall = [], Counter()
     by_priority, by_source = Counter(), Counter()
+    latency_sum, completed, unfinished = Counter(), Counter(), Counter()   # per priority, pooled over seeds
     for seed in seeds:
         obs, info = env.reset(seed=seed)
         terminated = False
@@ -64,6 +65,12 @@ def evaluate(config, policy: Callable, seeds: Iterable[int], keep_reports: bool 
             by_source[(arrival.department, ACTIONS[action])] += 1
             obs, _, terminated, _, info = env.step(action)
         report = info["report"]
+        for task in env.sim.tasks:
+            if task.completion_time is None:
+                unfinished[task.priority] += 1
+            else:
+                latency_sum[task.priority] += task.latency
+                completed[task.priority] += 1
         comm = report["final"]["offloading_communication"]
         row = {"seed": seed, "return": info["episode_return"], **{k: report["headline"][k] for k in METRIC_KEYS},
                "local_tasks_no_transfer": comm["local_tasks_no_transfer"],
@@ -89,6 +96,10 @@ def evaluate(config, policy: Callable, seeds: Iterable[int], keep_reports: bool 
         "action_proportions": {a: (overall[a] / n if n else None) for a in ACTIONS},
         "action_proportions_by_priority": proportions(by_priority, sorted({k for k, _ in by_priority})),
         "action_proportions_by_source": proportions(by_source, sorted({k for k, _ in by_source})),
+        # Step 10: latency per priority over all completed tasks of all seeds (pooled)
+        "latency_by_priority": {p: {"completed": completed[p], "unfinished": unfinished[p],
+                                    "avg_latency": latency_sum[p] / completed[p] if completed[p] else None}
+                                for p in sorted(set(completed) | set(unfinished))},
         "per_seed": rows,
     }
 

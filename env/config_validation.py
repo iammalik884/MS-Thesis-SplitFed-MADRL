@@ -21,7 +21,7 @@ from env.task import CLOUD_NODE_NAME, PRIORITY_CLASSES, is_finite_number, is_int
 
 TOP_LEVEL_KEYS = {"seed", "simulation", "departments", "task_generation", "offloading",
                   "deadlines", "evaluation", "scenario", "rl_environment"}
-RL_ENVIRONMENT_KEYS = {"deadline_miss_penalty"}
+RL_ENVIRONMENT_KEYS = {"deadline_miss_penalty", "priority_weights"}   # priority_weights: Step 10, optional
 OFFLOADING_KEYS = {"cloud_capacity", "cloud_network_delay", "neighbour_network_delay",
                    "cloud_threshold", "offload_threshold", "neighbour_tie_break_order"}
 REMOVED_OFFLOADING_KEYS = ("local_capacity", "local_threshold", "edge_threshold")
@@ -170,3 +170,10 @@ def validate_config(config) -> None:
         if "deadline_miss_penalty" not in rl_environment:
             raise ValueError("Config 'rl_environment' is missing key 'deadline_miss_penalty'")
         _number(rl_environment["deadline_miss_penalty"], "rl_environment.deadline_miss_penalty", positive=False)
+        weights = rl_environment.get("priority_weights")
+        if weights is not None:                      # Step 10: optional, absent = 1.0 for every priority
+            _check_keys(weights, set(PRIORITY_CLASSES), "rl_environment.priority_weights")
+            for priority in PRIORITY_CLASSES:
+                if priority not in weights:
+                    raise ValueError(f"Config 'rl_environment.priority_weights' is missing priority class '{priority}'")
+                _number(weights[priority], f"rl_environment.priority_weights.{priority}", positive=True)

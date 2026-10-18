@@ -14,7 +14,10 @@ learning_curves.png.
 
 The method (DQN or MAPPO) is read from the runs' manifests. For MAPPO the
 summary also has "destination_load" (tasks and queue wait per node; roadmap
-Step 9 checkpoint on spare capacity).
+Step 9 checkpoint on spare capacity) and "priority_breakdown" (latency and
+deadline violation rate per priority; roadmap Step 10 checkpoint). All
+returns use the ORIGINAL (unweighted) reward of the config, so runs trained
+on a priority-weighted reward (Step 10) compare directly with Steps 7-9.
 
 Run:  py evaluate_dqn_test.py --runs results/step7_final/training_runs --out results/step7_final
       py evaluate_dqn_test.py --runs results/step9_final/training_runs --out results/step9_final
@@ -136,7 +139,7 @@ def main(argv=None):
     torch.set_num_threads(1)
     os.makedirs(os.path.join(args.out, "reports"), exist_ok=True)
 
-    runs_by_scenario, summary, per_seed_rows, baselines_val, loads = {}, {}, [], {}, {}
+    runs_by_scenario, summary, per_seed_rows, baselines_val, loads, prio = {}, {}, [], {}, {}, {}
     method = None
     for scenario, config in SCENARIOS.items():
         run_dirs = sorted(d for d in glob.glob(os.path.join(args.runs, f"*_{scenario}_seed*"))
@@ -179,8 +182,10 @@ def main(argv=None):
             json.dump(reports, f)
         summary[scenario] = results
         if method == "MAPPO":
-            from train_mappo import destination_load
+            from train_mappo import destination_load, violation_by_priority
             loads[scenario] = {name: destination_load(result) for name, result in reports.items()}
+            prio[scenario] = {name: {"latency": result["latency_by_priority"], "violation": violation_by_priority(result)}
+                              for name, result in reports.items()}
 
     with open(os.path.join(args.out, "per_seed.csv"), "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=list(per_seed_rows[0]))
@@ -192,7 +197,10 @@ def main(argv=None):
                    "runs": {s: [os.path.relpath(d, ROOT) for d in ds] for s, ds in runs_by_scenario.items()},
                    "ci": "mean +- 95% CI over training seeds (t, df = n-1); baselines are deterministic (CI n/a)",
                    "provenance": collect_provenance(), "results": summary,
-                   **({"destination_load": loads} if method == "MAPPO" else {})}, f, indent=2)
+                   **({"destination_load": loads, "priority_breakdown": prio,
+                       "priority_weights": json.load(open(os.path.join(runs_by_scenario["default"][0], "manifest.json"),
+                                                          encoding="utf-8")).get("priority_weights")}
+                      if method == "MAPPO" else {})}, f, indent=2)
 
     lines = ["| Scenario | Policy | Return | Avg latency | Critical violation | Cloud share |", "|---|---|---|---|---|---|"]
     fmt = lambda m, h, pct=False: (f"{100 * m:.1f}%" if pct else f"{m:.1f}" if abs(m) >= 10 else f"{m:.2f}") + \

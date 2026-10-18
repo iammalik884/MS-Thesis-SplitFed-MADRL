@@ -37,6 +37,10 @@ REWARD: har task ka reward us ke KHATAM hone par milta hai:
   penalty -- episode ke aakhri step par. Har task ka reward EXACTLY EK baar.
   Episode ka total reward = -(sab latency) - penalty * (deadline misses),
   evaluation metrics ki wohi definitions (Step 5).
+  STEP 10 (optional): rl_environment.priority_weights {Critical, High,
+  Routine} -- har task ka poora reward us ki priority ke weight se multiply:
+  w_p * (-(latency) - penalty * miss). Config mein na ho to har weight 1.0,
+  yani reward bilkul pehle jaisa (Steps 6-9).
 
 TERMINATION: window (n_steps) ke baad koi naya task nahi aata, is liye
 aakhri faisle ke baad simulator drain chalata hai aur episode terminated=True
@@ -84,6 +88,8 @@ class HospitalSchedulingEnv(gym.Env):
         self.deadline_offsets: Dict[str, int] = dict(self.config["deadlines"])
         self.max_deadline_offset = max(self.deadline_offsets.values())
         self.deadline_miss_penalty = float(self.config["rl_environment"]["deadline_miss_penalty"])
+        weights = self.config["rl_environment"].get("priority_weights") or {}
+        self.priority_weights: Dict[str, float] = {p: float(weights.get(p, 1.0)) for p in PRIORITY_CLASSES}
         self.settings = protocol_settings(self.config)
 
         n = len(self.departments)
@@ -180,15 +186,17 @@ class HospitalSchedulingEnv(gym.Env):
                 return
             self.sim.step()
 
-    def _task_reward(self, latency: int, missed: bool) -> float:
-        return -float(latency) - (self.deadline_miss_penalty if missed else 0.0)
+    def _task_reward(self, latency: int, missed: bool, priority: str) -> float:
+        """w_priority * (-(latency) - penalty * missed); every weight is 1.0
+        unless rl_environment.priority_weights is set (Step 10)."""
+        return self.priority_weights[priority] * (-float(latency) - (self.deadline_miss_penalty if missed else 0.0))
 
     def _collect_completion_rewards(self) -> float:
         total = 0.0
         for task in self.sim.tasks:
             if task.completion_time is not None and task.task_id not in self._rewarded:
                 self._rewarded.add(task.task_id)
-                total += self._task_reward(task.latency, task.completion_time > task.deadline)
+                total += self._task_reward(task.latency, task.completion_time > task.deadline, task.priority)
         return total
 
     def _finish_episode(self) -> float:
@@ -199,7 +207,7 @@ class HospitalSchedulingEnv(gym.Env):
         for task in self.sim.tasks:
             if task.task_id not in self._rewarded:       # still unfinished after the drain
                 self._rewarded.add(task.task_id)
-                total += self._task_reward(cutoff - task.arrival_time + 1, task.deadline <= cutoff)
+                total += self._task_reward(cutoff - task.arrival_time + 1, task.deadline <= cutoff, task.priority)
         self._done = True
         return total
 
