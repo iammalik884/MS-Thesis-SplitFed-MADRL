@@ -42,6 +42,18 @@ python check_simple_policies.py --config configs/scenarios/overload.yaml  # Step
 python check_multi_agent_env.py --config configs/scenarios/overload.yaml   # Step 8 sanity check
 ```
 
+**Dashboard (all steps in one place):** `python dashboard.py` opens a local page
+(http://127.0.0.1:8765). For every step it shows:
+
+- a Roman Urdu explanation;
+- charts and tables read from the committed result files;
+- **Run** buttons that execute the step's real tests, evaluations or checks on
+  the backend, and report whether the new output is identical to the
+  committed one.
+
+It uses only the Python standard library, works offline, and never changes
+code, configs or committed results.
+
 Each test file can also be run on its own, e.g. `python -m tests.test_step3_routing`.
 
 ## System model (current, "v2")
@@ -490,10 +502,12 @@ MS_Thesis_Project/
 ├── run_baseline_fcfs.py          # FCFS baseline runner (--seed / --seeds / --config)
 ├── check_simple_policies.py      # Step 6 sanity check with simple fixed policies (+ ECT)
 ├── check_multi_agent_env.py      # Step 8 sanity check: per-agent returns of FCFS / ECT
+├── dashboard.py                  # one-file dashboard: explanations, charts, Run buttons for every step
 ├── train_dqn_pilot.py            # Step 7: DQN training with seed splits (--set for one override)
 ├── run_dqn_experiments.py        # Steps 7/9: runs the pre-registered experiments (one override each; --trainer dqn|mappo)
 ├── summarize_dqn_experiments.py  # Step 7: pre-registered score per experiment
 ├── evaluate_dqn_test.py          # Steps 7/9: one-time test-seed evaluation of the frozen DQN or MAPPO
+├── verification/                 # supervisor's verification checks (V1-V6) and their outputs
 ├── train_mappo.py                # Step 9: MAPPO training (validation seeds only)
 └── requirements.txt
 ```

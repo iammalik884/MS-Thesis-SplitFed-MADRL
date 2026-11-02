@@ -9,7 +9,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 os.chdir(ROOT)
-OUT = os.path.join(ROOT, "verification", "output")
+OUT = os.environ.get("VERIFICATION_OUT") or os.path.join(ROOT, "verification", "output")   # dashboard re-runs write to a temp folder
 os.makedirs(OUT, exist_ok=True)
 
 T_975 = {4: 2.7764451051977987, 29: 2.045229642132703}   # Student t, 95% two-sided, by degrees of freedom
@@ -33,4 +33,8 @@ def write(name, text):
     with open(path, "w", encoding="utf-8") as f:
         f.write(text)
     print(text)
-    print(f"[saved {os.path.relpath(path, ROOT)}]")
+    try:
+        shown = os.path.relpath(path, ROOT)
+    except ValueError:                     # output folder on another drive (e.g. a temp folder)
+        shown = path
+    print(f"[saved {shown}]")
