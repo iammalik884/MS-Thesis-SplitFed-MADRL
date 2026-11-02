@@ -1,0 +1,1172 @@
+{
+ "default | cloud capacity 50": {
+  "W5 trainseed0": {
+   "return": -13.9,
+   "critical_violation": 0.0,
+   "cloud_share": 0.13342503438789546,
+   "edge_share": 0.012379642365887207,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed1": {
+   "return": -14.333333333333334,
+   "critical_violation": 0.0,
+   "cloud_share": 0.1375515818431912,
+   "edge_share": 0.011004126547455296,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed2": {
+   "return": -13.633333333333333,
+   "critical_violation": 0.0,
+   "cloud_share": 0.13067400275103164,
+   "edge_share": 0.03576341127922971,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed3": {
+   "return": -13.633333333333333,
+   "critical_violation": 0.0,
+   "cloud_share": 0.10041265474552957,
+   "edge_share": 0.03851444291609354,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed4": {
+   "return": -14.333333333333334,
+   "critical_violation": 0.0,
+   "cloud_share": 0.13342503438789546,
+   "edge_share": 0.024759284731774415,
+   "cloud_queue_wait": 0.0
+  },
+  "FCFS": {
+   "return": -14.6,
+   "critical_violation": 0.0,
+   "cloud_share": 0.12929848693259974,
+   "edge_share": 0.10866574965612105,
+   "cloud_queue_wait": 0.0
+  },
+  "always Local": {
+   "return": -21.966666666666665,
+   "critical_violation": 0.019736842105263157,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -48.46666666666667,
+   "critical_violation": 0.0,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "ECT": {
+   "return": -14.6,
+   "critical_violation": 0.0,
+   "cloud_share": 0.0068775790921595595,
+   "edge_share": 0.07702888583218707,
+   "cloud_queue_wait": 0.0
+  }
+ },
+ "default | cloud capacity 25": {
+  "W5 trainseed0": {
+   "return": -13.9,
+   "critical_violation": 0.0,
+   "cloud_share": 0.13342503438789546,
+   "edge_share": 0.012379642365887207,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed1": {
+   "return": -14.3,
+   "critical_violation": 0.0,
+   "cloud_share": 0.1361760660247593,
+   "edge_share": 0.011004126547455296,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed2": {
+   "return": -13.766666666666667,
+   "critical_violation": 0.0,
+   "cloud_share": 0.1265474552957359,
+   "edge_share": 0.03851444291609354,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed3": {
+   "return": -13.633333333333333,
+   "critical_violation": 0.0,
+   "cloud_share": 0.10041265474552957,
+   "edge_share": 0.03851444291609354,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed4": {
+   "return": -14.3,
+   "critical_violation": 0.0,
+   "cloud_share": 0.13204951856946354,
+   "edge_share": 0.024759284731774415,
+   "cloud_queue_wait": 0.0
+  },
+  "FCFS": {
+   "return": -14.6,
+   "critical_violation": 0.0,
+   "cloud_share": 0.12929848693259974,
+   "edge_share": 0.10866574965612105,
+   "cloud_queue_wait": 0.0
+  },
+  "always Local": {
+   "return": -21.966666666666665,
+   "critical_violation": 0.019736842105263157,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -48.46666666666667,
+   "critical_violation": 0.0,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "ECT": {
+   "return": -14.6,
+   "critical_violation": 0.0,
+   "cloud_share": 0.0068775790921595595,
+   "edge_share": 0.07702888583218707,
+   "cloud_queue_wait": 0.0
+  }
+ },
+ "default | cloud capacity 12": {
+  "W5 trainseed0": {
+   "return": -14.1,
+   "critical_violation": 0.0,
+   "cloud_share": 0.13067400275103164,
+   "edge_share": 0.012379642365887207,
+   "cloud_queue_wait": 0.006172839506172839
+  },
+  "W5 trainseed1": {
+   "return": -14.5,
+   "critical_violation": 0.0,
+   "cloud_share": 0.1361760660247593,
+   "edge_share": 0.011004126547455296,
+   "cloud_queue_wait": 0.005952380952380952
+  },
+  "W5 trainseed2": {
+   "return": -13.766666666666667,
+   "critical_violation": 0.0,
+   "cloud_share": 0.12104539202200826,
+   "edge_share": 0.03851444291609354,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed3": {
+   "return": -13.8,
+   "critical_violation": 0.0,
+   "cloud_share": 0.10178817056396149,
+   "edge_share": 0.03851444291609354,
+   "cloud_queue_wait": 0.007692307692307693
+  },
+  "W5 trainseed4": {
+   "return": -14.5,
+   "critical_violation": 0.0,
+   "cloud_share": 0.1279229711141678,
+   "edge_share": 0.024759284731774415,
+   "cloud_queue_wait": 0.007407407407407408
+  },
+  "FCFS": {
+   "return": -14.733333333333333,
+   "critical_violation": 0.0,
+   "cloud_share": 0.12929848693259974,
+   "edge_share": 0.10866574965612105,
+   "cloud_queue_wait": 0.0
+  },
+  "always Local": {
+   "return": -21.966666666666665,
+   "critical_violation": 0.019736842105263157,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -53.96666666666667,
+   "critical_violation": 0.07236842105263158,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.023909926701593368
+  },
+  "ECT": {
+   "return": -14.633333333333333,
+   "critical_violation": 0.0,
+   "cloud_share": 0.005502063273727648,
+   "edge_share": 0.07702888583218707,
+   "cloud_queue_wait": 0.0
+  }
+ },
+ "default | cloud capacity 6": {
+  "W5 trainseed0": {
+   "return": -16.1,
+   "critical_violation": 0.0,
+   "cloud_share": 0.12517193947730398,
+   "edge_share": 0.012379642365887207,
+   "cloud_queue_wait": 0.014814814814814815
+  },
+  "W5 trainseed1": {
+   "return": -16.566666666666666,
+   "critical_violation": 0.0,
+   "cloud_share": 0.13342503438789546,
+   "edge_share": 0.011004126547455296,
+   "cloud_queue_wait": 0.030952380952380953
+  },
+  "W5 trainseed2": {
+   "return": -16.0,
+   "critical_violation": 0.0,
+   "cloud_share": 0.10729023383768914,
+   "edge_share": 0.0453920220082531,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed3": {
+   "return": -15.7,
+   "critical_violation": 0.0,
+   "cloud_share": 0.10178817056396149,
+   "edge_share": 0.03851444291609354,
+   "cloud_queue_wait": 0.05961538461538461
+  },
+  "W5 trainseed4": {
+   "return": -16.2,
+   "critical_violation": 0.0,
+   "cloud_share": 0.12242090784044017,
+   "edge_share": 0.02200825309491059,
+   "cloud_queue_wait": 0.024074074074074074
+  },
+  "FCFS": {
+   "return": -17.866666666666667,
+   "critical_violation": 0.0,
+   "cloud_share": 0.12929848693259974,
+   "edge_share": 0.10866574965612105,
+   "cloud_queue_wait": 0.033928571428571426
+  },
+  "always Local": {
+   "return": -21.966666666666665,
+   "critical_violation": 0.019736842105263157,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -87.73333333333333,
+   "critical_violation": 0.40789473684210525,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.3461228794578074
+  },
+  "ECT": {
+   "return": -14.733333333333333,
+   "critical_violation": 0.0,
+   "cloud_share": 0.001375515818431912,
+   "edge_share": 0.07977991746905089,
+   "cloud_queue_wait": 0.0
+  }
+ },
+ "default | cloud delay 4": {
+  "W5 trainseed0": {
+   "return": -20.333333333333332,
+   "critical_violation": 0.0,
+   "cloud_share": 0.13067400275103164,
+   "edge_share": 0.013755158184319119,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed1": {
+   "return": -21.0,
+   "critical_violation": 0.0,
+   "cloud_share": 0.1375515818431912,
+   "edge_share": 0.011004126547455296,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed2": {
+   "return": -19.866666666666667,
+   "critical_violation": 0.0,
+   "cloud_share": 0.12929848693259974,
+   "edge_share": 0.03576341127922971,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed3": {
+   "return": -18.5,
+   "critical_violation": 0.0,
+   "cloud_share": 0.10041265474552957,
+   "edge_share": 0.03851444291609354,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed4": {
+   "return": -20.733333333333334,
+   "critical_violation": 0.0,
+   "cloud_share": 0.13204951856946354,
+   "edge_share": 0.024759284731774415,
+   "cloud_queue_wait": 0.0
+  },
+  "FCFS": {
+   "return": -20.866666666666667,
+   "critical_violation": 0.0,
+   "cloud_share": 0.12929848693259974,
+   "edge_share": 0.10866574965612105,
+   "cloud_queue_wait": 0.0
+  },
+  "always Local": {
+   "return": -21.966666666666665,
+   "critical_violation": 0.019736842105263157,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -147.6,
+   "critical_violation": 1.0,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "ECT": {
+   "return": -14.833333333333334,
+   "critical_violation": 0.0,
+   "cloud_share": 0.0,
+   "edge_share": 0.0811554332874828,
+   "cloud_queue_wait": 0.0
+  }
+ },
+ "default | cloud delay 6": {
+  "W5 trainseed0": {
+   "return": -26.433333333333334,
+   "critical_violation": 0.0,
+   "cloud_share": 0.1279229711141678,
+   "edge_share": 0.012379642365887207,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed1": {
+   "return": -28.666666666666668,
+   "critical_violation": 0.0,
+   "cloud_share": 0.1375515818431912,
+   "edge_share": 0.011004126547455296,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed2": {
+   "return": -25.866666666666667,
+   "critical_violation": 0.0,
+   "cloud_share": 0.1265474552957359,
+   "edge_share": 0.03576341127922971,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed3": {
+   "return": -23.233333333333334,
+   "critical_violation": 0.0,
+   "cloud_share": 0.09903713892709766,
+   "edge_share": 0.03851444291609354,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed4": {
+   "return": -27.066666666666666,
+   "critical_violation": 0.0,
+   "cloud_share": 0.13067400275103164,
+   "edge_share": 0.024759284731774415,
+   "cloud_queue_wait": 0.0
+  },
+  "FCFS": {
+   "return": -27.133333333333333,
+   "critical_violation": 0.0,
+   "cloud_share": 0.12929848693259974,
+   "edge_share": 0.10866574965612105,
+   "cloud_queue_wait": 0.0
+  },
+  "always Local": {
+   "return": -21.966666666666665,
+   "critical_violation": 0.019736842105263157,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -290.73333333333335,
+   "critical_violation": 1.0,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "ECT": {
+   "return": -14.833333333333334,
+   "critical_violation": 0.0,
+   "cloud_share": 0.0,
+   "edge_share": 0.0811554332874828,
+   "cloud_queue_wait": 0.0
+  }
+ },
+ "overload | cloud capacity 50": {
+  "W5 trainseed0": {
+   "return": -135.06666666666666,
+   "critical_violation": 0.0,
+   "cloud_share": 0.48737650933040616,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed1": {
+   "return": -134.03333333333333,
+   "critical_violation": 0.0,
+   "cloud_share": 0.4769484083424808,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed2": {
+   "return": -132.5,
+   "critical_violation": 0.0,
+   "cloud_share": 0.466794731064764,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed3": {
+   "return": -134.8,
+   "critical_violation": 0.0,
+   "cloud_share": 0.49039517014270034,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed4": {
+   "return": -130.0,
+   "critical_violation": 0.0,
+   "cloud_share": 0.45115257958287597,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "FCFS": {
+   "return": -691.1666666666666,
+   "critical_violation": 0.5818399044205496,
+   "cloud_share": 0.12623490669593854,
+   "edge_share": 0.8117453347969265,
+   "cloud_queue_wait": 0.0
+  },
+  "always Local": {
+   "return": -1616.1666666666667,
+   "critical_violation": 0.7096774193548387,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -243.5,
+   "critical_violation": 0.0011947431302270011,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0007328997902971183
+  },
+  "ECT": {
+   "return": -200.16666666666666,
+   "critical_violation": 0.007168458781362007,
+   "cloud_share": 0.2678375411635565,
+   "edge_share": 0.06311745334796927,
+   "cloud_queue_wait": 0.0
+  }
+ },
+ "overload | cloud capacity 25": {
+  "W5 trainseed0": {
+   "return": -138.6,
+   "critical_violation": 0.0,
+   "cloud_share": 0.45334796926454446,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.029805222388058966
+  },
+  "W5 trainseed1": {
+   "return": -136.76666666666668,
+   "critical_violation": 0.0011947431302270011,
+   "cloud_share": 0.43468715697036225,
+   "edge_share": 0.00027442371020856203,
+   "cloud_queue_wait": 0.024319588669316928
+  },
+  "W5 trainseed2": {
+   "return": -137.06666666666666,
+   "critical_violation": 0.0,
+   "cloud_share": 0.45911086717892424,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.03743649282911805
+  },
+  "W5 trainseed3": {
+   "return": -136.56666666666666,
+   "critical_violation": 0.0,
+   "cloud_share": 0.4486827661909989,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.02645194916080294
+  },
+  "W5 trainseed4": {
+   "return": -132.1,
+   "critical_violation": 0.0,
+   "cloud_share": 0.4163007683863886,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.02333858599149202
+  },
+  "FCFS": {
+   "return": -691.3666666666667,
+   "critical_violation": 0.5818399044205496,
+   "cloud_share": 0.12623490669593854,
+   "edge_share": 0.8117453347969265,
+   "cloud_queue_wait": 0.0012345679012345679
+  },
+  "always Local": {
+   "return": -1616.1666666666667,
+   "critical_violation": 0.7096774193548387,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -319.76666666666665,
+   "critical_violation": 0.16965352449223417,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.1698462089667286
+  },
+  "ECT": {
+   "return": -247.36666666666667,
+   "critical_violation": 0.08721624850657109,
+   "cloud_share": 0.2664654226125137,
+   "edge_share": 0.06668496158068057,
+   "cloud_queue_wait": 0.0056553202894666305
+  }
+ },
+ "overload | cloud capacity 12": {
+  "W5 trainseed0": {
+   "return": -199.23333333333332,
+   "critical_violation": 0.023894862604540025,
+   "cloud_share": 0.38556531284302964,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.7161869372999884
+  },
+  "W5 trainseed1": {
+   "return": -192.53333333333333,
+   "critical_violation": 0.03345280764635603,
+   "cloud_share": 0.35153677277716794,
+   "edge_share": 0.007409440175631174,
+   "cloud_queue_wait": 0.3798070367471393
+  },
+  "W5 trainseed2": {
+   "return": -217.4,
+   "critical_violation": 0.0023894862604540022,
+   "cloud_share": 0.42206366630076836,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 1.1176292869719808
+  },
+  "W5 trainseed3": {
+   "return": -190.4,
+   "critical_violation": 0.025089605734767026,
+   "cloud_share": 0.36470911086717894,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.4884203044913316
+  },
+  "W5 trainseed4": {
+   "return": -187.43333333333334,
+   "critical_violation": 0.015531660692951015,
+   "cloud_share": 0.3611416026344676,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.5325855970100023
+  },
+  "FCFS": {
+   "return": -697.8333333333334,
+   "critical_violation": 0.5818399044205496,
+   "cloud_share": 0.12623490669593854,
+   "edge_share": 0.8117453347969265,
+   "cloud_queue_wait": 0.12536382457042483
+  },
+  "always Local": {
+   "return": -1616.1666666666667,
+   "critical_violation": 0.7096774193548387,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -1817.5333333333333,
+   "critical_violation": 0.9354838709677419,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 6.3365820274293
+  },
+  "ECT": {
+   "return": -393.73333333333335,
+   "critical_violation": 0.36081242532855434,
+   "cloud_share": 0.24972557628979145,
+   "edge_share": 0.07546652030735455,
+   "cloud_queue_wait": 0.07509500838501768
+  }
+ },
+ "overload | cloud capacity 6": {
+  "W5 trainseed0": {
+   "return": -471.23333333333335,
+   "critical_violation": 0.25925925925925924,
+   "cloud_share": 0.2478046103183315,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 3.3461073043279006
+  },
+  "W5 trainseed1": {
+   "return": -497.2,
+   "critical_violation": 0.25925925925925924,
+   "cloud_share": 0.24313940724478594,
+   "edge_share": 0.04665203073545554,
+   "cloud_queue_wait": 2.256232124603265
+  },
+  "W5 trainseed2": {
+   "return": -693.4666666666667,
+   "critical_violation": 0.10752688172043011,
+   "cloud_share": 0.3367178924259056,
+   "edge_share": 0.019758507135016465,
+   "cloud_queue_wait": 6.59659748309564
+  },
+  "W5 trainseed3": {
+   "return": -482.8,
+   "critical_violation": 0.31899641577060933,
+   "cloud_share": 0.24094401756311745,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 2.53288905598926
+  },
+  "W5 trainseed4": {
+   "return": -509.8666666666667,
+   "critical_violation": 0.24850657108721624,
+   "cloud_share": 0.26344676180021953,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 3.5060500425612653
+  },
+  "FCFS": {
+   "return": -741.4333333333333,
+   "critical_violation": 0.5818399044205496,
+   "cloud_share": 0.12623490669593854,
+   "edge_share": 0.8117453347969265,
+   "cloud_queue_wait": 1.4296648394077949
+  },
+  "always Local": {
+   "return": -1616.1666666666667,
+   "critical_violation": 0.7096774193548387,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -4164.9,
+   "critical_violation": 0.986857825567503,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 21.75326804270247
+  },
+  "ECT": {
+   "return": -681.6333333333333,
+   "critical_violation": 0.6152927120669056,
+   "cloud_share": 0.20417124039517015,
+   "edge_share": 0.09769484083424808,
+   "cloud_queue_wait": 0.627136277895275
+  }
+ },
+ "overload | cloud delay 4": {
+  "W5 trainseed0": {
+   "return": -248.0,
+   "critical_violation": 0.005973715651135006,
+   "cloud_share": 0.4618551042810099,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed1": {
+   "return": -240.43333333333334,
+   "critical_violation": 0.0,
+   "cloud_share": 0.44401756311745333,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed2": {
+   "return": -248.1,
+   "critical_violation": 0.011947431302270013,
+   "cloud_share": 0.46130625686059273,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed3": {
+   "return": -244.66666666666666,
+   "critical_violation": 0.0,
+   "cloud_share": 0.4602085620197585,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed4": {
+   "return": -234.93333333333334,
+   "critical_violation": 0.0047789725209080045,
+   "cloud_share": 0.4278265642151482,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "FCFS": {
+   "return": -721.8333333333334,
+   "critical_violation": 0.5818399044205496,
+   "cloud_share": 0.12623490669593854,
+   "edge_share": 0.8117453347969265,
+   "cloud_queue_wait": 0.0
+  },
+  "always Local": {
+   "return": -1616.1666666666667,
+   "critical_violation": 0.7096774193548387,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -765.1,
+   "critical_violation": 1.0,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0007328997902971183
+  },
+  "ECT": {
+   "return": -602.0666666666667,
+   "critical_violation": 0.7371565113500598,
+   "cloud_share": 0.21871569703622393,
+   "edge_share": 0.08589462129527992,
+   "cloud_queue_wait": 0.0
+  }
+ },
+ "overload | cloud delay 6": {
+  "W5 trainseed0": {
+   "return": -420.3333333333333,
+   "critical_violation": 0.0035842293906810036,
+   "cloud_share": 0.4462129527991218,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed1": {
+   "return": -402.23333333333335,
+   "critical_violation": 0.0011947431302270011,
+   "cloud_share": 0.4242590559824369,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed2": {
+   "return": -434.2,
+   "critical_violation": 0.011947431302270013,
+   "cloud_share": 0.45609220636663006,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed3": {
+   "return": -413.73333333333335,
+   "critical_violation": 0.0,
+   "cloud_share": 0.43798024149286496,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed4": {
+   "return": -409.26666666666665,
+   "critical_violation": 0.005973715651135006,
+   "cloud_share": 0.4108122941822173,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "FCFS": {
+   "return": -752.5,
+   "critical_violation": 0.5818399044205496,
+   "cloud_share": 0.12623490669593854,
+   "edge_share": 0.8117453347969265,
+   "cloud_queue_wait": 0.0
+  },
+  "always Local": {
+   "return": -1616.1666666666667,
+   "critical_violation": 0.7096774193548387,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -1469.7,
+   "critical_violation": 1.0,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0007328997902971183
+  },
+  "ECT": {
+   "return": -979.6333333333333,
+   "critical_violation": 0.7801672640382318,
+   "cloud_share": 0.16794731064763996,
+   "edge_share": 0.09632272228320526,
+   "cloud_queue_wait": 0.0
+  }
+ },
+ "slow_network | cloud capacity 50": {
+  "W5 trainseed0": {
+   "return": -140.26666666666668,
+   "critical_violation": 0.006329113924050633,
+   "cloud_share": 0.24954627949183303,
+   "edge_share": 0.00045372050816696913,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed1": {
+   "return": -154.0,
+   "critical_violation": 0.004219409282700422,
+   "cloud_share": 0.29219600725952816,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed2": {
+   "return": -141.66666666666666,
+   "critical_violation": 0.004219409282700422,
+   "cloud_share": 0.2558983666061706,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed3": {
+   "return": -155.86666666666667,
+   "critical_violation": 0.002109704641350211,
+   "cloud_share": 0.29491833030852993,
+   "edge_share": 0.0009074410163339383,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed4": {
+   "return": -138.06666666666666,
+   "critical_violation": 0.004219409282700422,
+   "cloud_share": 0.23593466424682397,
+   "edge_share": 0.0013611615245009074,
+   "cloud_queue_wait": 0.0
+  },
+  "FCFS": {
+   "return": -416.6333333333333,
+   "critical_violation": 0.8713080168776371,
+   "cloud_share": 0.1383847549909256,
+   "edge_share": 0.7477313974591652,
+   "cloud_queue_wait": 0.0
+  },
+  "always Local": {
+   "return": -397.1666666666667,
+   "critical_violation": 0.24472573839662448,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -872.8,
+   "critical_violation": 1.0,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "ECT": {
+   "return": -240.76666666666668,
+   "critical_violation": 0.3227848101265823,
+   "cloud_share": 0.017241379310344827,
+   "edge_share": 0.08348457350272233,
+   "cloud_queue_wait": 0.0
+  }
+ },
+ "slow_network | cloud capacity 25": {
+  "W5 trainseed0": {
+   "return": -140.9,
+   "critical_violation": 0.012658227848101266,
+   "cloud_share": 0.23411978221415608,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed1": {
+   "return": -146.13333333333333,
+   "critical_violation": 0.008438818565400843,
+   "cloud_share": 0.25,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed2": {
+   "return": -137.3,
+   "critical_violation": 0.006329113924050633,
+   "cloud_share": 0.2295825771324864,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed3": {
+   "return": -146.43333333333334,
+   "critical_violation": 0.008438818565400843,
+   "cloud_share": 0.2518148820326679,
+   "edge_share": 0.0013611615245009074,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed4": {
+   "return": -134.4,
+   "critical_violation": 0.010548523206751054,
+   "cloud_share": 0.20644283121597096,
+   "edge_share": 0.0009074410163339383,
+   "cloud_queue_wait": 0.0
+  },
+  "FCFS": {
+   "return": -416.6666666666667,
+   "critical_violation": 0.8713080168776371,
+   "cloud_share": 0.1383847549909256,
+   "edge_share": 0.7477313974591652,
+   "cloud_queue_wait": 0.0
+  },
+  "always Local": {
+   "return": -397.1666666666667,
+   "critical_violation": 0.24472573839662448,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -874.7,
+   "critical_violation": 1.0,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.007902750130364922
+  },
+  "ECT": {
+   "return": -240.76666666666668,
+   "critical_violation": 0.3227848101265823,
+   "cloud_share": 0.016333938294010888,
+   "edge_share": 0.08393829401088929,
+   "cloud_queue_wait": 0.0
+  }
+ },
+ "slow_network | cloud capacity 12": {
+  "W5 trainseed0": {
+   "return": -148.4,
+   "critical_violation": 0.02531645569620253,
+   "cloud_share": 0.21007259528130673,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.021064425770308124
+  },
+  "W5 trainseed1": {
+   "return": -145.93333333333334,
+   "critical_violation": 0.04219409282700422,
+   "cloud_share": 0.19464609800362975,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.01511039886039886
+  },
+  "W5 trainseed2": {
+   "return": -138.53333333333333,
+   "critical_violation": 0.029535864978902954,
+   "cloud_share": 0.1955535390199637,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.024693143114195747
+  },
+  "W5 trainseed3": {
+   "return": -144.06666666666666,
+   "critical_violation": 0.03375527426160337,
+   "cloud_share": 0.18784029038112524,
+   "edge_share": 0.0013611615245009074,
+   "cloud_queue_wait": 0.01177045177045177
+  },
+  "W5 trainseed4": {
+   "return": -139.13333333333333,
+   "critical_violation": 0.02531645569620253,
+   "cloud_share": 0.17422867513611615,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.012538850038850038
+  },
+  "FCFS": {
+   "return": -419.1,
+   "critical_violation": 0.8713080168776371,
+   "cloud_share": 0.1383847549909256,
+   "edge_share": 0.7477313974591652,
+   "cloud_queue_wait": 0.032234617234617235
+  },
+  "always Local": {
+   "return": -397.1666666666667,
+   "critical_violation": 0.24472573839662448,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -999.0,
+   "critical_violation": 1.0,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 1.1857030062379241
+  },
+  "ECT": {
+   "return": -244.96666666666667,
+   "critical_violation": 0.3291139240506329,
+   "cloud_share": 0.013611615245009074,
+   "edge_share": 0.08484573502722323,
+   "cloud_queue_wait": 0.0
+  }
+ },
+ "slow_network | cloud capacity 6": {
+  "W5 trainseed0": {
+   "return": -196.9,
+   "critical_violation": 0.08016877637130802,
+   "cloud_share": 0.18647912885662432,
+   "edge_share": 0.00045372050816696913,
+   "cloud_queue_wait": 0.22906199622530893
+  },
+  "W5 trainseed1": {
+   "return": -168.9,
+   "critical_violation": 0.11181434599156118,
+   "cloud_share": 0.13702359346642468,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.1117042217042217
+  },
+  "W5 trainseed2": {
+   "return": -155.3,
+   "critical_violation": 0.06540084388185655,
+   "cloud_share": 0.16606170598911071,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.18710033430621667
+  },
+  "W5 trainseed3": {
+   "return": -170.66666666666666,
+   "critical_violation": 0.09282700421940929,
+   "cloud_share": 0.1365698729582577,
+   "edge_share": 0.002268602540834846,
+   "cloud_queue_wait": 0.11963564213564214
+  },
+  "W5 trainseed4": {
+   "return": -175.23333333333332,
+   "critical_violation": 0.10337552742616034,
+   "cloud_share": 0.13702359346642468,
+   "edge_share": 0.0013611615245009074,
+   "cloud_queue_wait": 0.09254245754245755
+  },
+  "FCFS": {
+   "return": -432.3666666666667,
+   "critical_violation": 0.8713080168776371,
+   "cloud_share": 0.1383847549909256,
+   "edge_share": 0.7477313974591652,
+   "cloud_queue_wait": 0.43007640507640504
+  },
+  "always Local": {
+   "return": -397.1666666666667,
+   "critical_violation": 0.24472573839662448,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -1943.7333333333333,
+   "critical_violation": 1.0,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 10.49697087064864
+  },
+  "ECT": {
+   "return": -251.53333333333333,
+   "critical_violation": 0.3333333333333333,
+   "cloud_share": 0.010889292196007259,
+   "edge_share": 0.0911978221415608,
+   "cloud_queue_wait": 0.0
+  }
+ },
+ "slow_network | cloud delay 8": {
+  "W5 trainseed0": {
+   "return": -175.26666666666668,
+   "critical_violation": 0.006329113924050633,
+   "cloud_share": 0.24319419237749546,
+   "edge_share": 0.00045372050816696913,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed1": {
+   "return": -192.36666666666667,
+   "critical_violation": 0.004219409282700422,
+   "cloud_share": 0.2813067150635209,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed2": {
+   "return": -176.8,
+   "critical_violation": 0.004219409282700422,
+   "cloud_share": 0.24909255898366606,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed3": {
+   "return": -194.63333333333333,
+   "critical_violation": 0.002109704641350211,
+   "cloud_share": 0.28448275862068967,
+   "edge_share": 0.0009074410163339383,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed4": {
+   "return": -168.96666666666667,
+   "critical_violation": 0.004219409282700422,
+   "cloud_share": 0.22595281306715065,
+   "edge_share": 0.0013611615245009074,
+   "cloud_queue_wait": 0.0
+  },
+  "FCFS": {
+   "return": -436.96666666666664,
+   "critical_violation": 0.8713080168776371,
+   "cloud_share": 0.1383847549909256,
+   "edge_share": 0.7477313974591652,
+   "cloud_queue_wait": 0.0
+  },
+  "always Local": {
+   "return": -397.1666666666667,
+   "critical_violation": 0.24472573839662448,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -1019.7333333333333,
+   "critical_violation": 1.0,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "ECT": {
+   "return": -260.4,
+   "critical_violation": 0.3438818565400844,
+   "cloud_share": 0.003176043557168784,
+   "edge_share": 0.09301270417422867,
+   "cloud_queue_wait": 0.0
+  }
+ },
+ "slow_network | cloud delay 10": {
+  "W5 trainseed0": {
+   "return": -210.46666666666667,
+   "critical_violation": 0.008438818565400843,
+   "cloud_share": 0.24092558983666063,
+   "edge_share": 0.00045372050816696913,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed1": {
+   "return": -226.93333333333334,
+   "critical_violation": 0.004219409282700422,
+   "cloud_share": 0.2690562613430127,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed2": {
+   "return": -211.03333333333333,
+   "critical_violation": 0.006329113924050633,
+   "cloud_share": 0.2422867513611615,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed3": {
+   "return": -232.0,
+   "critical_violation": 0.004219409282700422,
+   "cloud_share": 0.2754083484573503,
+   "edge_share": 0.0009074410163339383,
+   "cloud_queue_wait": 0.0
+  },
+  "W5 trainseed4": {
+   "return": -201.13333333333333,
+   "critical_violation": 0.006329113924050633,
+   "cloud_share": 0.22232304900181488,
+   "edge_share": 0.0009074410163339383,
+   "cloud_queue_wait": 0.0
+  },
+  "FCFS": {
+   "return": -457.3,
+   "critical_violation": 0.8713080168776371,
+   "cloud_share": 0.1383847549909256,
+   "edge_share": 0.7477313974591652,
+   "cloud_queue_wait": 0.0
+  },
+  "always Local": {
+   "return": -397.1666666666667,
+   "critical_violation": 0.24472573839662448,
+   "cloud_share": 0.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "always Cloud": {
+   "return": -1166.6666666666667,
+   "critical_violation": 1.0,
+   "cloud_share": 1.0,
+   "edge_share": 0.0,
+   "cloud_queue_wait": 0.0
+  },
+  "ECT": {
+   "return": -260.73333333333335,
+   "critical_violation": 0.3438818565400844,
+   "cloud_share": 0.0,
+   "edge_share": 0.09618874773139746,
+   "cloud_queue_wait": 0.0
+  }
+ }
+}
