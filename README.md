@@ -42,14 +42,20 @@ python check_simple_policies.py --config configs/scenarios/overload.yaml  # Step
 python check_multi_agent_env.py --config configs/scenarios/overload.yaml   # Step 8 sanity check
 ```
 
-**Dashboard (all steps in one place):** `python dashboard.py` opens a local page
-(http://127.0.0.1:8765). For every step it shows:
+**Dashboard (all steps in one place):** `py dashboard.py` (or `python dashboard.py`
+if `python` is on PATH) opens a local page (http://127.0.0.1:8765).
 
-- a Roman Urdu explanation;
-- charts and tables read from the committed result files;
-- **Run** buttons that execute the step's real tests, evaluations or checks on
-  the backend, and report whether the new output is identical to the
-  committed one.
+- **Overview** page: headline results, a system diagram, the 10-step pipeline,
+  the key findings and the open questions.
+- **Concepts** page: a searchable glossary in Roman Urdu.
+- Every step has three tabs:
+  - **Samjhein**: a detailed Roman Urdu explanation (goal, what was done, how
+    it works, result, limitations, files);
+  - **Nateeje**: charts and tables read from the committed result files;
+  - **Run**: buttons that execute the step's real tests, evaluations or
+    checks on the backend, and report whether the new output is identical
+    to the committed one.
+- Light and dark theme.
 
 It uses only the Python standard library, works offline, and never changes
 code, configs or committed results.
