@@ -104,7 +104,7 @@ for key, runs in data["learned"].items():
     c = statistics.mean(x["critical"] for x in runs)
     sh = {a: mean_ci([x["icu_shares"][a] for x in runs]) for a in ACTIONS}
     waits = " / ".join(f"{statistics.mean((x['load'].get(d, {}).get('mean_avg_queue_wait') or 0) for x in runs):.2f}" for d in DEPTS)
-    lines.append(f"| {key} | {r[0]:.1f} ± {r[2]:.1f} | {paired([x['per_seed'] for x in runs], B['FCFS']['per_seed'])} | "
+    lines.append(f"| {key.replace(' | ', ' — ')} | {r[0]:.1f} ± {r[2]:.1f} | {paired([x['per_seed'] for x in runs], B['FCFS']['per_seed'])} | "
                  f"{paired([x['per_seed'] for x in runs], B['ECT']['per_seed'])} | {100 * c:.2f}% | "
                  f"{100 * sh['Local'][0]:.0f} / {100 * sh['Edge'][0]:.1f} ± {100 * sh['Edge'][2]:.1f} / {100 * sh['Cloud'][0]:.0f}% | {waits} |")
 lines += ["", "Edge feasibility on ICU decisions (ECT estimate, decision-time information; myopic, not ground truth):", ""]

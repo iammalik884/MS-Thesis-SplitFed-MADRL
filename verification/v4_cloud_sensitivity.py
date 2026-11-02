@@ -42,11 +42,12 @@ json.dump(data, open(f"{OUT}/v4_cloud_sensitivity.json", "w", encoding="utf-8"),
 lines = ["# V4 - Cloud capacity / delay sensitivity (frozen W5 MAPPO, validation seeds 1000-1029)", "",
          "Current values: cloud capacity 50; cloud delay 2 (default, overload) and 6 (slow network). W5 = mean ± 95% CI "
          "over 5 training seeds; critical violation pooled over seeds. No model was retrained for these settings.", "",
-         "| Scenario / setting | W5 return | W5 Critical viol. | W5 Cloud / Edge share | Cloud queue wait | ECT | FCFS | always Cloud | always Local |",
+         "| Scenario / setting | W5 return | W5 Critical viol. | W5 Cloud / Edge share | Cloud queue wait | "
+         + " | ".join(BASELINES) + " |",
          "|---|---|---|---|---|---|---|---|---|"]
 for key, row in data.items():
     w = lambda k: mean_ci([row[f"W5 trainseed{i}"][k] for i in range(5)])
     r, c, cl, e, q = w("return"), w("critical_violation"), w("cloud_share"), w("edge_share"), w("cloud_queue_wait")
-    lines.append(f"| {key} | {r[0]:.1f} ± {r[2]:.1f} | {100 * c[0]:.2f}% | {100 * cl[0]:.1f}% / {100 * e[0]:.1f}% | {q[0]:.2f} | "
+    lines.append(f"| {key.replace(' | ', ' — ')} | {r[0]:.1f} ± {r[2]:.1f} | {100 * c[0]:.2f}% | {100 * cl[0]:.1f}% / {100 * e[0]:.1f}% | {q[0]:.2f} | "
                  + " | ".join(f"{row[b]['return']:.1f}" for b in BASELINES) + " |")
 write("v4_cloud_sensitivity.md", "\n".join(lines) + "\n")
